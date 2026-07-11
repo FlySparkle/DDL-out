@@ -1,0 +1,10 @@
+{
+  "dart.flutterSdkPath": "D:\\flutter",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.formatOnSave": true,
+  "files.encoding": "utf8",
+  "files.eol": "\n"
+}

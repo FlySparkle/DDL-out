@@ -1,0 +1,826 @@
+:root {
+    --primary-color: #4a90e2;
+    --secondary-color: #50e3c2;
+    --text-color: #333;
+    --bg-color: #f0f2f5;
+    --card-bg: #ffffff;
+    --modal-overlay: rgba(0, 0, 0, 0.5);
+    --spacing: 1rem;
+    --radius: 8px;
+}
+
+html {
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* 防止body滚动 */
+}
+
+header {
+    background-color: #fff;
+    padding: 0 1.5rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+header h1 {
+    margin: 0;
+    margin-right: auto;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.header-actions button {
+    white-space: nowrap;
+    min-width: fit-content;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* 确保滚动条只在 kanban-board 出现 */
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    /* 禁止文本选择，优化长按体验 */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #357abd;
+}
+
+.btn-primary:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 1px solid var(--secondary-color);
+    color: var(--text-color);
+}
+
+.btn-secondary:hover {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-danger {
+    background-color: #ff4d4f;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #d9363e;
+}
+
+.btn-danger:disabled {
+    background-color: #ffcccc;
+    cursor: not-allowed;
+}
+
+.btn-sm {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+}
+
+/* 新增：添加任务按钮样式 */
+.btn-add-task {
+    background-color: transparent;
+    border: 1px dashed #ccc;
+    color: #666;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    margin-left: auto; /* 推到最右边 */
+    border-radius: 4px;
+}
+
+.btn-add-task:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background-color: rgba(74, 144, 226, 0.05);
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    font-size: 1.2rem;
+    margin: 0;
+    color: #666;
+}
+.btn-icon:hover {
+    color: var(--primary-color);
+    background-color: rgba(0,0,0,0.05);
+}
+
+/* Kanban Board Layout - Vertical Stack */
+.kanban-board {
+    flex: 1;
+    display: flex;
+    flex-direction: column; /* 垂直排列 */
+    overflow-y: auto; /* 垂直滚动 */
+    padding: 1rem;
+    gap: 1rem;
+    /* 美化滚动条 */
+    scrollbar-width: thin;
+    scrollbar-color: #ccc #f0f2f5;
+}
+
+/* Webkit Scrollbar Styling */
+.kanban-board::-webkit-scrollbar {
+    width: 8px;
+}
+.kanban-board::-webkit-scrollbar-track {
+    background: #f0f2f5;
+}
+.kanban-board::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+}
+
+.column {
+    background-color: #fff;
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    /* min-width unset for vertical layout */
+    max-width: none; 
+    width: 100%;
+    flex-shrink: 0; /* 防止被压缩 */
+    transition: transform 0.1s;
+}
+
+/* 长按反馈 */
+.column.pressing {
+    transform: scale(0.98);
+    background-color: #f9f9f9;
+    box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+.column-header {
+    padding: 0.8rem 1rem;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    border-left: 5px solid transparent; /* Color indicator on left */
+    background-color: #fafafa;
+    border-radius: var(--radius) var(--radius) 0 0;
+    user-select: none; /* 禁止选中文本，便于长按 */
+    -webkit-user-select: none;
+}
+
+.column-header:hover {
+    background-color: #f0f0f0;
+}
+
+.column-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    /* 确保点击区域覆盖 */
+    padding: 0.2rem 0;
+}
+
+.toggle-icon {
+    transition: transform 0.3s;
+    font-size: 0.8rem;
+    color: #999;
+}
+
+.column.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.column-actions {
+    display: flex;
+    align-items: center;
+}
+
+.task-list {
+    padding: 0.5rem;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out, padding 0.3s;
+    overflow: hidden;
+    /* 默认展开 */
+    max-height: 2000px; 
+    opacity: 1;
+}
+
+.column.collapsed .task-list {
+    max-height: 0;
+    opacity: 0;
+    padding: 0 0.5rem; /* Remove vertical padding */
+}
+
+/* Task Card as Progress Bar */
+.task-card {
+    position: relative;
+    background-color: #f5f5f5; /* Track color */
+    border-radius: 4px; /* Reduced radius for bar look */
+    margin-bottom: 0.5rem;
+    box-shadow: none;
+    cursor: grab;
+    transition: transform 0.2s;
+    overflow: hidden;
+    height: 48px; /* Fixed height for readability */
+    display: flex;
+    align-items: center;
+    padding: 0 1rem 0 0; /* Left padding removed for checkbox */
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.task-card:active {
+    cursor: grabbing;
+}
+
+.task-card:hover {
+    transform: scale(1.01);
+}
+
+/* The actual progress bar fill */
+.task-progress-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background-color: var(--primary-color); /* Fallback */
+    z-index: 1;
+    transition: width 0.5s ease;
+    opacity: 0.8; /* Slight transparency to see bg if needed, or solid */
+}
+
+/* Content on top of progress bar */
+.task-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    color: #333;
+    /* pointer-events: none; - REMOVED to allow checkbox interaction */
+}
+
+/* Checkbox Style - New Accessible Implementation */
+.task-checkbox-btn {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    margin-right: 0.5rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; /* Optional: make the hover/active area circular */
+    transition: background-color 0.2s;
+    /* Ensure it's on top */
+    position: relative;
+    z-index: 10;
+}
+
+.task-checkbox-btn:active {
+    background-color: rgba(0,0,0,0.08);
+    transition: background-color 0.15s ease-out;
+}
+
+.check-indicator {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #666;
+    border-radius: 4px;
+    background: white;
+    display: grid;
+    place-content: center;
+    transition: all 0.2s;
+    pointer-events: none; /* Let clicks pass to button */
+}
+
+.check-indicator::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    transform: scale(0);
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em #fff;
+    transform-origin: center;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    background-color: #fff;
+}
+
+/* Checked State */
+.task-checkbox-btn[aria-checked="true"] .check-indicator {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.task-checkbox-btn[aria-checked="true"] .check-indicator::before {
+    transform: scale(1);
+}
+
+/* Completed Task Styles */
+.task-card.completed .task-name {
+    color: #9E9E9E;
+    position: relative;
+}
+
+.task-card.completed .task-name::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    background: #9E9E9E;
+    animation: strike 0.2s ease-out forwards;
+}
+
+@keyframes strike {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+.task-name {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60%;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.8); /* Ensure contrast */
+    flex: 1;
+}
+
+.task-meta {
+    font-size: 0.8rem;
+    color: #555;
+    background-color: rgba(255,255,255,0.6);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Hover tooltip for exact percentage */
+.task-card::after {
+    content: attr(data-progress);
+    position: absolute;
+    right: 1rem;
+    top: -20px;
+    background: #333;
+    color: #fff;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.task-card:hover::after {
+    opacity: 1;
+    top: 5px; /* Adjust position */
+}
+
+/* Drag and Drop Feedback */
+.sortable-ghost {
+    opacity: 0.4;
+    background-color: #c8ebfb;
+}
+
+.sortable-drag {
+    cursor: grabbing;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--modal-overlay);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    /* Flex layout for centering */
+    display: none; /* JS will toggle flex */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.show {
+    display: flex; /* Use flex instead of block for centering */
+    opacity: 1;
+}
+
+.modal-content {
+    background-color: #fff;
+    /* margin removed due to flex centering */
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    width: 85%; /* Narrower for vertical layout */
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+    
+    /* Ensure it doesn't overflow screen */
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal.show .modal-content {
+    transform: translateY(0);
+}
+
+/* Custom Confirm Modal */
+.confirm-content {
+    width: 80%;
+    max-width: 320px;
+    aspect-ratio: 16/9; /* 强制16:9比例 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+}
+
+#confirm-title {
+    margin-top: 0;
+    color: var(--text-color);
+}
+
+#confirm-message {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    margin: 1rem 0;
+}
+
+.close, .close-cat {
+    float: right;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+input[type="text"],
+input[type="datetime-local"],
+input[type="date"],
+select {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+
+/* Color Palette Grid */
+.color-palette {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 0.5rem;
+}
+
+.color-option {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.2s;
+    box-sizing: border-box; /* Ensure border doesn't grow size */
+}
+
+.color-option:hover {
+    transform: scale(1.1);
+}
+
+.color-option.selected {
+    border-color: #333;
+    transform: scale(1.15);
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+}
+
+/* 自定义颜色按钮 - 彩虹渐变 */
+.color-option.custom {
+    background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+    position: relative;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+/* 按钮按下状态 */
+.color-option:active {
+    transform: scale(0.95);
+}
+
+input[type="color"] {
+    visibility: hidden;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.8rem;
+    margin-top: 1.5rem;
+}
+
+/* 针对确认弹窗的按钮布局 */
+.confirm-content .modal-actions {
+    justify-content: center;
+}
+
+/* ------------------- New Styles for Deadline ------------------- */
+
+/* Tabs */
+.deadline-tabs {
+    display: flex;
+    margin-bottom: 1rem;
+    background: #f0f0f0;
+    border-radius: 4px;
+    padding: 2px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 0.5rem;
+    text-align: center;
+    background: transparent;
+    border-radius: 4px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.tab-btn.active {
+    background: white;
+    color: var(--primary-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    font-weight: bold;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+/* Remaining Time Inputs */
+.time-inputs {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    width: 100%;
+    max-width: 268px;
+    margin: 0 auto;
+}
+
+.time-input-group {
+    flex: 1;
+    display: flex;
+    flex-direction: row; /* Horizontal layout */
+    align-items: center;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0 0.5rem;
+    height: 40px;
+    min-width: 0;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.time-input-group.input-error {
+    animation: input-error-flash 0.5s ease-out;
+    border-color: #ff4d4f;
+}
+
+@keyframes input-error-flash {
+    0% { box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.4); border-color: #ff4d4f; }
+    50% { box-shadow: 0 0 0 4px rgba(255, 77, 79, 0); border-color: #ff4d4f; }
+    100% { border-color: #ddd; }
+}
+
+.time-input-group input {
+    width: 3ch; /* Approx 3 digits */
+    flex: 0 0 auto; /* Don't grow */
+    text-align: right;
+    font-size: 1.1rem;
+    padding: 0.2rem;
+    padding-right: 0.2rem;
+    border: none;
+    outline: none;
+    background: transparent;
+}
+
+#rem-day {
+    width: 4ch;
+}
+
+.time-input-group .label {
+    margin: 0;
+    margin-left: 0.2rem;
+    font-size: 0.9rem;
+    color: #666;
+    white-space: nowrap;
+    order: 3; /* Label at the end */
+}
+
+.input-hint {
+    font-size: 0.8rem;
+    color: #e67e22;
+    margin-top: 0.5rem;
+    min-height: 1.2em;
+}
+
+/* Absolute Time Picker */
+.abs-date-picker {
+    margin-bottom: 1rem;
+}
+
+.abs-time-picker {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.5rem;
+}
+
+.picker-label {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+    display: block;
+    text-align: center;
+}
+
+.absolute-time-inputs {
+    margin-bottom: 0.5rem;
+}
+
+.remaining-wheel-picker {
+    margin-top: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.wheel-picker-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 120px;
+    overflow: hidden;
+    position: relative;
+    background: #fff;
+    user-select: none;
+}
+
+/* The gradient overlay for wheel effect */
+.wheel-picker-container::before,
+.wheel-picker-container::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.wheel-picker-container::before {
+    top: 0;
+    background: linear-gradient(to bottom, rgba(255,255,255,1), rgba(255,255,255,0));
+}
+
+.wheel-picker-container::after {
+    bottom: 0;
+    background: linear-gradient(to top, rgba(255,255,255,1), rgba(255,255,255,0));
+}
+
+.wheel-highlight {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 32px;
+    margin-top: -16px;
+    background: rgba(74, 144, 226, 0.1);
+    border-top: 1px solid rgba(74, 144, 226, 0.3);
+    border-bottom: 1px solid rgba(74, 144, 226, 0.3);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.wheel-column {
+    height: 100%;
+    width: 60px;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    text-align: center;
+    /* Hide scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    outline: none; /* remove focus outline */
+}
+
+.wheel-column::-webkit-scrollbar {
+    display: none;
+}
+
+.wheel-item {
+    height: 32px;
+    line-height: 32px;
+    scroll-snap-align: center;
+    font-size: 1.1rem;
+    color: #ccc;
+    transition: color 0.2s, font-size 0.2s;
+}
+
+.wheel-item.active {
+    color: var(--primary-color);
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+/* Spacer to allow scrolling top item to center */
+.wheel-spacer {
+    height: 44px; /* (120 - 32) / 2 */
+}
+
+.wheel-separator {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0 0.5rem;
+    color: #333;
+    z-index: 3;
+}
+
+.wheel-separator.wheel-unit {
+    margin: 0 0.15rem;
+    font-size: 0.9rem;
+    font-weight: normal;
+    color: #666;
+}

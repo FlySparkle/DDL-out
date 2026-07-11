@@ -1,0 +1,53 @@
+# Flutter and Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+doc/api/
+
+# Flutter generated platform files
+**/android/.gradle/
+**/android/local.properties
+**/ios/Flutter/.last_build_id
+**/windows/flutter/ephemeral/
+**/linux/flutter/ephemeral/
+**/macos/Flutter/ephemeral/
+
+# IDEs and operating systems
+.idea/
+*.iml
+*.code-workspace
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Python legacy caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Local data, logs, and secrets
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.log
+.env
+.env.*
+!.env.example
+
+# Local packaging output
+dist/
+release/
+
+# Android signing material
+**/android/key.properties
+**/*.jks
+**/*.keystore
