@@ -250,11 +250,33 @@ jobs:
           test -n "$IOS_KEYCHAIN_PASSWORD"
           certificate_path="$RUNNER_TEMP/ddl-out-distribution.p12"
           keychain_path="$RUNNER_TEMP/ddl-out-signing.keychain-db"
-          profile_path="$HOME/Library/MobileDevice/Provisioning Profiles/ddl-out.mobileprovision"
+          profile_source="$RUNNER_TEMP/ddl-out.mobileprovision"
+          profile_plist="$RUNNER_TEMP/ddl-out-profile.plist"
           printf '%s' "$IOS_CERTIFICATE_BASE64" | base64 -D > "$certificate_path"
+          printf '%s' "$IOS_PROVISION_PROFILE_BASE64" | base64 -D > "$profile_source"
+          security cms -D -i "$profile_source" > "$profile_plist"
+          profile_uuid=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$profile_plist")
+          profile_team_id=$(/usr/libexec/PlistBuddy -c 'Print :TeamIdentifier:0' "$profile_plist")
+          profile_app_id=$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' "$profile_plist")
+          profile_get_task_allow=$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:get-task-allow' "$profile_plist")
+          test "$profile_team_id" = "95G86VA5XB"
+          case "$profile_app_id" in
+            "$profile_team_id.com.flysparkle.ddlOut"|"$profile_team_id.com.flysparkle.*") ;;
+            *) echo "The provisioning profile does not cover com.flysparkle.ddlOut." >&2; exit 1 ;;
+          esac
+          test "$profile_get_task_allow" = "false" || {
+            echo "IOS_PROVISION_PROFILE_BASE64 must contain a distribution provisioning profile." >&2
+            exit 1
+          }
+          profile_path="$HOME/Library/MobileDevice/Provisioning Profiles/$profile_uuid.mobileprovision"
           mkdir -p "$(dirname "$profile_path")"
-          printf '%s' "$IOS_PROVISION_PROFILE_BASE64" | base64 -D > "$profile_path"
+          cp "$profile_source" "$profile_path"
           printf '%s' "$IOS_EXPORT_OPTIONS_PLIST_BASE64" | base64 -D > ios/ExportOptions.plist
+          export_method=$(/usr/libexec/PlistBuddy -c 'Print :method' ios/ExportOptions.plist)
+          case "$export_method" in
+            app-store|app-store-connect|ad-hoc|release-testing|enterprise) ;;
+            *) echo "ExportOptions.plist must use a distribution export method." >&2; exit 1 ;;
+          esac
           security create-keychain -p "$IOS_KEYCHAIN_PASSWORD" "$keychain_path"
           security set-keychain-settings -lut 21600 "$keychain_path"
           security unlock-keychain -p "$IOS_KEYCHAIN_PASSWORD" "$keychain_path"
@@ -264,6 +286,16 @@ jobs:
           identity_count=$(security find-identity -v -p codesigning "$keychain_path" | grep -Ec '^[[:space:]]*[0-9]+\)' || true)
           test "$identity_count" -gt 0
           security set-key-partition-list -S apple-tool:,apple: -s -k "$IOS_KEYCHAIN_PASSWORD" "$keychain_path"
+          signing_identity=$(security find-identity -v -p codesigning "$keychain_path" | sed -n 's/.*"\(.*\)"/\1/p' | grep -E '^(Apple|iPhone) Distribution:' | head -n 1)
+          test -n "$signing_identity" || {
+            echo "IOS_CERTIFICATE_BASE64 must contain an Apple Distribution certificate." >&2
+            exit 1
+          }
+          printf '%s\n' \
+            'CODE_SIGN_STYLE = Manual' \
+            "CODE_SIGN_IDENTITY[sdk=iphoneos*] = $signing_identity" \
+            "PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*] = $profile_uuid" \
+            > ios/Flutter/Signing.xcconfig
           security find-identity -v -p codesigning "$keychain_path"
       - run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
       - name: Name IPA

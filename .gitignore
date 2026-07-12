@@ -13,6 +13,7 @@ doc/api/
 **/android/.gradle/
 **/android/local.properties
 **/ios/Flutter/.last_build_id
+/ios/Flutter/Signing.xcconfig
 **/windows/flutter/ephemeral/
 **/linux/flutter/ephemeral/
 **/macos/Flutter/ephemeral/
