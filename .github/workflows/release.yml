@@ -146,7 +146,7 @@ jobs:
         run: mv build/app/outputs/flutter-apk/app-release.apk "DDL_out_$GITHUB_REF_NAME-android-${{ matrix.abi }}.apk"
       - uses: actions/upload-artifact@v4
         with:
-          name: android-release-${{ matrix.abi }}
+          name: android-${{ matrix.abi }}-release
           path: DDL_out_v*-android-${{ matrix.abi }}.apk
           if-no-files-found: error
 
@@ -219,9 +219,8 @@ jobs:
           if-no-files-found: error
 
   ios:
-    name: Package signed iOS IPA release
+    name: Package iOS IPA release
     needs: [verify, check-secrets]
-    if: needs.check-secrets.outputs.ios_ready == 'true'
     runs-on: macos-latest
     env:
       IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
@@ -241,6 +240,8 @@ jobs:
           cache: true
       - run: flutter pub get --enforce-lockfile
       - name: Configure iOS signing
+        id: signing
+        continue-on-error: true
         shell: bash
         run: |
           test -n "$IOS_CERTIFICATE_BASE64"
@@ -297,17 +298,31 @@ jobs:
             "PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*] = $profile_uuid" \
             > ios/Flutter/Signing.xcconfig
           security find-identity -v -p codesigning "$keychain_path"
-      - run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
-      - name: Name IPA
+      - name: Build signed iOS IPA
+        id: signed_ipa
+        if: steps.signing.outcome == 'success'
+        continue-on-error: true
+        run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+      - name: Name signed IPA
+        if: steps.signed_ipa.outcome == 'success'
         shell: bash
         run: |
-          version=$(awk '/^version:/ {print $2; exit}' pubspec.yaml)
-          version=${version%%+*}
           mv build/ios/ipa/*.ipa "DDL_out_$GITHUB_REF_NAME-ios.ipa"
+      - name: Build unsigned iOS IPA fallback
+        if: steps.signing.outcome != 'success' || steps.signed_ipa.outcome == 'failure'
+        shell: bash
+        run: |
+          flutter build ios --release --no-codesign
+          rm -rf Payload
+          ln -s build/ios/iphoneos Payload
+          if [ -d Payload/Runner.app/Frameworks ]; then
+            find Payload/Runner.app/Frameworks -type d -name '*.framework' -exec codesign --force --sign - --preserve-metadata=identifier,entitlements {} \;
+          fi
+          zip -r9 "DDL_out_$GITHUB_REF_NAME-ios-unsigned.ipa" Payload/Runner.app
       - uses: actions/upload-artifact@v4
         with:
           name: ios-release
-          path: DDL_out_v*-ios.ipa
+          path: DDL_out_v*-ios*.ipa
           if-no-files-found: error
 
   windows-arm64:
