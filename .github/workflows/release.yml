@@ -45,6 +45,30 @@ jobs:
       - run: flutter analyze
       - run: flutter test
 
+  check-secrets:
+    name: Check signing secrets
+    runs-on: ubuntu-latest
+    outputs:
+      ios_ready: ${{ steps.ios.outputs.ready }}
+      android_ready: ${{ steps.android.outputs.ready }}
+    steps:
+      - id: ios
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.IOS_CERTIFICATE_BASE64 }}" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+      - id: android
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
   windows:
     name: Package Windows release
     needs: verify
@@ -71,7 +95,8 @@ jobs:
 
   android:
     name: Package signed Android ${{ matrix.abi }} release
-    needs: verify
+    needs: [verify, check-secrets]
+    if: needs.check-secrets.outputs.android_ready == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -195,7 +220,8 @@ jobs:
 
   ios:
     name: Package signed iOS IPA release
-    needs: verify
+    needs: [verify, check-secrets]
+    if: needs.check-secrets.outputs.ios_ready == 'true'
     runs-on: macos-latest
     env:
       IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
