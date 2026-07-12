@@ -9,6 +9,7 @@ import '../core/theme/app_theme.dart';
 import '../data/settings/app_settings.dart';
 import '../features/board/board_page.dart';
 import '../features/settings/settings_page.dart';
+import '../features/update/update_prompt.dart';
 import '../l10n/app_localizations.dart';
 
 final _router = GoRouter(
@@ -39,6 +40,8 @@ class DdlOutApp extends ConsumerWidget {
           darkTheme: AppTheme.dark(useDynamic ? darkDynamic : null),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
+          builder: (context, child) =>
+              UpdateCheckOnLaunch(child: child ?? const SizedBox.shrink()),
         );
       },
     );

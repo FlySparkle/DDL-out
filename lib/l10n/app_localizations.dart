@@ -576,8 +576,32 @@ abstract class AppLocalizations {
   /// No description provided for @checkForUpdatesSubtitle.
   ///
   /// In zh, this message translates to:
-  /// **'在 GitHub 查看最新版本'**
+  /// **'检查 GitHub 上是否有新版本'**
   String get checkForUpdatesSubtitle;
+
+  /// No description provided for @updateAvailableTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'发现新版本'**
+  String get updateAvailableTitle;
+
+  /// No description provided for @updateAvailableBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'DDL out! {version} 已发布。是否前往 GitHub 下载？'**
+  String updateAvailableBody(String version);
+
+  /// No description provided for @downloadUpdate.
+  ///
+  /// In zh, this message translates to:
+  /// **'前往下载'**
+  String get downloadUpdate;
+
+  /// No description provided for @alreadyUpToDate.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前已是最新版本'**
+  String get alreadyUpToDate;
 
   /// No description provided for @aboutVersion.
   ///

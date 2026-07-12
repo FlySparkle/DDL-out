@@ -262,7 +262,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get checkForUpdates => '检查更新';
 
   @override
-  String get checkForUpdatesSubtitle => '在 GitHub 查看最新版本';
+  String get checkForUpdatesSubtitle => '检查 GitHub 上是否有新版本';
+
+  @override
+  String get updateAvailableTitle => '发现新版本';
+
+  @override
+  String updateAvailableBody(String version) {
+    return 'DDL out! $version 已发布。是否前往 GitHub 下载？';
+  }
+
+  @override
+  String get downloadUpdate => '前往下载';
+
+  @override
+  String get alreadyUpToDate => '当前已是最新版本';
 
   @override
   String aboutVersion(String version) {

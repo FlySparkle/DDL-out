@@ -262,7 +262,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get checkForUpdates => 'アップデートを確認';
 
   @override
-  String get checkForUpdatesSubtitle => 'GitHub で最新リリースを確認';
+  String get checkForUpdatesSubtitle => 'GitHub で新しいリリースを確認';
+
+  @override
+  String get updateAvailableTitle => 'アップデートがあります';
+
+  @override
+  String updateAvailableBody(String version) {
+    return 'DDL out! $version が公開されました。GitHub を開いてダウンロードしますか？';
+  }
+
+  @override
+  String get downloadUpdate => 'ダウンロード';
+
+  @override
+  String get alreadyUpToDate => '最新バージョンです';
 
   @override
   String aboutVersion(String version) {

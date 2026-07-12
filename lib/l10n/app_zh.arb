@@ -85,7 +85,12 @@
   "errorTitle": "加载失败",
   "retry": "重试",
   "checkForUpdates": "检查更新",
-  "checkForUpdatesSubtitle": "在 GitHub 查看最新版本",
+  "checkForUpdatesSubtitle": "检查 GitHub 上是否有新版本",
+  "updateAvailableTitle": "发现新版本",
+  "updateAvailableBody": "DDL out! {version} 已发布。是否前往 GitHub 下载？",
+  "@updateAvailableBody": {"placeholders": {"version": {"type": "String"}}},
+  "downloadUpdate": "前往下载",
+  "alreadyUpToDate": "当前已是最新版本",
   "aboutVersion": "版本 {version}",
   "@aboutVersion": {"placeholders": {"version": {"type": "String"}}}
 }

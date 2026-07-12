@@ -85,7 +85,12 @@
   "errorTitle": "読み込めませんでした",
   "retry": "再試行",
   "checkForUpdates": "アップデートを確認",
-  "checkForUpdatesSubtitle": "GitHub で最新リリースを確認",
+  "checkForUpdatesSubtitle": "GitHub で新しいリリースを確認",
+  "updateAvailableTitle": "アップデートがあります",
+  "updateAvailableBody": "DDL out! {version} が公開されました。GitHub を開いてダウンロードしますか？",
+  "@updateAvailableBody": {"placeholders": {"version": {"type": "String"}}},
+  "downloadUpdate": "ダウンロード",
+  "alreadyUpToDate": "最新バージョンです",
   "aboutVersion": "バージョン {version}",
   "@aboutVersion": {"placeholders": {"version": {"type": "String"}}}
 }

@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
-
 import '../../core/version/app_version.dart';
+import '../../core/update/update_checker.dart';
 import '../../data/backup/backup_service.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/settings/app_settings.dart';
+import '../update/update_prompt.dart';
 import '../../l10n/app_localizations.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
-
-  static final _latestReleaseUri = Uri.parse(
-    'https://github.com/FlySparkle/DDL-out/releases/latest',
-  );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -107,7 +103,7 @@ class SettingsPage extends ConsumerWidget {
                 title: Text(l10n.checkForUpdates),
                 subtitle: Text(l10n.checkForUpdatesSubtitle),
                 trailing: const Icon(Icons.open_in_new),
-                onTap: () => _openLatestRelease(context),
+                onTap: () => _checkForUpdates(context, ref),
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -209,14 +205,19 @@ class SettingsPage extends ConsumerWidget {
     }
   }
 
-  Future<void> _openLatestRelease(BuildContext context) async {
+  Future<void> _checkForUpdates(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
     try {
-      final opened = await launchUrl(
-        _latestReleaseUri,
-        mode: LaunchMode.externalApplication,
-      );
-      if (!opened && context.mounted) _message(context, l10n.operationFailed);
+      final update = await ref.read(updateCheckerProvider).checkForUpdate();
+      if (!context.mounted) return;
+      if (update == null) {
+        _message(context, l10n.alreadyUpToDate);
+        return;
+      }
+      final result = await showUpdatePrompt(context, update);
+      if (result == UpdatePromptResult.downloadFailed && context.mounted) {
+        _message(context, l10n.operationFailed);
+      }
     } on Object {
       if (context.mounted) _message(context, l10n.operationFailed);
     }

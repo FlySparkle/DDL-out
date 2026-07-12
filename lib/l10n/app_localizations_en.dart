@@ -266,7 +266,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkForUpdates => 'Check for updates';
 
   @override
-  String get checkForUpdatesSubtitle => 'View the latest release on GitHub';
+  String get checkForUpdatesSubtitle => 'Check GitHub for a newer release';
+
+  @override
+  String get updateAvailableTitle => 'Update available';
+
+  @override
+  String updateAvailableBody(String version) {
+    return 'DDL out! $version is available. Open GitHub to download it?';
+  }
+
+  @override
+  String get downloadUpdate => 'Download';
+
+  @override
+  String get alreadyUpToDate => 'You\'re up to date';
 
   @override
   String aboutVersion(String version) {

@@ -85,7 +85,12 @@
   "errorTitle": "Unable to load",
   "retry": "Retry",
   "checkForUpdates": "Check for updates",
-  "checkForUpdatesSubtitle": "View the latest release on GitHub",
+  "checkForUpdatesSubtitle": "Check GitHub for a newer release",
+  "updateAvailableTitle": "Update available",
+  "updateAvailableBody": "DDL out! {version} is available. Open GitHub to download it?",
+  "@updateAvailableBody": {"placeholders": {"version": {"type": "String"}}},
+  "downloadUpdate": "Download",
+  "alreadyUpToDate": "You're up to date",
   "aboutVersion": "Version {version}",
   "@aboutVersion": {"placeholders": {"version": {"type": "String"}}}
 }
