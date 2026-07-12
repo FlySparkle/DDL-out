@@ -34,6 +34,10 @@ void main() {
 
     expect(find.text('还没有截止事项'), findsOneWidget);
     expect(find.text('新建分类'), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.menu));
+    await tester.pumpAndSettle();
+    expect(find.text('截止事项'), findsOneWidget);
+    expect(find.text('设置'), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
   });

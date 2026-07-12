@@ -34,6 +34,33 @@ class BoardPage extends ConsumerWidget {
     final board = ref.watch(boardProvider);
 
     return Scaffold(
+      drawer: NavigationDrawer(
+        selectedIndex: 0,
+        onDestinationSelected: (index) {
+          final router = GoRouter.of(context);
+          Navigator.pop(context);
+          if (index == 1) router.push('/settings');
+        },
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(28, 24, 28, 16),
+            child: Text(
+              l10n.appTitle,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ),
+          NavigationDrawerDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
+            label: Text(l10n.boardTitle),
+          ),
+          NavigationDrawerDestination(
+            icon: const Icon(Icons.settings_outlined),
+            selectedIcon: const Icon(Icons.settings),
+            label: Text(l10n.settingsTitle),
+          ),
+        ],
+      ),
       appBar: AppBar(
         title: Text(l10n.appTitle),
         actions: [
@@ -62,11 +89,6 @@ class BoardPage extends ConsumerWidget {
                 ),
               ),
             ],
-          ),
-          IconButton(
-            tooltip: l10n.settingsTitle,
-            onPressed: () => context.push('/settings'),
-            icon: const Icon(Icons.settings_outlined),
           ),
         ],
       ),
