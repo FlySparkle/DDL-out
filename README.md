@@ -1,5 +1,9 @@
 # DDL out!
 
+<p align="center">
+  <img src="assets/logo.png" alt="DDL out! logo" />
+</p>
+
 **中文** | [English](README.en.md) | [日本語](README.ja.md)
 
 [![CI](https://github.com/FlySparkle/DDL-out/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/FlySparkle/DDL-out/actions/workflows/ci.yml)
