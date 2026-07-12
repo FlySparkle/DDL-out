@@ -1,65 +1,82 @@
-# DDL out! Flutter Rewrite
+# DDL out!
 
-This repository contains the legacy desktop application and its Flutter rewrite.
-The Flutter application targets Windows and Android with shared domain, Riverpod,
-and Drift layers.
+**中文** | [English](README.en.md) | [日本語](README.ja.md)
 
 [![CI](https://github.com/FlySparkle/DDL-out/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/FlySparkle/DDL-out/actions/workflows/ci.yml)
 
-## Layout
+DDL out! 是一个本地优先的截止事项看板。它帮助你按截止时间组织任务，在不联网的情况下
+也能完成所有日常操作。应用使用 Flutter、Riverpod、Drift 与 Material 3 构建。
 
-- `DDL out/` - legacy Python + Flask + SQLite + pywebview application
-- `ddl_out_flutter/` - Flutter application
-- `docs/MIGRATION_ROADMAP.md` - implementation sequence and acceptance gates
-- `tool/check_environment.ps1` - local toolchain check
+## 功能
 
-## Local environment
+- 分类与事项的创建、编辑、删除、折叠和跨分类拖放。
+- 按截止时间排序，并以紧急程度呈现任务状态。
+- 相对时间和绝对时间两种截止时间输入方式。
+- 完成状态与一键清理已完成事项。
+- 经过校验、带版本的 JSON 全量备份与恢复。
+- 所有数据保存在本机 SQLite 数据库；时间以 UTC 存储并按本地时区显示。
 
-The expected Windows development environment is:
+## 平台计划
 
-- Git
-- Flutter Stable (Dart is bundled)
-- VS Code with Dart and Flutter extensions
-- Visual Studio 2022 with Desktop development with C++
-- JDK 21 and Android SDK command-line tools
+| 平台与分发方式 | 状态 | 自动化 |
+| --- | --- | --- |
+| Windows x64 portable | 可构建 | CI 与标签发布 |
+| Windows ARM64 portable | 预留 | 手动扩展平台工作流 |
+| Windows MSIX | 预留 | 需要应用身份和签名证书后启用 |
+| Linux x64 bundle、DEB、RPM | 预留 | 手动扩展平台工作流 |
+| Android arm64-v8a APK | 可构建 | CI 与标签发布 |
+| iOS | 预留 | macOS 工作流执行无签名构建；发布需要 Apple 签名 |
+| macOS | 预留 | 已生成原生宿主，待发布签名配置 |
 
-Open a new terminal after installing or changing `PATH`, then run:
+预留表示原生宿主或工作流入口已经存在，但不代表已经发布可供最终用户安装的正式包。
+
+## 快速开始
+
+安装 Flutter Stable（Dart 已包含），然后从仓库根目录运行：
 
 ```powershell
-.\tool\check_environment.ps1
-flutter doctor -v
+flutter pub get
+dart run build_runner build --force-jit
+flutter gen-l10n
+flutter run -d windows
 ```
 
-Keep SDK paths machine-local. Do not commit an SDK, IDE cache, generated build
-output, or local SQLite data into this repository.
+Android 开发还需要 JDK 21、Android SDK 和已接受的许可证。Windows 构建需要 Visual
+Studio 的 Desktop development with C++ 工作负载。运行 `flutter doctor -v` 可检查环境。
 
-Verified on 2026-07-12:
+## 开发与验证
 
-- Flutter 3.44.6 Stable, Dart 3.12.2, and DevTools 2.57.0
-- Visual Studio Community 2022 17.11.2 with the C++ desktop workload
-- Windows SDK 10.0.22621.0 and Windows desktop engine caches
-- VS Code Flutter 3.138.0 and Dart 3.138.0 extensions
-- JDK 21 configured for Flutter
-- Android SDK platforms 34, 35, and 36; Build Tools 36.0.0; NDK 28.2.13676358
-- Android licenses accepted and the release APK toolchain available
+```powershell
+dart format --output=none --set-exit-if-changed .
+flutter analyze
+flutter test
+flutter build windows --release
+flutter build apk --release --target-platform android-arm64
+```
 
-## Migration principle
+在包含非 ASCII 字符的路径中运行代码生成时，保留 `--force-jit`。完整的签名、打包与
+标签发布说明见 [发布指南](docs/RELEASE.md)。
 
-The legacy app is a behavior reference, not a migration source or target
-architecture. Flutter owns UI, application state, and SQLite persistence
-directly; a local Flask server is not part of the target design. Version 0.1
-starts with an empty database and uses versioned JSON for backup and restore.
+## 项目结构
 
-Read [the migration roadmap](docs/MIGRATION_ROADMAP.md) for implementation and
-release status.
+```text
+lib/        Flutter 应用与业务逻辑
+test/       单元与组件测试
+assets/     应用资源
+android/    Android 原生宿主
+ios/        iOS 原生宿主
+linux/      Linux 原生宿主
+macos/      macOS 原生宿主
+windows/    Windows 原生宿主
+docs/       发布、贡献与架构文档
+tool/       本地验证与打包脚本
+```
 
-## Community and delivery
+## 参与贡献
 
-- [Contributing guide](CONTRIBUTING.md) covers the branch, test, and pull
-  request workflow.
-- [Code of conduct](CODE_OF_CONDUCT.md) defines the expectations for project
-  spaces.
-- [Security policy](SECURITY.md) explains how to report a vulnerability without
-  disclosing it publicly.
-- [Release guide](docs/RELEASE.md) documents local signing and the tag-driven
-  GitHub release process.
+请阅读[贡献指南](docs/CONTRIBUTING.md)和[行为准则](docs/CODE_OF_CONDUCT.md)。公开问题请
+使用 GitHub Issue 模板；请勿提交本地数据库、备份、签名材料或其他个人数据。
+
+## 许可证
+
+本项目采用 [GPL-v3](LICENSE) 许可证。

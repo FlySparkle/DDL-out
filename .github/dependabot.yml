@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: pub
-    directory: /ddl_out_flutter
+    directory: /
     schedule:
       interval: weekly
     open-pull-requests-limit: 5

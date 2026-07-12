@@ -1,8 +1,7 @@
 # 贡献指南
 
-感谢你帮助改进 DDL out!。本项目正在将旧版桌面应用重写为 Windows 与 Android
-共用的本地优先 Flutter 应用。提交 issue 或 Pull Request 前，请先阅读
-[迁移路线图](docs/MIGRATION_ROADMAP.md) 和仓库根目录的 `AGENTS.md`。
+感谢你帮助改进 DDL out!。这是一个面向桌面与移动端的本地优先 Flutter 应用。
+提交 issue 或 Pull Request 前，请阅读仓库根目录的 `AGENTS.md`。
 
 ## 开始开发
 
@@ -11,7 +10,7 @@
 
 ```powershell
 git clone https://github.com/FlySparkle/DDL-out.git
-cd DDL-out\ddl_out_flutter
+cd DDL-out
 flutter pub get
 dart run build_runner build --force-jit
 flutter gen-l10n
@@ -22,7 +21,7 @@ flutter run -d windows
 
 ## 提交前检查
 
-从 `ddl_out_flutter/` 运行：
+从仓库根目录运行：
 
 ```powershell
 dart run build_runner build --force-jit
@@ -48,9 +47,9 @@ flutter build apk --release
 不要在 Pull Request 中顺带重构无关代码、修改他人的未完成工作，或提交真实备份与
 Android 签名材料。
 
-## 问题与安全报告
+## 问题报告
 
-使用 GitHub issue 模板报告可公开讨论的缺陷和功能建议。安全漏洞请遵循
-[安全政策](SECURITY.md)，不要在公开 issue 中披露可利用细节。
+使用 GitHub issue 模板报告可公开讨论的缺陷和功能建议。不要在公开 issue 中披露
+密钥、个人数据或其他敏感信息。
 
 参与项目即表示你同意遵守[行为准则](CODE_OF_CONDUCT.md)。

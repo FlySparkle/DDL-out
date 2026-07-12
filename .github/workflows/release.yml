@@ -14,7 +14,7 @@ concurrency:
 
 env:
   FLUTTER_VERSION: 3.44.6
-  PROJECT_DIR: ddl_out_flutter
+  PROJECT_DIR: .
 
 jobs:
   verify:
@@ -66,7 +66,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: windows-release
-          path: ddl_out_flutter/ddl-out-*-windows-x64.zip
+          path: ddl-out-*-windows-x64.zip
           if-no-files-found: error
 
   android:
@@ -107,14 +107,14 @@ jobs:
             echo "keyAlias=$ANDROID_KEY_ALIAS"
             echo "storeFile=release-key.jks"
           } > android/key.properties
-      - run: flutter build apk --release
+      - run: flutter build apk --release --target-platform android-arm64
       - name: Name release asset
         shell: bash
         run: mv build/app/outputs/flutter-apk/app-release.apk "ddl-out-$GITHUB_REF_NAME-android.apk"
       - uses: actions/upload-artifact@v4
         with:
           name: android-release
-          path: ddl_out_flutter/ddl-out-*-android.apk
+          path: ddl-out-*-android.apk
           if-no-files-found: error
 
   publish:

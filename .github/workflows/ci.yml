@@ -15,7 +15,7 @@ concurrency:
 
 env:
   FLUTTER_VERSION: 3.44.6
-  PROJECT_DIR: ddl_out_flutter
+  PROJECT_DIR: .
 
 jobs:
   quality:
@@ -42,7 +42,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-lcov
-          path: ddl_out_flutter/coverage/lcov.info
+          path: coverage/lcov.info
           if-no-files-found: error
           retention-days: 14
 
@@ -66,7 +66,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: windows-x64-${{ github.sha }}
-          path: ddl_out_flutter/ddl-out-windows-x64.zip
+          path: ddl-out-windows-x64.zip
           if-no-files-found: error
           retention-days: 14
 
@@ -88,10 +88,10 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get --enforce-lockfile
-      - run: flutter build apk --release
+      - run: flutter build apk --release --target-platform android-arm64
       - uses: actions/upload-artifact@v4
         with:
           name: android-apk-${{ github.sha }}
-          path: ddl_out_flutter/build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 14

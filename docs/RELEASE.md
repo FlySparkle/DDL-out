@@ -2,18 +2,19 @@
 
 ## 质量门槛
 
-从 `ddl_out_flutter/` 运行：
+从仓库根目录运行：
 
 ```powershell
 dart format --output=none --set-exit-if-changed .
 flutter analyze
 flutter test
 flutter build windows --release
-flutter build apk --release
+flutter build apk --release --target-platform android-arm64
 ```
 
 CI 在对 `main` 的推送和 Pull Request 上运行依赖解析、代码生成检查、格式化、
-静态分析、测试、Windows 构建和 Android 构建。只有这些检查通过的改动才应合并。
+静态分析、测试、Windows x64 构建和 Android arm64-v8a 构建。只有这些检查通过的
+改动才应合并。
 
 ## Windows
 
@@ -29,7 +30,7 @@ Windows 构建依赖 Visual Studio 2022 C++ 桌面工作负载和 Windows 开发
 keytool -genkeypair -v -keystore upload-keystore.jks -keyalg RSA -keysize 4096 -validity 10000 -alias upload
 ```
 
-在 `ddl_out_flutter/android/key.properties` 写入：
+在 `android/key.properties` 写入：
 
 ```properties
 storePassword=<store password>
@@ -59,8 +60,8 @@ git tag -a v0.1.0 -m "Release v0.1.0"
 git push origin v0.1.0
 ```
 
-发布工作流要求上述 Android 签名 Secrets，并会创建 GitHub Release，附带
-Windows x64 ZIP 和已签名 APK。标签中包含连字符的版本会作为预发布版本创建。
+发布工作流要求上述 Android 签名 Secrets，并会创建 GitHub Release，附带 Windows x64
+ZIP 和已签名 arm64-v8a APK。标签中包含连字符的版本会作为预发布版本创建。
 
 `file_picker` 当前固定在 10.x：11.x 要求 AGP 9 的 Built-in Kotlin 模式，
 而 `dynamic_color 1.8.1` 仍要求 Flutter 的 Kotlin 兼容模式。只有两个插件均支持
@@ -68,6 +69,18 @@ Built-in Kotlin 后，才能一起升级并切换 Android 构建模式。
 
 APK 位于 `build/app/outputs/flutter-apk/app-release.apk`，发布命名为
 `ddl-out-v<version>-android.apk`。
+
+## 扩展平台
+
+`.github/workflows/extended-platforms.yml` 可通过 GitHub Actions 的手动触发入口构建
+Linux x64 bundle，并产出 DEB 与 RPM；也可执行无签名 iOS 构建及 Windows ARM64 portable
+构建。它们不会自动附加到标签发布，直到对应平台完成真实设备验证与签名配置。
+
+Windows MSIX 需要先确定稳定的 Package/Publisher Identity 并配置签名证书。完成后应在
+扩展平台工作流中新增 MSIX job，而不是将未签名包作为正式发布产物。
+
+iOS 与 macOS 的正式分发需要 Apple Developer 签名、provisioning profile 与 notarization
+配置；这些凭据不得提交到仓库。
 
 ## 数据兼容
 

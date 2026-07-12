@@ -1,0 +1,98 @@
+name: Extended Platform Builds
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Platform build to run
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - linux
+          - ios
+          - windows-arm64
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: 3.44.6
+
+jobs:
+  linux:
+    name: Build Linux bundle, DEB, and RPM
+    if: inputs.target == 'all' || inputs.target == 'linux'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Linux packaging dependencies
+        run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev rpm ruby-full
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter build linux --release
+      - name: Create DEB and RPM packages
+        shell: bash
+        run: |
+          sudo gem install --no-document fpm
+          version=$(awk '/^version:/ {print $2; exit}' pubspec.yaml)
+          version=${version%%+*}
+          cd build/linux/x64/release/bundle
+          fpm -s dir -t deb -n ddl-out -v "$version" --architecture amd64 --prefix /opt/ddl-out .
+          fpm -s dir -t rpm -n ddl-out -v "$version" --architecture x86_64 --prefix /opt/ddl-out .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ddl-out-linux-x64
+          path: |
+            build/linux/x64/release/bundle/
+            build/linux/x64/release/bundle/*.deb
+            build/linux/x64/release/bundle/*.rpm
+          if-no-files-found: error
+          retention-days: 14
+
+  ios:
+    name: Build unsigned iOS app
+    if: inputs.target == 'all' || inputs.target == 'ios'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter build ios --release --no-codesign
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ddl-out-ios-unsigned
+          path: build/ios/iphoneos/Runner.app
+          if-no-files-found: error
+          retention-days: 14
+
+  windows-arm64:
+    name: Build Windows ARM64 portable app
+    if: inputs.target == 'all' || inputs.target == 'windows-arm64'
+    runs-on: windows-11-arm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter build windows --release --target-platform windows-arm64
+      - shell: pwsh
+        run: Compress-Archive -Path build/windows/arm64/runner/Release/* -DestinationPath ddl-out-windows-arm64.zip -CompressionLevel Optimal
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ddl-out-windows-arm64
+          path: ddl-out-windows-arm64.zip
+          if-no-files-found: error
+          retention-days: 14

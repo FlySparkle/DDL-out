@@ -3,7 +3,7 @@ param()
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$project = Join-Path $root 'ddl_out_flutter'
+$project = $root
 $pubspec = Get-Content -Raw -LiteralPath (Join-Path $project 'pubspec.yaml')
 $version = [regex]::Match($pubspec, '(?m)^version:\s*([^+\r\n]+)').Groups[1].Value
 $releaseDir = Join-Path $project 'build\windows\x64\runner\Release'

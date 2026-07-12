@@ -7,7 +7,7 @@ Accepted on 2026-07-12.
 ## Context
 
 Flutter 3.44.6 generates an AGP 9 project. `dynamic_color 1.8.1` still applies
-the legacy Kotlin Android plugin, while `file_picker 11` expects AGP built-in
+the compatibility Kotlin Android plugin, while `file_picker 11` expects AGP built-in
 Kotlin. Enabling either mode for both dependencies makes the other fail.
 
 ## Decision

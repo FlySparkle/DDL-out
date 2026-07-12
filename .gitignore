@@ -16,6 +16,9 @@ doc/api/
 **/windows/flutter/ephemeral/
 **/linux/flutter/ephemeral/
 **/macos/Flutter/ephemeral/
+/linux/flutter/generated_plugin_registrant.*
+/linux/flutter/generated_plugins.cmake
+/macos/Flutter/GeneratedPluginRegistrant.swift
 
 # IDEs and operating systems
 .idea/
@@ -24,13 +27,6 @@ doc/api/
 .DS_Store
 Thumbs.db
 Desktop.ini
-
-# Python legacy caches
-__pycache__/
-*.py[cod]
-.pytest_cache/
-.venv/
-venv/
 
 # Local data, logs, and secrets
 *.db
@@ -51,3 +47,8 @@ release/
 **/android/key.properties
 **/*.jks
 **/*.keystore
+
+# Native packaging output
+*.msix
+*.deb
+*.rpm

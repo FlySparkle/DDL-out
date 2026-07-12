@@ -37,7 +37,7 @@ body:
       label: 环境信息 | Environment
       value: |
         - App version:
-        - Platform: Windows / Android
+        - Platform: Windows x64 / Windows ARM64 / Linux / Android / iOS / macOS
         - OS version:
         - Device model (Android only):
     validations:

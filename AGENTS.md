@@ -2,15 +2,14 @@
 
 ## Mission
 
-Rewrite DDL out! as a local-first Flutter application using Material 3 and
+Build DDL out! as a local-first Flutter application using Material 3 and
 Material 3 Expressive-inspired motion and component styling.
 
 ## Repository layout
 
-- `DDL out/`: legacy Python, Flask, SQLite, and pywebview implementation. Treat
-  it as a behavior and migration reference. Do not add new product features here.
-- `ddl_out_flutter/`: target Flutter application. Create all new product code here.
-- `docs/`: architecture decisions, feature baseline, and migration roadmap.
+- `lib/`: Flutter application source code.
+- `android/`, `ios/`, `linux/`, `macos/`, and `windows/`: native platform hosts.
+- `docs/`: architecture decisions, release, contribution, and platform notes.
 - `tool/`: repository-level setup and verification scripts.
 
 ## Product invariants
@@ -21,7 +20,7 @@ Material 3 Expressive-inspired motion and component styling.
 - Support both relative and absolute deadline entry.
 - Keep the compact 9:20 desktop experience, but make layouts responsive rather
   than forcibly resizing the native window.
-- Version 0.1 starts from empty data and does not import the legacy `tasks.db`.
+- Version 0.1 starts from empty data.
 - Cross-platform transfer uses validated, versioned JSON whole-database backups.
 - Store timestamps in UTC and render them in the user's local time zone.
 - All source files and user-facing Chinese text must be UTF-8.
@@ -42,7 +41,7 @@ Material 3 Expressive-inspired motion and component styling.
 
 ## Quality gates
 
-Run from `ddl_out_flutter/` after the Flutter project exists:
+Run from the repository root:
 
 ```powershell
 flutter pub get
@@ -53,8 +52,8 @@ flutter build windows
 flutter build apk --release
 ```
 
-On this workspace's Unicode path, run Drift generation through the `X:` subst
-drive and force JIT compilation:
+On paths containing non-ASCII characters, force JIT compilation for Drift
+generation:
 
 ```powershell
 dart run build_runner build --force-jit
@@ -69,9 +68,6 @@ Add tests in proportion to risk:
 
 ## Change discipline
 
-- Read the relevant legacy implementation and tests before changing equivalent
-  Flutter behavior.
 - Do not edit or delete the user's local `*.db` files.
 - Keep commits scoped to one milestone or one cohesive fix.
-- Update `docs/MIGRATION_ROADMAP.md` when a milestone's scope or status changes.
 - Record durable architecture decisions in `docs/decisions/` as short ADRs.

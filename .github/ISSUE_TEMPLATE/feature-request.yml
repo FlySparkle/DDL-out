@@ -29,7 +29,9 @@ body:
         - 截止时间 | Deadlines
         - 备份与恢复 | Backup and restore
         - Windows 体验 | Windows experience
+        - Linux 体验 | Linux experience
         - Android 体验 | Android experience
+        - Apple 平台体验 | Apple platform experience
         - 开发与发布 | Development and release
         - 其他 | Other
   - type: textarea
