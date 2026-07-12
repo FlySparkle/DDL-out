@@ -85,7 +85,7 @@ class BackupService {
     final bytes = await createBackupBytes();
     final date = DateTime.now().toIso8601String().split('T').first;
     final fileName = 'ddl-out-backup-$date.json';
-    final path = await FilePicker.saveFile(
+    final path = await FilePicker.platform.saveFile(
       dialogTitle: dialogTitle,
       fileName: fileName,
       type: FileType.custom,
@@ -99,7 +99,7 @@ class BackupService {
   }
 
   Future<BackupPreview?> pickBackup({required String dialogTitle}) async {
-    final result = await FilePicker.pickFiles(
+    final result = await FilePicker.platform.pickFiles(
       dialogTitle: dialogTitle,
       type: FileType.custom,
       allowedExtensions: const ['json'],

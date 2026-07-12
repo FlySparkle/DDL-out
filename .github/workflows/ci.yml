@@ -1,9 +1,17 @@
-name: Flutter CI
+name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   FLUTTER_VERSION: 3.44.6
@@ -11,6 +19,7 @@ env:
 
 jobs:
   quality:
+    name: Format, analyze, and test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -22,14 +31,23 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
-      - run: flutter pub get
+      - run: flutter pub get --enforce-lockfile
       - run: dart run build_runner build --force-jit
       - run: flutter gen-l10n
+      - name: Verify generated sources are committed
+        run: git diff --exit-code
       - run: dart format --output=none --set-exit-if-changed .
       - run: flutter analyze
-      - run: flutter test
+      - run: flutter test --coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-lcov
+          path: ddl_out_flutter/coverage/lcov.info
+          if-no-files-found: error
+          retention-days: 14
 
   windows:
+    name: Build Windows
     runs-on: windows-latest
     defaults:
       run:
@@ -41,22 +59,20 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
-      - run: flutter pub get
+      - run: flutter pub get --enforce-lockfile
       - run: flutter build windows --release
       - shell: pwsh
-        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath ddl-out-v0.1.0-windows-x64.zip
+        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath ddl-out-windows-x64.zip -CompressionLevel Optimal
       - uses: actions/upload-artifact@v4
         with:
-          name: ddl-out-windows-x64
-          path: ddl_out_flutter/ddl-out-v0.1.0-windows-x64.zip
+          name: windows-x64-${{ github.sha }}
+          path: ddl_out_flutter/ddl-out-windows-x64.zip
+          if-no-files-found: error
+          retention-days: 14
 
   android:
+    name: Build Android
     runs-on: ubuntu-latest
-    env:
-      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-      ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
-      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
     defaults:
       run:
         working-directory: ${{ env.PROJECT_DIR }}
@@ -65,26 +81,17 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: "21"
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
-      - run: flutter pub get
-      - name: Configure Android release signing
-        if: env.ANDROID_KEYSTORE_BASE64 != ''
-        run: |
-          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/release-key.jks
-          {
-            echo "storePassword=$ANDROID_STORE_PASSWORD"
-            echo "keyPassword=$ANDROID_KEY_PASSWORD"
-            echo "keyAlias=$ANDROID_KEY_ALIAS"
-            echo "storeFile=release-key.jks"
-          } > android/key.properties
+      - run: flutter pub get --enforce-lockfile
       - run: flutter build apk --release
-      - run: mv build/app/outputs/flutter-apk/app-release.apk ddl-out-v0.1.0-android.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: ddl-out-android
-          path: ddl_out_flutter/ddl-out-v0.1.0-android.apk
+          name: android-apk-${{ github.sha }}
+          path: ddl_out_flutter/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 14

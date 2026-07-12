@@ -12,6 +12,9 @@ flutter build windows --release
 flutter build apk --release
 ```
 
+CI 在对 `main` 的推送和 Pull Request 上运行依赖解析、代码生成检查、格式化、
+静态分析、测试、Windows 构建和 Android 构建。只有这些检查通过的改动才应合并。
+
 ## Windows
 
 Windows 构建依赖 Visual Studio 2022 C++ 桌面工作负载和 Windows 开发者模式。
@@ -38,10 +41,8 @@ storeFile=<absolute path to upload-keystore.jks>
 密钥、密码和 `key.properties` 已被 Git 忽略。缺少该文件时本地及 CI 会使用
 调试密钥生成可安装的验证包；对外正式发布必须提供 release 密钥。
 
-本机首发密钥已生成在
-`C:\Users\27950\.ddl-out-signing\ddl-out-release.jks`，凭据保存在被 Git
-忽略的 `ddl_out_flutter/android/key.properties`。发布前必须将这两个文件
-一起离线备份；丢失密钥后无法用同一应用身份发布升级包。
+请将密钥与 `key.properties` 保存在仓库外的安全位置，并进行离线备份。丢失密钥后
+无法使用同一应用身份发布升级包。
 
 GitHub Actions 正式签名使用以下 Secrets：
 
@@ -50,12 +51,23 @@ GitHub Actions 正式签名使用以下 Secrets：
 - `ANDROID_KEY_PASSWORD`
 - `ANDROID_KEY_ALIAS`
 
+推送与 `pubspec.yaml` 中应用版本一致的标签会触发正式发布。例如版本为
+`0.1.0+1` 时：
+
+```powershell
+git tag -a v0.1.0 -m "Release v0.1.0"
+git push origin v0.1.0
+```
+
+发布工作流要求上述 Android 签名 Secrets，并会创建 GitHub Release，附带
+Windows x64 ZIP 和已签名 APK。标签中包含连字符的版本会作为预发布版本创建。
+
+`file_picker` 当前固定在 10.x：11.x 要求 AGP 9 的 Built-in Kotlin 模式，
+而 `dynamic_color 1.8.1` 仍要求 Flutter 的 Kotlin 兼容模式。只有两个插件均支持
+Built-in Kotlin 后，才能一起升级并切换 Android 构建模式。
+
 APK 位于 `build/app/outputs/flutter-apk/app-release.apk`，发布命名为
 `ddl-out-v<version>-android.apk`。
-
-Flutter 3.44.6 使用 AGP 9 兼容模式时，`dynamic_color 1.8.1` 与
-`file_picker 10.3.10` 共用旧 Kotlin Gradle Plugin。升级到 `file_picker 11`
-前，应先确认 `dynamic_color` 已迁移到 AGP 内建 Kotlin。
 
 ## 数据兼容
 

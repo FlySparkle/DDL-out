@@ -1,0 +1,38 @@
+name: 功能建议 | Feature request
+description: 建议 DDL out! 的功能或体验改进。| Suggest a feature or experience improvement for DDL out!.
+title: "[Feature] "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请先搜索现有 issue，并说明建议是否符合本地优先和跨平台产品原则。
+        Search existing issues first and explain how the request fits the local-first, cross-platform product.
+  - type: textarea
+    id: problem
+    attributes:
+      label: 要解决的问题 | Problem to solve
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案 | Proposed solution
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 涉及模块 | Area
+      options:
+        - 任务与分类 | Tasks and categories
+        - 截止时间 | Deadlines
+        - 备份与恢复 | Backup and restore
+        - Windows 体验 | Windows experience
+        - Android 体验 | Android experience
+        - 开发与发布 | Development and release
+        - 其他 | Other
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 备选方案 | Alternatives considered

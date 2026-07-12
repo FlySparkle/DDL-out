@@ -4,6 +4,8 @@ This repository contains the legacy desktop application and its Flutter rewrite.
 The Flutter application targets Windows and Android with shared domain, Riverpod,
 and Drift layers.
 
+[![CI](https://github.com/FlySparkle/DDL-out/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/FlySparkle/DDL-out/actions/workflows/ci.yml)
+
 ## Layout
 
 - `DDL out/` - legacy Python + Flask + SQLite + pywebview application
@@ -28,8 +30,8 @@ Open a new terminal after installing or changing `PATH`, then run:
 flutter doctor -v
 ```
 
-The current machine uses `D:\flutter` for the Flutter SDK. Do not commit an SDK,
-IDE cache, generated build output, or local SQLite data into this repository.
+Keep SDK paths machine-local. Do not commit an SDK, IDE cache, generated build
+output, or local SQLite data into this repository.
 
 Verified on 2026-07-12:
 
@@ -50,3 +52,14 @@ starts with an empty database and uses versioned JSON for backup and restore.
 
 Read [the migration roadmap](docs/MIGRATION_ROADMAP.md) for implementation and
 release status.
+
+## Community and delivery
+
+- [Contributing guide](CONTRIBUTING.md) covers the branch, test, and pull
+  request workflow.
+- [Code of conduct](CODE_OF_CONDUCT.md) defines the expectations for project
+  spaces.
+- [Security policy](SECURITY.md) explains how to report a vulnerability without
+  disclosing it publicly.
+- [Release guide](docs/RELEASE.md) documents local signing and the tag-driven
+  GitHub release process.

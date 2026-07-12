@@ -1,0 +1,49 @@
+name: 缺陷报告 | Bug report
+description: 报告 DDL out! 的可复现问题。| Report a reproducible problem in DDL out!.
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请先确认没有相同 issue，并移除备份、数据库和日志中的个人信息。
+        Please search existing issues first and remove personal data from backups, databases, and logs.
+  - type: textarea
+    id: summary
+    attributes:
+      label: 问题描述 | Problem
+      description: 简明说明实际发生的行为。| Briefly describe what happened.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤 | Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为 | Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境信息 | Environment
+      value: |
+        - App version:
+        - Platform: Windows / Android
+        - OS version:
+        - Device model (Android only):
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 错误信息或截图 | Error output or screenshots
+      description: 请先移除个人数据和文件路径中的敏感信息。| Remove personal data and sensitive paths first.

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全漏洞 | Security vulnerability
+    url: https://github.com/FlySparkle/DDL-out/security/advisories/new
+    about: 请通过私密安全报告提交漏洞，不要公开披露细节。| Report vulnerabilities privately; do not disclose details publicly.
+  - name: 使用问题与讨论 | Questions and discussions
+    url: https://github.com/FlySparkle/DDL-out/discussions
+    about: 请在 Discussions 中交流使用问题和开放讨论。| Use Discussions for usage questions and open-ended discussion.
