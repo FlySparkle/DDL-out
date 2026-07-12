@@ -50,6 +50,7 @@ dependencies:
   path: ^1.9.1
   intl: ^0.20.2
   flex_color_picker: ^3.8.0
+  package_info_plus: ^9.0.0
 
 dev_dependencies:
   flutter_test:

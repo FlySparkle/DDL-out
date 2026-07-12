@@ -564,8 +564,8 @@ abstract class AppLocalizations {
   /// No description provided for @aboutVersion.
   ///
   /// In zh, this message translates to:
-  /// **'版本 0.1.0'**
-  String get aboutVersion;
+  /// **'版本 {version}'**
+  String aboutVersion(String version);
 }
 
 class _AppLocalizationsDelegate

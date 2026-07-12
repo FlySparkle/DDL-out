@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/version/app_version.dart';
 import '../../data/backup/backup_service.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/settings/app_settings.dart';
@@ -14,6 +15,7 @@ class SettingsPage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final settings = ref.watch(settingsControllerProvider);
     final board = ref.watch(boardProvider).value;
+    final appVersion = ref.watch(appVersionProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsTitle)),
@@ -98,7 +100,11 @@ class SettingsPage extends ConsumerWidget {
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.info_outline),
                 title: Text(l10n.appTitle),
-                subtitle: Text(l10n.aboutVersion),
+                subtitle: appVersion.when(
+                  data: (value) => Text(l10n.aboutVersion(value)),
+                  error: (_, _) => const SizedBox.shrink(),
+                  loading: () => const SizedBox.shrink(),
+                ),
               ),
             ],
           ),

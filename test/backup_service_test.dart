@@ -1,13 +1,24 @@
 import 'dart:convert';
 
+import 'package:ddl_out/core/version/app_version.dart';
 import 'package:ddl_out/data/backup/backup_service.dart';
 import 'package:ddl_out/data/database/app_database.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class _TestAppVersionReader implements AppVersionReader {
+  const _TestAppVersionReader(this.value);
+
+  final String value;
+
+  @override
+  Future<String> read() async => value;
+}
+
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+  const appVersionReader = _TestAppVersionReader('0.1.1+1');
   late AppDatabase source;
   late AppDatabase target;
 
@@ -28,11 +39,13 @@ void main() {
       deadlineUtc: DateTime.utc(2026, 8, 1, 12),
       categoryId: categoryId,
     );
-    final sourceService = BackupService(source);
+    final sourceService = BackupService(source, appVersionReader);
     final bytes = await sourceService.createBackupBytes();
-    final preview = BackupService(target).parseBackup(bytes);
+    final payload = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+    expect(payload['appVersion'], '0.1.1+1');
+    final preview = BackupService(target, appVersionReader).parseBackup(bytes);
 
-    await BackupService(target).restore(preview);
+    await BackupService(target, appVersionReader).restore(preview);
 
     expect((await target.readCategories()).single.name, '项目');
     final task = (await target.readTasks()).single;
@@ -50,7 +63,7 @@ void main() {
       }),
     );
     expect(
-      () => BackupService(target).parseBackup(bytes),
+      () => BackupService(target, appVersionReader).parseBackup(bytes),
       throwsA(isA<BackupException>()),
     );
   });
@@ -76,7 +89,7 @@ void main() {
       }),
     );
     expect(
-      () => BackupService(target).parseBackup(bytes),
+      () => BackupService(target, appVersionReader).parseBackup(bytes),
       throwsA(isA<BackupException>()),
     );
   });

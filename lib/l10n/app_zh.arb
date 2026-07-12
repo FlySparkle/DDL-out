@@ -84,5 +84,6 @@
   "@taskCount": {"placeholders": {"count": {"type": "int"}}},
   "errorTitle": "加载失败",
   "retry": "重试",
-  "aboutVersion": "版本 0.1.0"
+  "aboutVersion": "版本 {version}",
+  "@aboutVersion": {"placeholders": {"version": {"type": "String"}}}
 }
