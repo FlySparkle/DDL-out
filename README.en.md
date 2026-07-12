@@ -1,12 +1,29 @@
-# DDL out!
-
 <p align="center">
-  <img src="assets/logo.png" alt="DDL out! logo" style="max-width: 120px;" />
+  <img src="assets/logo.png" width="120" alt="DDL out! Logo" />
 </p>
 
-[中文](README.md) | **English** | [日本語](README.ja.md)
+<h1 align="center">DDL out!</h1>
 
-[![CI](https://github.com/FlySparkle/DDL-out/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/FlySparkle/DDL-out/actions/workflows/ci.yml)
+<p align="center">
+  <a href="README.md">中文</a> | <b>English</b> | <a href="README.ja.md">日本語</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/FlySparkle/DDL-out">
+    <img src="https://img.shields.io/badge/GitHub-Repo-black?logo=github" />
+  </a>
+  <a href="https://github.com/FlySparkle/DDL-out/actions/workflows/ci.yml">
+    <img src="https://github.com/FlySparkle/DDL-out/actions/workflows/ci.yml/badge.svg" />
+  </a>
+  <a href="https://github.com/FlySparkle/DDL-out/actions/workflows/release.yml">
+    <img src="https://github.com/FlySparkle/DDL-out/actions/workflows/release.yml/badge.svg" />
+  </a>
+  <a href="./LICENSE">
+    <img alt="GitHub License" src="https://img.shields.io/github/license/FlySparkle/DDL-out" />
+  </a>
+</p>
+
+---
 
 DDL out! is a local-first deadline board. Organize tasks by their deadlines and
 work without a network connection. It is built with Flutter, Riverpod, Drift,

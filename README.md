@@ -1,12 +1,29 @@
-# DDL out!
-
 <p align="center">
-  <img src="assets/logo.png" alt="DDL out! logo" style="max-width: 120px;" />
+  <img src="assets/logo.png" width="120" alt="DDL out! Logo" />
 </p>
 
-**中文** | [English](README.en.md) | [日本語](README.ja.md)
+<h1 align="center">DDL out!</h1>
 
-[![CI](https://github.com/FlySparkle/DDL-out/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/FlySparkle/DDL-out/actions/workflows/ci.yml)
+<p align="center">
+  <b>中文</b> | <a href="README.en.md">English</a> | <a href="README.ja.md">日本語</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/FlySparkle/DDL-out">
+    <img src="https://img.shields.io/badge/GitHub-Repo-black?logo=github" />
+  </a>
+  <a href="https://github.com/FlySparkle/DDL-out/actions/workflows/ci.yml">
+    <img src="https://github.com/FlySparkle/DDL-out/actions/workflows/ci.yml/badge.svg" />
+  </a>
+  <a href="https://github.com/FlySparkle/DDL-out/actions/workflows/release.yml">
+    <img src="https://github.com/FlySparkle/DDL-out/actions/workflows/release.yml/badge.svg" />
+  </a>
+  <a href="./LICENSE">
+    <img alt="GitHub License" src="https://img.shields.io/github/license/FlySparkle/DDL-out" />
+  </a>
+</p>
+
+---
 
 DDL out! 是一个本地优先的截止事项看板。它帮助你按截止时间组织任务，在不联网的情况下
 也能完成所有日常操作。应用使用 Flutter、Riverpod、Drift 与 Material 3 构建。
