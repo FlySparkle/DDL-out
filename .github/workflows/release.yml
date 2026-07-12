@@ -259,7 +259,10 @@ jobs:
           security set-keychain-settings -lut 21600 "$keychain_path"
           security unlock-keychain -p "$IOS_KEYCHAIN_PASSWORD" "$keychain_path"
           security import "$certificate_path" -P "$IOS_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$keychain_path"
-          security list-keychain -d user -s "$keychain_path" login.keychain-db
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$IOS_KEYCHAIN_PASSWORD" "$keychain_path"
+          security default-keychain -s "$keychain_path"
+          security list-keychain -d user -s "$keychain_path"
+          security find-identity -v -p codesigning "$keychain_path"
       - run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
       - name: Name IPA
         shell: bash
@@ -282,11 +285,13 @@ jobs:
         working-directory: ${{ env.PROJECT_DIR }}
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
+      - name: Install Flutter (manual clone for ARM64)
+        shell: pwsh
+        working-directory: ${{ runner.temp }}
+        run: |
+          git clone --depth 1 --branch ${{ env.FLUTTER_VERSION }} https://github.com/flutter/flutter.git flutter
+          Add-Content $env:GITHUB_PATH "${{ runner.temp }}\flutter\bin"
+      - run: flutter doctor
       - run: flutter pub get --enforce-lockfile
       - run: flutter build windows --release --target-platform windows-arm64
       - shell: pwsh
