@@ -258,9 +258,11 @@ jobs:
           security create-keychain -p "$IOS_KEYCHAIN_PASSWORD" "$keychain_path"
           security set-keychain-settings -lut 21600 "$keychain_path"
           security unlock-keychain -p "$IOS_KEYCHAIN_PASSWORD" "$keychain_path"
-          security import "$certificate_path" -P "$IOS_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$keychain_path"
+          security import "$certificate_path" -P "$IOS_CERTIFICATE_PASSWORD" -A -f pkcs12 -k "$keychain_path"
           security default-keychain -s "$keychain_path"
           security list-keychain -d user -s "$keychain_path"
+          identity_count=$(security find-identity -v -p codesigning "$keychain_path" | grep -Ec '^[[:space:]]*[0-9]+\)' || true)
+          test "$identity_count" -gt 0
           security set-key-partition-list -S apple-tool:,apple: -s -k "$IOS_KEYCHAIN_PASSWORD" "$keychain_path"
           security find-identity -v -p codesigning "$keychain_path"
       - run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
