@@ -170,6 +170,12 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get adaptiveDesktopSidebar => '自适应桌面侧边栏';
+
+  @override
+  String get adaptiveDesktopSidebarSubtitle => '宽窗口固定显示侧边栏；窄窗口收起到边缘，鼠标悬停时展开。';
+
+  @override
   String get backup => '导出备份';
 
   @override

@@ -172,6 +172,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get adaptiveDesktopSidebar => 'Adaptive desktop sidebar';
+
+  @override
+  String get adaptiveDesktopSidebarSubtitle =>
+      'On wide windows, keep the sidebar visible. On narrow windows, collapse it until the pointer hovers over the edge.';
+
+  @override
   String get backup => 'Export backup';
 
   @override

@@ -54,6 +54,8 @@
   "fontSize": "Text size",
   "fontSizeValue": "{percent}%",
   "@fontSizeValue": {"placeholders": {"percent": {"type": "int"}}},
+  "adaptiveDesktopSidebar": "Adaptive desktop sidebar",
+  "adaptiveDesktopSidebarSubtitle": "On wide windows, keep the sidebar visible. On narrow windows, collapse it until the pointer hovers over the edge.",
   "backup": "Export backup",
   "restore": "Restore backup",
   "exportDialogTitle": "Export DDL out! backup",

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:ddl_out/data/database/app_database.dart';
 import 'package:ddl_out/data/repositories/repositories.dart';
 import 'package:ddl_out/features/board/board_page.dart';
@@ -38,6 +40,50 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('截止事项'), findsOneWidget);
     expect(find.text('设置'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('adaptive desktop sidebar expands from the window edge', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({'adaptive_desktop_sidebar': true});
+    const snapshot = BoardSnapshot(categories: [], tasks: []);
+    await tester.binding.setSurfaceSize(const Size(720, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          boardProvider.overrideWith((ref) => Stream.value(snapshot)),
+          currentTimeProvider.overrideWith(
+            (ref) => Stream.value(DateTime.now()),
+          ),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: const BoardPage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.menu), findsNothing);
+    expect(find.byIcon(Icons.view_sidebar_outlined), findsOneWidget);
+    expect(find.text('Deadlines'), findsNothing);
+
+    final gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    await gesture.addPointer(location: const Offset(8, 120));
+    await gesture.moveTo(const Offset(24, 120));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Deadlines'), findsOneWidget);
+    await gesture.removePointer();
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
   });

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/version/app_version.dart';
@@ -17,6 +19,8 @@ class SettingsPage extends ConsumerWidget {
     final settings = ref.watch(settingsControllerProvider);
     final board = ref.watch(boardProvider).value;
     final appVersion = ref.watch(appVersionProvider);
+    final isDesktop =
+        Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsTitle)),
@@ -114,6 +118,19 @@ class SettingsPage extends ConsumerWidget {
                   l10n.fontSizeValue((settings.textScale * 100).round()),
                 ),
               ),
+              if (isDesktop) ...[
+                const SizedBox(height: 8),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  secondary: const Icon(Icons.view_sidebar_outlined),
+                  title: Text(l10n.adaptiveDesktopSidebar),
+                  subtitle: Text(l10n.adaptiveDesktopSidebarSubtitle),
+                  value: settings.adaptiveDesktopSidebar,
+                  onChanged: ref
+                      .read(settingsControllerProvider.notifier)
+                      .setAdaptiveDesktopSidebar,
+                ),
+              ],
               const Divider(height: 32),
               _SectionTitle(l10n.dataSection),
               const SizedBox(height: 8),

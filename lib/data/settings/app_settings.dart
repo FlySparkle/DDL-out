@@ -15,6 +15,7 @@ class AppSettingsState {
     this.dynamicColorEnabled = true,
     this.fontFamily = AppFontFamily.system,
     this.textScale = 1,
+    this.adaptiveDesktopSidebar = false,
     this.collapsedCategoryIds = const <int>{},
     this.deadlineMode = DeadlineMode.relative,
     this.relativeDays = 1,
@@ -26,6 +27,7 @@ class AppSettingsState {
   final bool dynamicColorEnabled;
   final AppFontFamily fontFamily;
   final double textScale;
+  final bool adaptiveDesktopSidebar;
   final Set<int> collapsedCategoryIds;
   final DeadlineMode deadlineMode;
   final int relativeDays;
@@ -37,6 +39,7 @@ class AppSettingsState {
     bool? dynamicColorEnabled,
     AppFontFamily? fontFamily,
     double? textScale,
+    bool? adaptiveDesktopSidebar,
     Set<int>? collapsedCategoryIds,
     DeadlineMode? deadlineMode,
     int? relativeDays,
@@ -48,6 +51,8 @@ class AppSettingsState {
       dynamicColorEnabled: dynamicColorEnabled ?? this.dynamicColorEnabled,
       fontFamily: fontFamily ?? this.fontFamily,
       textScale: textScale ?? this.textScale,
+      adaptiveDesktopSidebar:
+          adaptiveDesktopSidebar ?? this.adaptiveDesktopSidebar,
       collapsedCategoryIds: collapsedCategoryIds ?? this.collapsedCategoryIds,
       deadlineMode: deadlineMode ?? this.deadlineMode,
       relativeDays: relativeDays ?? this.relativeDays,
@@ -67,6 +72,7 @@ class SettingsController extends Notifier<AppSettingsState> {
   static const _dynamicColorKey = 'dynamic_color';
   static const _fontFamilyKey = 'font_family';
   static const _textScaleKey = 'text_scale';
+  static const _adaptiveDesktopSidebarKey = 'adaptive_desktop_sidebar';
   static const _collapsedKey = 'collapsed_categories';
   static const _deadlineModeKey = 'deadline_mode';
   static const _relativeDaysKey = 'relative_days';
@@ -91,6 +97,8 @@ class SettingsController extends Notifier<AppSettingsState> {
       dynamicColorEnabled: preferences.getBool(_dynamicColorKey) ?? true,
       fontFamily: _parseFontFamily(preferences.getString(_fontFamilyKey)),
       textScale: (preferences.getDouble(_textScaleKey) ?? 1).clamp(0.8, 1.4),
+      adaptiveDesktopSidebar:
+          preferences.getBool(_adaptiveDesktopSidebarKey) ?? false,
       collapsedCategoryIds:
           (preferences.getStringList(_collapsedKey) ?? const [])
               .map(int.tryParse)
@@ -138,6 +146,11 @@ class SettingsController extends Notifier<AppSettingsState> {
     final normalized = value.clamp(0.8, 1.4);
     state = state.copyWith(textScale: normalized);
     await (await _prefs()).setDouble(_textScaleKey, normalized);
+  }
+
+  Future<void> setAdaptiveDesktopSidebar(bool value) async {
+    state = state.copyWith(adaptiveDesktopSidebar: value);
+    await (await _prefs()).setBool(_adaptiveDesktopSidebarKey, value);
   }
 
   Future<void> toggleCategory(int id) async {

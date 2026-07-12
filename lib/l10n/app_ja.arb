@@ -54,6 +54,8 @@
   "fontSize": "文字サイズ",
   "fontSizeValue": "{percent}%",
   "@fontSizeValue": {"placeholders": {"percent": {"type": "int"}}},
+  "adaptiveDesktopSidebar": "デスクトップ用サイドバーを自動調整",
+  "adaptiveDesktopSidebarSubtitle": "広いウィンドウではサイドバーを固定表示し、狭いウィンドウでは端にたたみ、ポインターを重ねると展開します。",
   "backup": "バックアップをエクスポート",
   "restore": "バックアップを復元",
   "exportDialogTitle": "DDL out! のバックアップをエクスポート",

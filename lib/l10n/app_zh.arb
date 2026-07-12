@@ -54,6 +54,8 @@
   "fontSize": "字号",
   "fontSizeValue": "{percent}%",
   "@fontSizeValue": {"placeholders": {"percent": {"type": "int"}}},
+  "adaptiveDesktopSidebar": "自适应桌面侧边栏",
+  "adaptiveDesktopSidebarSubtitle": "宽窗口固定显示侧边栏；窄窗口收起到边缘，鼠标悬停时展开。",
   "backup": "导出备份",
   "restore": "恢复备份",
   "exportDialogTitle": "导出 DDL out! 备份",

@@ -170,6 +170,13 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get adaptiveDesktopSidebar => 'デスクトップ用サイドバーを自動調整';
+
+  @override
+  String get adaptiveDesktopSidebarSubtitle =>
+      '広いウィンドウではサイドバーを固定表示し、狭いウィンドウでは端にたたみ、ポインターを重ねると展開します。';
+
+  @override
   String get backup => 'バックアップをエクスポート';
 
   @override

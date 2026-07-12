@@ -418,6 +418,18 @@ abstract class AppLocalizations {
   /// **'{percent}%'**
   String fontSizeValue(int percent);
 
+  /// No description provided for @adaptiveDesktopSidebar.
+  ///
+  /// In zh, this message translates to:
+  /// **'自适应桌面侧边栏'**
+  String get adaptiveDesktopSidebar;
+
+  /// No description provided for @adaptiveDesktopSidebarSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'宽窗口固定显示侧边栏；窄窗口收起到边缘，鼠标悬停时展开。'**
+  String get adaptiveDesktopSidebarSubtitle;
+
   /// No description provided for @backup.
   ///
   /// In zh, this message translates to:
