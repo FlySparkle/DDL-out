@@ -46,6 +46,18 @@ class $CategoriesTable extends Categories
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _createdAtUtcMeta = const VerificationMeta(
     'createdAtUtc',
   );
@@ -73,6 +85,7 @@ class $CategoriesTable extends Categories
     id,
     name,
     colorArgb,
+    sortOrder,
     createdAtUtc,
     updatedAtUtc,
   ];
@@ -106,6 +119,12 @@ class $CategoriesTable extends Categories
       );
     } else if (isInserting) {
       context.missing(_colorArgbMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
     }
     if (data.containsKey('created_at_utc')) {
       context.handle(
@@ -150,6 +169,10 @@ class $CategoriesTable extends Categories
         DriftSqlType.int,
         data['${effectivePrefix}color_argb'],
       )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
       createdAtUtc: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at_utc'],
@@ -171,12 +194,14 @@ class Category extends DataClass implements Insertable<Category> {
   final int id;
   final String name;
   final int colorArgb;
+  final int sortOrder;
   final DateTime createdAtUtc;
   final DateTime updatedAtUtc;
   const Category({
     required this.id,
     required this.name,
     required this.colorArgb,
+    required this.sortOrder,
     required this.createdAtUtc,
     required this.updatedAtUtc,
   });
@@ -186,6 +211,7 @@ class Category extends DataClass implements Insertable<Category> {
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     map['color_argb'] = Variable<int>(colorArgb);
+    map['sort_order'] = Variable<int>(sortOrder);
     map['created_at_utc'] = Variable<DateTime>(createdAtUtc);
     map['updated_at_utc'] = Variable<DateTime>(updatedAtUtc);
     return map;
@@ -196,6 +222,7 @@ class Category extends DataClass implements Insertable<Category> {
       id: Value(id),
       name: Value(name),
       colorArgb: Value(colorArgb),
+      sortOrder: Value(sortOrder),
       createdAtUtc: Value(createdAtUtc),
       updatedAtUtc: Value(updatedAtUtc),
     );
@@ -210,6 +237,7 @@ class Category extends DataClass implements Insertable<Category> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       colorArgb: serializer.fromJson<int>(json['colorArgb']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
       createdAtUtc: serializer.fromJson<DateTime>(json['createdAtUtc']),
       updatedAtUtc: serializer.fromJson<DateTime>(json['updatedAtUtc']),
     );
@@ -221,6 +249,7 @@ class Category extends DataClass implements Insertable<Category> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'colorArgb': serializer.toJson<int>(colorArgb),
+      'sortOrder': serializer.toJson<int>(sortOrder),
       'createdAtUtc': serializer.toJson<DateTime>(createdAtUtc),
       'updatedAtUtc': serializer.toJson<DateTime>(updatedAtUtc),
     };
@@ -230,12 +259,14 @@ class Category extends DataClass implements Insertable<Category> {
     int? id,
     String? name,
     int? colorArgb,
+    int? sortOrder,
     DateTime? createdAtUtc,
     DateTime? updatedAtUtc,
   }) => Category(
     id: id ?? this.id,
     name: name ?? this.name,
     colorArgb: colorArgb ?? this.colorArgb,
+    sortOrder: sortOrder ?? this.sortOrder,
     createdAtUtc: createdAtUtc ?? this.createdAtUtc,
     updatedAtUtc: updatedAtUtc ?? this.updatedAtUtc,
   );
@@ -244,6 +275,7 @@ class Category extends DataClass implements Insertable<Category> {
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       colorArgb: data.colorArgb.present ? data.colorArgb.value : this.colorArgb,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
       createdAtUtc: data.createdAtUtc.present
           ? data.createdAtUtc.value
           : this.createdAtUtc,
@@ -259,6 +291,7 @@ class Category extends DataClass implements Insertable<Category> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('colorArgb: $colorArgb, ')
+          ..write('sortOrder: $sortOrder, ')
           ..write('createdAtUtc: $createdAtUtc, ')
           ..write('updatedAtUtc: $updatedAtUtc')
           ..write(')'))
@@ -267,7 +300,7 @@ class Category extends DataClass implements Insertable<Category> {
 
   @override
   int get hashCode =>
-      Object.hash(id, name, colorArgb, createdAtUtc, updatedAtUtc);
+      Object.hash(id, name, colorArgb, sortOrder, createdAtUtc, updatedAtUtc);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -275,6 +308,7 @@ class Category extends DataClass implements Insertable<Category> {
           other.id == this.id &&
           other.name == this.name &&
           other.colorArgb == this.colorArgb &&
+          other.sortOrder == this.sortOrder &&
           other.createdAtUtc == this.createdAtUtc &&
           other.updatedAtUtc == this.updatedAtUtc);
 }
@@ -283,12 +317,14 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<int> id;
   final Value<String> name;
   final Value<int> colorArgb;
+  final Value<int> sortOrder;
   final Value<DateTime> createdAtUtc;
   final Value<DateTime> updatedAtUtc;
   const CategoriesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.colorArgb = const Value.absent(),
+    this.sortOrder = const Value.absent(),
     this.createdAtUtc = const Value.absent(),
     this.updatedAtUtc = const Value.absent(),
   });
@@ -296,6 +332,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.id = const Value.absent(),
     required String name,
     required int colorArgb,
+    this.sortOrder = const Value.absent(),
     required DateTime createdAtUtc,
     required DateTime updatedAtUtc,
   }) : name = Value(name),
@@ -306,6 +343,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Expression<int>? id,
     Expression<String>? name,
     Expression<int>? colorArgb,
+    Expression<int>? sortOrder,
     Expression<DateTime>? createdAtUtc,
     Expression<DateTime>? updatedAtUtc,
   }) {
@@ -313,6 +351,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (colorArgb != null) 'color_argb': colorArgb,
+      if (sortOrder != null) 'sort_order': sortOrder,
       if (createdAtUtc != null) 'created_at_utc': createdAtUtc,
       if (updatedAtUtc != null) 'updated_at_utc': updatedAtUtc,
     });
@@ -322,6 +361,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Value<int>? id,
     Value<String>? name,
     Value<int>? colorArgb,
+    Value<int>? sortOrder,
     Value<DateTime>? createdAtUtc,
     Value<DateTime>? updatedAtUtc,
   }) {
@@ -329,6 +369,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       id: id ?? this.id,
       name: name ?? this.name,
       colorArgb: colorArgb ?? this.colorArgb,
+      sortOrder: sortOrder ?? this.sortOrder,
       createdAtUtc: createdAtUtc ?? this.createdAtUtc,
       updatedAtUtc: updatedAtUtc ?? this.updatedAtUtc,
     );
@@ -346,6 +387,9 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     if (colorArgb.present) {
       map['color_argb'] = Variable<int>(colorArgb.value);
     }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
     if (createdAtUtc.present) {
       map['created_at_utc'] = Variable<DateTime>(createdAtUtc.value);
     }
@@ -361,6 +405,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('colorArgb: $colorArgb, ')
+          ..write('sortOrder: $sortOrder, ')
           ..write('createdAtUtc: $createdAtUtc, ')
           ..write('updatedAtUtc: $updatedAtUtc')
           ..write(')'))
@@ -934,6 +979,7 @@ typedef $$CategoriesTableCreateCompanionBuilder =
       Value<int> id,
       required String name,
       required int colorArgb,
+      Value<int> sortOrder,
       required DateTime createdAtUtc,
       required DateTime updatedAtUtc,
     });
@@ -942,6 +988,7 @@ typedef $$CategoriesTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> name,
       Value<int> colorArgb,
+      Value<int> sortOrder,
       Value<DateTime> createdAtUtc,
       Value<DateTime> updatedAtUtc,
     });
@@ -991,6 +1038,11 @@ class $$CategoriesTableFilterComposer
 
   ColumnFilters<int> get colorArgb => $composableBuilder(
     column: $table.colorArgb,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1054,6 +1106,11 @@ class $$CategoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAtUtc => $composableBuilder(
     column: $table.createdAtUtc,
     builder: (column) => ColumnOrderings(column),
@@ -1082,6 +1139,9 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumn<int> get colorArgb =>
       $composableBuilder(column: $table.colorArgb, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAtUtc => $composableBuilder(
     column: $table.createdAtUtc,
@@ -1150,12 +1210,14 @@ class $$CategoriesTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<int> colorArgb = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
                 Value<DateTime> createdAtUtc = const Value.absent(),
                 Value<DateTime> updatedAtUtc = const Value.absent(),
               }) => CategoriesCompanion(
                 id: id,
                 name: name,
                 colorArgb: colorArgb,
+                sortOrder: sortOrder,
                 createdAtUtc: createdAtUtc,
                 updatedAtUtc: updatedAtUtc,
               ),
@@ -1164,12 +1226,14 @@ class $$CategoriesTableTableManager
                 Value<int> id = const Value.absent(),
                 required String name,
                 required int colorArgb,
+                Value<int> sortOrder = const Value.absent(),
                 required DateTime createdAtUtc,
                 required DateTime updatedAtUtc,
               }) => CategoriesCompanion.insert(
                 id: id,
                 name: name,
                 colorArgb: colorArgb,
+                sortOrder: sortOrder,
                 createdAtUtc: createdAtUtc,
                 updatedAtUtc: updatedAtUtc,
               ),

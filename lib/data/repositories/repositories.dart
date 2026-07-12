@@ -5,6 +5,7 @@ import '../database/app_database.dart';
 abstract interface class CategoryRepository {
   Future<int> create(String name, int colorArgb);
   Future<void> update(Category category, String name, int colorArgb);
+  Future<void> reorder(List<int> categoryIds);
   Future<void> delete(int id);
   Future<void> clear();
 }
@@ -57,6 +58,10 @@ final class DriftCategoryRepository implements CategoryRepository {
   @override
   Future<void> update(Category category, String name, int colorArgb) =>
       _database.updateCategory(category, name, colorArgb);
+
+  @override
+  Future<void> reorder(List<int> categoryIds) =>
+      _database.reorderCategories(categoryIds);
 
   @override
   Future<void> delete(int id) => _database.deleteCategory(id);

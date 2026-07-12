@@ -56,4 +56,18 @@ void main() {
     expect(emissions.last.categories.single.name, '生活');
     await subscription.cancel();
   });
+
+  test('category order can be changed and persists in reads', () async {
+    final first = await database.createCategory('第一', 0xFF4A90E2);
+    final second = await database.createCategory('第二', 0xFF50E3C2);
+    final third = await database.createCategory('第三', 0xFFFF6B6B);
+
+    await database.reorderCategories([third, first, second]);
+
+    expect((await database.readCategories()).map((category) => category.id), [
+      third,
+      first,
+      second,
+    ]);
+  });
 }

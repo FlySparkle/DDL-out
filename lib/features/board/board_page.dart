@@ -157,28 +157,42 @@ class _BoardContent extends ConsumerWidget {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 680),
-        child: ListView(
+        child: ReorderableListView.builder(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 96),
-          children: [
-            if (uncategorized.isNotEmpty)
-              _CategorySection(
-                snapshot: snapshot,
-                category: null,
-                title: l10n.uncategorized,
-                color: Theme.of(context).colorScheme.secondary,
-                tasks: uncategorized,
-              ),
-            for (final category in snapshot.categories)
-              _CategorySection(
-                snapshot: snapshot,
-                category: category,
-                title: category.name,
-                color: Color(category.colorArgb),
-                tasks: snapshot.tasks
-                    .where((task) => task.categoryId == category.id)
-                    .toList(growable: false),
-              ),
-          ],
+          buildDefaultDragHandles: false,
+          header: uncategorized.isEmpty
+              ? null
+              : _CategorySection(
+                  snapshot: snapshot,
+                  category: null,
+                  title: l10n.uncategorized,
+                  color: Theme.of(context).colorScheme.secondary,
+                  tasks: uncategorized,
+                ),
+          itemCount: snapshot.categories.length,
+          itemBuilder: (context, index) {
+            final category = snapshot.categories[index];
+            return _CategorySection(
+              key: ValueKey('category-${category.id}'),
+              snapshot: snapshot,
+              category: category,
+              title: category.name,
+              color: Color(category.colorArgb),
+              tasks: snapshot.tasks
+                  .where((task) => task.categoryId == category.id)
+                  .toList(growable: false),
+              reorderIndex: index,
+            );
+          },
+          onReorderItem: (oldIndex, newIndex) {
+            if (oldIndex == newIndex) return;
+            final reordered = snapshot.categories
+                .map((category) => category.id)
+                .toList();
+            final moved = reordered.removeAt(oldIndex);
+            reordered.insert(newIndex, moved);
+            ref.read(categoryRepositoryProvider).reorder(reordered);
+          },
         ),
       ),
     );
@@ -187,11 +201,13 @@ class _BoardContent extends ConsumerWidget {
 
 class _CategorySection extends ConsumerWidget {
   const _CategorySection({
+    super.key,
     required this.snapshot,
     required this.category,
     required this.title,
     required this.color,
     required this.tasks,
+    this.reorderIndex,
   });
 
   final BoardSnapshot snapshot;
@@ -199,6 +215,7 @@ class _CategorySection extends ConsumerWidget {
   final String title;
   final Color color;
   final List<Task> tasks;
+  final int? reorderIndex;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -240,80 +257,76 @@ class _CategorySection extends ConsumerWidget {
             clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
-                InkWell(
-                  borderRadius: BorderRadius.circular(8),
-                  onTap: category == null
-                      ? null
-                      : () => ref
-                            .read(settingsControllerProvider.notifier)
-                            .toggleCategory(category!.id),
-                  onLongPress: category == null
-                      ? null
-                      : () => showCategoryEditor(
-                          context,
-                          ref,
-                          category: category,
-                          taskCount: tasks.length,
-                        ),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: 56),
-                    child: Row(
-                      children: [
-                        if (category != null)
-                          IconButton(
-                            tooltip: collapsed
-                                ? l10n.expandCategory
-                                : l10n.collapseCategory,
-                            onPressed: () => ref
-                                .read(settingsControllerProvider.notifier)
-                                .toggleCategory(category!.id),
-                            icon: AnimatedRotation(
-                              turns: collapsed ? -0.25 : 0,
-                              duration: const Duration(milliseconds: 180),
-                              child: const Icon(Icons.expand_more),
+                _reorderableHeader(
+                  InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: category == null
+                        ? null
+                        : () => ref
+                              .read(settingsControllerProvider.notifier)
+                              .toggleCategory(category!.id),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 56),
+                      child: Row(
+                        children: [
+                          if (category != null)
+                            IconButton(
+                              tooltip: collapsed
+                                  ? l10n.expandCategory
+                                  : l10n.collapseCategory,
+                              onPressed: () => ref
+                                  .read(settingsControllerProvider.notifier)
+                                  .toggleCategory(category!.id),
+                              icon: AnimatedRotation(
+                                turns: collapsed ? -0.25 : 0,
+                                duration: const Duration(milliseconds: 180),
+                                child: const Icon(Icons.expand_more),
+                              ),
+                            )
+                          else
+                            const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium,
+                                ),
+                                Text(
+                                  l10n.taskCount(tasks.length),
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
                             ),
-                          )
-                        else
-                          const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                title,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              Text(
-                                l10n.taskCount(tasks.length),
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
                           ),
-                        ),
-                        if (category != null)
+                          if (category != null)
+                            IconButton(
+                              tooltip: l10n.editCategory,
+                              onPressed: () => showCategoryEditor(
+                                context,
+                                ref,
+                                category: category,
+                                taskCount: tasks.length,
+                              ),
+                              icon: const Icon(Icons.edit_outlined),
+                            ),
                           IconButton(
-                            tooltip: l10n.editCategory,
-                            onPressed: () => showCategoryEditor(
+                            tooltip: l10n.addTask,
+                            onPressed: () => showTaskEditor(
                               context,
                               ref,
-                              category: category,
-                              taskCount: tasks.length,
+                              snapshot: snapshot,
+                              initialCategoryId: category?.id,
                             ),
-                            icon: const Icon(Icons.edit_outlined),
+                            icon: const Icon(Icons.add),
                           ),
-                        IconButton(
-                          tooltip: l10n.addTask,
-                          onPressed: () => showTaskEditor(
-                            context,
-                            ref,
-                            snapshot: snapshot,
-                            initialCategoryId: category?.id,
-                          ),
-                          icon: const Icon(Icons.add),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -356,6 +369,12 @@ class _CategorySection extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  Widget _reorderableHeader(Widget child) {
+    final index = reorderIndex;
+    if (index == null) return child;
+    return ReorderableDelayedDragStartListener(index: index, child: child);
   }
 }
 

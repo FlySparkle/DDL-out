@@ -7,6 +7,7 @@ class Categories extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().withLength(min: 1, max: 60)();
   IntColumn get colorArgb => integer()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAtUtc => dateTime()();
   DateTimeColumn get updatedAtUtc => dateTime()();
 }
@@ -41,13 +42,19 @@ class AppDatabase extends _$AppDatabase {
     : super(executor ?? driftDatabase(name: 'ddl_out'));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (migrator) async {
       await migrator.createAll();
       await customStatement('PRAGMA foreign_keys = ON');
+    },
+    onUpgrade: (migrator, from, to) async {
+      if (from < 2) {
+        await migrator.addColumn(categories, categories.sortOrder);
+        await customStatement('UPDATE categories SET sort_order = id');
+      }
     },
     beforeOpen: (_) async {
       await customStatement('PRAGMA foreign_keys = ON');
@@ -60,9 +67,12 @@ class AppDatabase extends _$AppDatabase {
       readsFrom: {categories, tasks},
     );
     return trigger.watch().asyncMap((_) async {
-      final categoryRows = await (select(
-        categories,
-      )..orderBy([(row) => OrderingTerm.asc(row.id)])).get();
+      final categoryRows =
+          await (select(categories)..orderBy([
+                (row) => OrderingTerm.asc(row.sortOrder),
+                (row) => OrderingTerm.asc(row.id),
+              ]))
+              .get();
       final taskRows =
           await (select(tasks)..orderBy([
                 (row) => OrderingTerm.asc(row.isCompleted),
@@ -75,17 +85,25 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<List<Category>> readCategories() =>
-      (select(categories)..orderBy([(row) => OrderingTerm.asc(row.id)])).get();
+      (select(categories)..orderBy([
+            (row) => OrderingTerm.asc(row.sortOrder),
+            (row) => OrderingTerm.asc(row.id),
+          ]))
+          .get();
 
   Future<List<Task>> readTasks() =>
       (select(tasks)..orderBy([(row) => OrderingTerm.asc(row.id)])).get();
 
-  Future<int> createCategory(String name, int colorArgb) {
+  Future<int> createCategory(String name, int colorArgb) async {
     final now = DateTime.now().toUtc();
+    final maximum = categories.sortOrder.max();
+    final query = selectOnly(categories)..addColumns([maximum]);
+    final lastOrder = await query.map((row) => row.read(maximum)).getSingle();
     return into(categories).insert(
       CategoriesCompanion.insert(
         name: name.trim(),
         colorArgb: colorArgb,
+        sortOrder: Value((lastOrder ?? -1) + 1),
         createdAtUtc: now,
         updatedAtUtc: now,
       ),
@@ -102,6 +120,22 @@ class AppDatabase extends _$AppDatabase {
         updatedAtUtc: Value(DateTime.now().toUtc()),
       ),
     );
+  }
+
+  Future<void> reorderCategories(List<int> categoryIds) async {
+    final now = DateTime.now().toUtc();
+    await batch((batch) {
+      for (final (index, id) in categoryIds.indexed) {
+        batch.update(
+          categories,
+          CategoriesCompanion(
+            sortOrder: Value(index),
+            updatedAtUtc: Value(now),
+          ),
+          where: (row) => row.id.equals(id),
+        );
+      }
+    });
   }
 
   Future<void> deleteCategory(int id) async {
