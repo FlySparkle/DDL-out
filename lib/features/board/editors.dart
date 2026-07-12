@@ -422,6 +422,7 @@ class _TaskEditorState extends ConsumerState<_TaskEditor> {
   }
 
   Widget _absoluteFields(AppLocalizations l10n) {
+    final locale = Localizations.localeOf(context).toLanguageTag();
     return Row(
       key: const ValueKey('absolute'),
       children: [
@@ -429,7 +430,7 @@ class _TaskEditorState extends ConsumerState<_TaskEditor> {
           child: OutlinedButton.icon(
             onPressed: _pickDate,
             icon: const Icon(Icons.calendar_today_outlined),
-            label: Text(DateFormat.yMMMd('zh').format(_absoluteLocal)),
+            label: Text(DateFormat.yMMMd(locale).format(_absoluteLocal)),
           ),
         ),
         const SizedBox(width: 8),
@@ -437,7 +438,7 @@ class _TaskEditorState extends ConsumerState<_TaskEditor> {
           child: OutlinedButton.icon(
             onPressed: _pickTime,
             icon: const Icon(Icons.schedule),
-            label: Text(DateFormat.Hm('zh').format(_absoluteLocal)),
+            label: Text(DateFormat.Hm(locale).format(_absoluteLocal)),
           ),
         ),
       ],
