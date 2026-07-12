@@ -84,6 +84,8 @@
   "@taskCount": {"placeholders": {"count": {"type": "int"}}},
   "errorTitle": "読み込めませんでした",
   "retry": "再試行",
+  "checkForUpdates": "アップデートを確認",
+  "checkForUpdatesSubtitle": "GitHub で最新リリースを確認",
   "aboutVersion": "バージョン {version}",
   "@aboutVersion": {"placeholders": {"version": {"type": "String"}}}
 }

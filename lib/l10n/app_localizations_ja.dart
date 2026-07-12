@@ -259,6 +259,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get retry => '再試行';
 
   @override
+  String get checkForUpdates => 'アップデートを確認';
+
+  @override
+  String get checkForUpdatesSubtitle => 'GitHub で最新リリースを確認';
+
+  @override
   String aboutVersion(String version) {
     return 'バージョン $version';
   }

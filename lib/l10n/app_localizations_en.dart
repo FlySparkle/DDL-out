@@ -263,6 +263,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retry => 'Retry';
 
   @override
+  String get checkForUpdates => 'Check for updates';
+
+  @override
+  String get checkForUpdatesSubtitle => 'View the latest release on GitHub';
+
+  @override
   String aboutVersion(String version) {
     return 'Version $version';
   }

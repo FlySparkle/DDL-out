@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/version/app_version.dart';
 import '../../data/backup/backup_service.dart';
@@ -9,6 +10,10 @@ import '../../l10n/app_localizations.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
+
+  static final _latestReleaseUri = Uri.parse(
+    'https://github.com/FlySparkle/DDL-out/releases/latest',
+  );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -96,6 +101,14 @@ class SettingsPage extends ConsumerWidget {
                 onTap: () => _clearAll(context, ref),
               ),
               const Divider(height: 32),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.system_update_outlined),
+                title: Text(l10n.checkForUpdates),
+                subtitle: Text(l10n.checkForUpdatesSubtitle),
+                trailing: const Icon(Icons.open_in_new),
+                onTap: () => _openLatestRelease(context),
+              ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.info_outline),
@@ -193,6 +206,19 @@ class SettingsPage extends ConsumerWidget {
     );
     if (confirmed == true) {
       await ref.read(appDatabaseProvider).clearAllData();
+    }
+  }
+
+  Future<void> _openLatestRelease(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      final opened = await launchUrl(
+        _latestReleaseUri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!opened && context.mounted) _message(context, l10n.operationFailed);
+    } on Object {
+      if (context.mounted) _message(context, l10n.operationFailed);
     }
   }
 

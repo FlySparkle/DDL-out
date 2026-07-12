@@ -567,6 +567,18 @@ abstract class AppLocalizations {
   /// **'重试'**
   String get retry;
 
+  /// No description provided for @checkForUpdates.
+  ///
+  /// In zh, this message translates to:
+  /// **'检查更新'**
+  String get checkForUpdates;
+
+  /// No description provided for @checkForUpdatesSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'在 GitHub 查看最新版本'**
+  String get checkForUpdatesSubtitle;
+
   /// No description provided for @aboutVersion.
   ///
   /// In zh, this message translates to:

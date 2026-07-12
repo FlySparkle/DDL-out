@@ -84,6 +84,8 @@
   "@taskCount": {"placeholders": {"count": {"type": "int"}}},
   "errorTitle": "Unable to load",
   "retry": "Retry",
+  "checkForUpdates": "Check for updates",
+  "checkForUpdatesSubtitle": "View the latest release on GitHub",
   "aboutVersion": "Version {version}",
   "@aboutVersion": {"placeholders": {"version": {"type": "String"}}}
 }
