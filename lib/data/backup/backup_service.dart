@@ -9,7 +9,7 @@ import '../../core/version/app_version.dart';
 import '../database/app_database.dart';
 import '../repositories/repositories.dart';
 
-const backupSchemaVersion = 1;
+const backupSchemaVersion = 2;
 
 class BackupException implements Exception {
   const BackupException(this.message);
@@ -62,6 +62,7 @@ class BackupService {
               'id': category.id,
               'name': category.name,
               'colorArgb': category.colorArgb,
+              'sortOrder': category.sortOrder,
               'createdAtUtc': category.createdAtUtc.toUtc().toIso8601String(),
               'updatedAtUtc': category.updatedAtUtc.toUtc().toIso8601String(),
             },
@@ -131,10 +132,14 @@ class BackupService {
         throw const BackupException('备份顶层必须是 JSON 对象');
       }
       final version = decoded['schemaVersion'];
-      if (version is! int || version != backupSchemaVersion) {
+      if (version is! int || version < 1 || version > backupSchemaVersion) {
         throw const BackupException('不支持的备份版本');
       }
-      final categoryRows = _objectList(decoded['categories'], 'categories');
+      final rawCategoryRows = _objectList(decoded['categories'], 'categories');
+      final categoryRows = [
+        for (final (index, row) in rawCategoryRows.indexed)
+          <String, Object?>{...row, if (version == 1) 'sortOrder': index},
+      ];
       final taskRows = _objectList(decoded['tasks'], 'tasks');
       _validate(categoryRows, taskRows);
       return BackupPreview(
@@ -164,10 +169,17 @@ class BackupService {
     List<Map<String, Object?>> taskRows,
   ) {
     final categoryIds = <int>{};
+    final categoryOrders = <int>{};
     for (final row in categoryRows) {
       final id = _positiveInt(row, 'id');
       if (!categoryIds.add(id)) throw const BackupException('分类 ID 重复');
       _name(row, 60);
+      final sortOrder = row['sortOrder'];
+      if (sortOrder is! int ||
+          sortOrder < 0 ||
+          !categoryOrders.add(sortOrder)) {
+        throw const BackupException('分类顺序无效');
+      }
       final color = row['colorArgb'];
       if (color is! int || color < 0 || color > 0xFFFFFFFF) {
         throw const BackupException('分类颜色无效');
@@ -228,6 +240,7 @@ class BackupService {
         id: Value(row['id']! as int),
         name: _name(row, 60),
         colorArgb: row['colorArgb']! as int,
+        sortOrder: Value(row['sortOrder']! as int),
         createdAtUtc: _utc(row, 'createdAtUtc'),
         updatedAtUtc: _utc(row, 'updatedAtUtc'),
       );

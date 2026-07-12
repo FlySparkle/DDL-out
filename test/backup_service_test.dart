@@ -34,6 +34,8 @@ void main() {
 
   test('backup round trip preserves categories and tasks', () async {
     final categoryId = await source.createCategory('项目', 0xFF4A90E2);
+    final secondCategoryId = await source.createCategory('生活', 0xFF50E3C2);
+    await source.reorderCategories([secondCategoryId, categoryId]);
     await source.createTask(
       name: '发布版本',
       deadlineUtc: DateTime.utc(2026, 8, 1, 12),
@@ -47,7 +49,10 @@ void main() {
 
     await BackupService(target, appVersionReader).restore(preview);
 
-    expect((await target.readCategories()).single.name, '项目');
+    expect((await target.readCategories()).map((category) => category.name), [
+      '生活',
+      '项目',
+    ]);
     final task = (await target.readTasks()).single;
     expect(task.name, '发布版本');
     expect(task.categoryId, categoryId);

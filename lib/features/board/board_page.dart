@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,9 +33,14 @@ class BoardPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final board = ref.watch(boardProvider);
+    final settings = ref.watch(settingsControllerProvider);
+    final adaptiveSidebar =
+        _isDesktopPlatform && settings.adaptiveDesktopSidebar;
 
     return Scaffold(
+      drawer: adaptiveSidebar ? null : const _BoardNavigationDrawer(),
       appBar: AppBar(
+        automaticallyImplyLeading: !adaptiveSidebar,
         title: Text(l10n.appTitle),
         actions: [
           IconButton(
@@ -63,11 +69,6 @@ class BoardPage extends ConsumerWidget {
               ),
             ],
           ),
-          IconButton(
-            tooltip: l10n.settingsTitle,
-            onPressed: () => context.push('/settings'),
-            icon: const Icon(Icons.settings_outlined),
-          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -76,7 +77,11 @@ class BoardPage extends ConsumerWidget {
         child: const Icon(Icons.create_new_folder_outlined),
       ),
       body: board.when(
-        data: (snapshot) => _BoardContent(snapshot: snapshot),
+        data: (snapshot) {
+          final content = _BoardContent(snapshot: snapshot);
+          if (!adaptiveSidebar) return content;
+          return _AdaptiveDesktopSidebar(child: content);
+        },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) => _ErrorState(
           message: error.toString(),
@@ -113,6 +118,262 @@ class BoardPage extends ConsumerWidget {
   }
 }
 
+bool get _isDesktopPlatform =>
+    Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+
+class _BoardNavigationDrawer extends StatelessWidget {
+  const _BoardNavigationDrawer();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return NavigationDrawer(
+      selectedIndex: 0,
+      onDestinationSelected: (index) {
+        final router = GoRouter.of(context);
+        Navigator.pop(context);
+        if (index == 1) router.push('/settings');
+      },
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(28, 24, 28, 16),
+          child: Text(
+            l10n.appTitle,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+        ),
+        NavigationDrawerDestination(
+          icon: const Icon(Icons.home_outlined),
+          selectedIcon: const Icon(Icons.home),
+          label: Text(l10n.boardTitle),
+        ),
+        NavigationDrawerDestination(
+          icon: const Icon(Icons.settings_outlined),
+          selectedIcon: const Icon(Icons.settings),
+          label: Text(l10n.settingsTitle),
+        ),
+      ],
+    );
+  }
+}
+
+class _AdaptiveDesktopSidebar extends StatefulWidget {
+  const _AdaptiveDesktopSidebar({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_AdaptiveDesktopSidebar> createState() =>
+      _AdaptiveDesktopSidebarState();
+}
+
+class _AdaptiveDesktopSidebarState extends State<_AdaptiveDesktopSidebar> {
+  static const double _collapsedWidth = 56;
+  static const double _expandedWidth = 280;
+  static const double _pinnedBreakpoint = 920;
+
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final pinned = constraints.maxWidth >= _pinnedBreakpoint;
+        if (pinned) {
+          return Row(
+            children: [
+              const SizedBox(
+                width: _expandedWidth,
+                child: _DesktopSidebar(expanded: true),
+              ),
+              VerticalDivider(
+                width: 1,
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+              Expanded(child: widget.child),
+            ],
+          );
+        }
+
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(left: _collapsedWidth, child: widget.child),
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: _hovered ? _expandedWidth : _collapsedWidth,
+              child: MouseRegion(
+                onEnter: (_) => setState(() => _hovered = true),
+                onExit: (_) => setState(() => _hovered = false),
+                child: SizedBox.expand(
+                  child: Material(
+                    elevation: _hovered ? 8 : 0,
+                    shadowColor: Theme.of(
+                      context,
+                    ).colorScheme.shadow.withValues(alpha: 0.18),
+                    borderRadius: _hovered
+                        ? const BorderRadius.only(
+                            topRight: Radius.circular(8),
+                            bottomRight: Radius.circular(8),
+                          )
+                        : BorderRadius.zero,
+                    clipBehavior: Clip.antiAlias,
+                    child: _DesktopSidebar(expanded: _hovered),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _DesktopSidebar extends StatelessWidget {
+  const _DesktopSidebar({required this.expanded});
+
+  final bool expanded;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return ColoredBox(
+      color: scheme.surfaceContainerLowest,
+      child: SafeArea(
+        top: false,
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(expanded ? 12 : 8, 12, 8, 12),
+          child: Column(
+            crossAxisAlignment: expanded
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 44,
+                child: expanded
+                    ? Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            l10n.appTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleMedium,
+                          ),
+                        ),
+                      )
+                    : Center(
+                        child: Icon(
+                          Icons.view_sidebar_outlined,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+              ),
+              const SizedBox(height: 8),
+              _DesktopSidebarDestination(
+                expanded: expanded,
+                selected: true,
+                icon: Icons.home_outlined,
+                selectedIcon: Icons.home,
+                label: l10n.boardTitle,
+                onTap: () {},
+              ),
+              const SizedBox(height: 4),
+              _DesktopSidebarDestination(
+                expanded: expanded,
+                selected: false,
+                icon: Icons.settings_outlined,
+                selectedIcon: Icons.settings,
+                label: l10n.settingsTitle,
+                onTap: () => GoRouter.of(context).push('/settings'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DesktopSidebarDestination extends StatelessWidget {
+  const _DesktopSidebarDestination({
+    required this.expanded,
+    required this.selected,
+    required this.icon,
+    required this.selectedIcon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final bool expanded;
+  final bool selected;
+  final IconData icon;
+  final IconData selectedIcon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final foreground = selected
+        ? scheme.onSecondaryContainer
+        : scheme.onSurface;
+    final tile = Material(
+      color: selected ? scheme.secondaryContainer : Colors.transparent,
+      borderRadius: BorderRadius.circular(8),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          height: 44,
+          child: Row(
+            mainAxisAlignment: expanded
+                ? MainAxisAlignment.start
+                : MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: expanded ? 44 : 36,
+                child: Icon(
+                  selected ? selectedIcon : icon,
+                  color: foreground,
+                  size: 22,
+                ),
+              ),
+              if (expanded) ...[
+                Expanded(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: foreground,
+                      fontWeight: selected ? FontWeight.w600 : null,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+
+    return Tooltip(
+      message: label,
+      waitDuration: const Duration(milliseconds: 500),
+      child: tile,
+    );
+  }
+}
+
 class _BoardContent extends ConsumerWidget {
   const _BoardContent({required this.snapshot});
 
@@ -135,28 +396,42 @@ class _BoardContent extends ConsumerWidget {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 680),
-        child: ListView(
+        child: ReorderableListView.builder(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 96),
-          children: [
-            if (uncategorized.isNotEmpty)
-              _CategorySection(
-                snapshot: snapshot,
-                category: null,
-                title: l10n.uncategorized,
-                color: Theme.of(context).colorScheme.secondary,
-                tasks: uncategorized,
-              ),
-            for (final category in snapshot.categories)
-              _CategorySection(
-                snapshot: snapshot,
-                category: category,
-                title: category.name,
-                color: Color(category.colorArgb),
-                tasks: snapshot.tasks
-                    .where((task) => task.categoryId == category.id)
-                    .toList(growable: false),
-              ),
-          ],
+          buildDefaultDragHandles: false,
+          header: uncategorized.isEmpty
+              ? null
+              : _CategorySection(
+                  snapshot: snapshot,
+                  category: null,
+                  title: l10n.uncategorized,
+                  color: Theme.of(context).colorScheme.secondary,
+                  tasks: uncategorized,
+                ),
+          itemCount: snapshot.categories.length,
+          itemBuilder: (context, index) {
+            final category = snapshot.categories[index];
+            return _CategorySection(
+              key: ValueKey('category-${category.id}'),
+              snapshot: snapshot,
+              category: category,
+              title: category.name,
+              color: Color(category.colorArgb),
+              tasks: snapshot.tasks
+                  .where((task) => task.categoryId == category.id)
+                  .toList(growable: false),
+              reorderIndex: index,
+            );
+          },
+          onReorderItem: (oldIndex, newIndex) {
+            if (oldIndex == newIndex) return;
+            final reordered = snapshot.categories
+                .map((category) => category.id)
+                .toList();
+            final moved = reordered.removeAt(oldIndex);
+            reordered.insert(newIndex, moved);
+            ref.read(categoryRepositoryProvider).reorder(reordered);
+          },
         ),
       ),
     );
@@ -165,11 +440,13 @@ class _BoardContent extends ConsumerWidget {
 
 class _CategorySection extends ConsumerWidget {
   const _CategorySection({
+    super.key,
     required this.snapshot,
     required this.category,
     required this.title,
     required this.color,
     required this.tasks,
+    this.reorderIndex,
   });
 
   final BoardSnapshot snapshot;
@@ -177,6 +454,7 @@ class _CategorySection extends ConsumerWidget {
   final String title;
   final Color color;
   final List<Task> tasks;
+  final int? reorderIndex;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -208,91 +486,93 @@ class _CategorySection extends ConsumerWidget {
           ref.read(taskRepositoryProvider).move(details.data, category?.id);
         },
         builder: (context, candidates, rejects) {
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            decoration: BoxDecoration(
-              color: candidates.isEmpty
-                  ? Theme.of(context).colorScheme.surfaceContainerLow
-                  : Theme.of(context).colorScheme.secondaryContainer,
-              borderRadius: BorderRadius.circular(8),
-              border: Border(left: BorderSide(color: color, width: 4)),
-            ),
+          final scheme = Theme.of(context).colorScheme;
+          final cardColor = Color.alphaBlend(
+            color.withValues(alpha: 0.16),
+            scheme.surfaceContainerLow,
+          );
+          return Card(
+            color: candidates.isEmpty ? cardColor : scheme.secondaryContainer,
+            clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
-                InkWell(
-                  borderRadius: BorderRadius.circular(8),
-                  onTap: category == null
-                      ? null
-                      : () => ref
-                            .read(settingsControllerProvider.notifier)
-                            .toggleCategory(category!.id),
-                  onLongPress: category == null
-                      ? null
-                      : () => showCategoryEditor(
-                          context,
-                          ref,
-                          category: category,
-                          taskCount: tasks.length,
-                        ),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: 56),
-                    child: Row(
-                      children: [
-                        if (category != null)
-                          IconButton(
-                            tooltip: collapsed
-                                ? l10n.expandCategory
-                                : l10n.collapseCategory,
-                            onPressed: () => ref
-                                .read(settingsControllerProvider.notifier)
-                                .toggleCategory(category!.id),
-                            icon: AnimatedRotation(
-                              turns: collapsed ? -0.25 : 0,
-                              duration: const Duration(milliseconds: 180),
-                              child: const Icon(Icons.expand_more),
+                _reorderableHeader(
+                  InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: category == null
+                        ? null
+                        : () => ref
+                              .read(settingsControllerProvider.notifier)
+                              .toggleCategory(category!.id),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 56),
+                      child: Row(
+                        children: [
+                          if (category != null)
+                            IconButton(
+                              tooltip: collapsed
+                                  ? l10n.expandCategory
+                                  : l10n.collapseCategory,
+                              onPressed: () => ref
+                                  .read(settingsControllerProvider.notifier)
+                                  .toggleCategory(category!.id),
+                              icon: AnimatedRotation(
+                                turns: collapsed ? -0.25 : 0,
+                                duration: const Duration(milliseconds: 180),
+                                child: const Icon(Icons.expand_more),
+                              ),
+                            )
+                          else
+                            const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium,
+                                ),
+                                Text(
+                                  l10n.taskCount(tasks.length),
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
                             ),
-                          )
-                        else
-                          const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                title,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              Text(
-                                l10n.taskCount(tasks.length),
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
                           ),
-                        ),
-                        if (category != null)
                           IconButton(
-                            tooltip: l10n.editCategory,
-                            onPressed: () => showCategoryEditor(
+                            tooltip: l10n.clearCategoryTasks,
+                            onPressed: tasks.isEmpty
+                                ? null
+                                : () => _clearTasks(context, ref),
+                            icon: const Icon(Icons.cleaning_services_outlined),
+                          ),
+                          if (category != null)
+                            IconButton(
+                              tooltip: l10n.editCategory,
+                              onPressed: () => showCategoryEditor(
+                                context,
+                                ref,
+                                category: category,
+                                taskCount: tasks.length,
+                              ),
+                              icon: const Icon(Icons.edit_outlined),
+                            ),
+                          IconButton(
+                            tooltip: l10n.addTask,
+                            onPressed: () => showTaskEditor(
                               context,
                               ref,
-                              category: category,
-                              taskCount: tasks.length,
+                              snapshot: snapshot,
+                              initialCategoryId: category?.id,
                             ),
-                            icon: const Icon(Icons.edit_outlined),
+                            icon: const Icon(Icons.add),
                           ),
-                        IconButton(
-                          tooltip: l10n.addTask,
-                          onPressed: () => showTaskEditor(
-                            context,
-                            ref,
-                            snapshot: snapshot,
-                            initialCategoryId: category?.id,
-                          ),
-                          icon: const Icon(Icons.add),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -335,6 +615,25 @@ class _CategorySection extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  Widget _reorderableHeader(Widget child) {
+    final index = reorderIndex;
+    if (index == null) return child;
+    return ReorderableDelayedDragStartListener(index: index, child: child);
+  }
+
+  Future<void> _clearTasks(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showConfirmation(
+      context,
+      title: l10n.clearCategoryTasksTitle,
+      body: l10n.clearCategoryTasksBody(tasks.length),
+      destructive: true,
+    );
+    if (confirmed) {
+      await ref.read(taskRepositoryProvider).clearCategory(category?.id);
+    }
   }
 }
 

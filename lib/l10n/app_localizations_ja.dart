@@ -120,6 +120,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get clearCompleted => '完了済みを削除';
 
   @override
+  String get clearCategoryTasks => 'このカテゴリーのタスクを削除';
+
+  @override
   String get clearCategories => 'カテゴリーを削除';
 
   @override
@@ -142,6 +145,36 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get dynamicColorSubtitle => 'Android 12 以降では、システムの配色をデフォルトで使用します';
+
+  @override
+  String get fontFamily => 'UI フォント';
+
+  @override
+  String get fontSystem => 'システム既定';
+
+  @override
+  String get fontSansSerif => 'サンセリフ';
+
+  @override
+  String get fontSerif => 'セリフ';
+
+  @override
+  String get fontMonospace => '等幅';
+
+  @override
+  String get fontSize => '文字サイズ';
+
+  @override
+  String fontSizeValue(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String get adaptiveDesktopSidebar => 'デスクトップ用サイドバーを自動調整';
+
+  @override
+  String get adaptiveDesktopSidebarSubtitle =>
+      '広いウィンドウではサイドバーを固定表示し、狭いウィンドウでは端にたたみ、ポインターを重ねると展開します。';
 
   @override
   String get backup => 'バックアップをエクスポート';
@@ -205,6 +238,14 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String clearCompletedBody(int count) {
     return '完了済みの $count 件のタスクを完全に削除します。';
+  }
+
+  @override
+  String get clearCategoryTasksTitle => 'このカテゴリーのタスクを削除しますか？';
+
+  @override
+  String clearCategoryTasksBody(int count) {
+    return 'このカテゴリー内の $count 件のタスクを完全に削除します。';
   }
 
   @override

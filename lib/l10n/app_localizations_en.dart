@@ -121,6 +121,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearCompleted => 'Clear completed';
 
   @override
+  String get clearCategoryTasks => 'Clear tasks in this category';
+
+  @override
   String get clearCategories => 'Clear categories';
 
   @override
@@ -144,6 +147,36 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get dynamicColorSubtitle =>
       'Uses the system color scheme by default on Android 12 and later';
+
+  @override
+  String get fontFamily => 'Interface font';
+
+  @override
+  String get fontSystem => 'System default';
+
+  @override
+  String get fontSansSerif => 'Sans serif';
+
+  @override
+  String get fontSerif => 'Serif';
+
+  @override
+  String get fontMonospace => 'Monospace';
+
+  @override
+  String get fontSize => 'Text size';
+
+  @override
+  String fontSizeValue(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String get adaptiveDesktopSidebar => 'Adaptive desktop sidebar';
+
+  @override
+  String get adaptiveDesktopSidebarSubtitle =>
+      'On wide windows, keep the sidebar visible. On narrow windows, collapse it until the pointer hovers over the edge.';
 
   @override
   String get backup => 'Export backup';
@@ -207,6 +240,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String clearCompletedBody(int count) {
     return 'This will permanently delete $count completed tasks.';
+  }
+
+  @override
+  String get clearCategoryTasksTitle => 'Clear tasks in this category?';
+
+  @override
+  String clearCategoryTasksBody(int count) {
+    return 'This will permanently delete the $count tasks in this category.';
   }
 
   @override

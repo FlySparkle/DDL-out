@@ -5,6 +5,7 @@ import '../database/app_database.dart';
 abstract interface class CategoryRepository {
   Future<int> create(String name, int colorArgb);
   Future<void> update(Category category, String name, int colorArgb);
+  Future<void> reorder(List<int> categoryIds);
   Future<void> delete(int id);
   Future<void> clear();
 }
@@ -25,6 +26,7 @@ abstract interface class TaskRepository {
   Future<void> setCompleted(int taskId, bool completed);
   Future<void> delete(int id);
   Future<void> clearCompleted();
+  Future<void> clearCategory(int? categoryId);
 }
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
@@ -57,6 +59,10 @@ final class DriftCategoryRepository implements CategoryRepository {
   @override
   Future<void> update(Category category, String name, int colorArgb) =>
       _database.updateCategory(category, name, colorArgb);
+
+  @override
+  Future<void> reorder(List<int> categoryIds) =>
+      _database.reorderCategories(categoryIds);
 
   @override
   Future<void> delete(int id) => _database.deleteCategory(id);
@@ -107,4 +113,8 @@ final class DriftTaskRepository implements TaskRepository {
 
   @override
   Future<void> clearCompleted() => _database.clearCompleted();
+
+  @override
+  Future<void> clearCategory(int? categoryId) =>
+      _database.clearTasksInCategory(categoryId);
 }

@@ -120,6 +120,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get clearCompleted => '清除已完成';
 
   @override
+  String get clearCategoryTasks => '清空本分类事项';
+
+  @override
   String get clearCategories => '清空分类';
 
   @override
@@ -142,6 +145,35 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get dynamicColorSubtitle => 'Android 12 及以上默认使用系统配色';
+
+  @override
+  String get fontFamily => '界面字体';
+
+  @override
+  String get fontSystem => '系统默认';
+
+  @override
+  String get fontSansSerif => '无衬线字体';
+
+  @override
+  String get fontSerif => '衬线字体';
+
+  @override
+  String get fontMonospace => '等宽字体';
+
+  @override
+  String get fontSize => '字号';
+
+  @override
+  String fontSizeValue(int percent) {
+    return '$percent%';
+  }
+
+  @override
+  String get adaptiveDesktopSidebar => '自适应桌面侧边栏';
+
+  @override
+  String get adaptiveDesktopSidebarSubtitle => '宽窗口固定显示侧边栏；窄窗口收起到边缘，鼠标悬停时展开。';
 
   @override
   String get backup => '导出备份';
@@ -205,6 +237,14 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String clearCompletedBody(int count) {
     return '将永久删除 $count 个已完成事项。';
+  }
+
+  @override
+  String get clearCategoryTasksTitle => '清空本分类的事项？';
+
+  @override
+  String clearCategoryTasksBody(int count) {
+    return '将永久删除本分类内的 $count 个事项。';
   }
 
   @override

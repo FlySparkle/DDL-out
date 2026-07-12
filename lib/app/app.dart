@@ -31,19 +31,62 @@ class DdlOutApp extends ConsumerWidget {
     return DynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
         final useDynamic = settings.dynamicColorEnabled && Platform.isAndroid;
+        final typography = _typographyFor(settings.fontFamily);
         return MaterialApp.router(
           title: 'DDL out!',
           debugShowCheckedModeBanner: false,
           routerConfig: _router,
           themeMode: settings.themeMode,
-          theme: AppTheme.light(useDynamic ? lightDynamic : null),
-          darkTheme: AppTheme.dark(useDynamic ? darkDynamic : null),
+          theme: AppTheme.light(
+            dynamicScheme: useDynamic ? lightDynamic : null,
+            fontFamily: typography.fontFamily,
+            fontFamilyFallback: typography.fallback,
+          ),
+          darkTheme: AppTheme.dark(
+            dynamicScheme: useDynamic ? darkDynamic : null,
+            fontFamily: typography.fontFamily,
+            fontFamilyFallback: typography.fallback,
+          ),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          builder: (context, child) =>
-              UpdateCheckOnLaunch(child: child ?? const SizedBox.shrink()),
+          builder: (context, child) {
+            final mediaQuery = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQuery.copyWith(
+                textScaler: TextScaler.linear(settings.textScale),
+              ),
+              child: UpdateCheckOnLaunch(
+                child: child ?? const SizedBox.shrink(),
+              ),
+            );
+          },
         );
       },
     );
   }
+}
+
+({String? fontFamily, List<String>? fallback}) _typographyFor(
+  AppFontFamily family,
+) {
+  if (family == AppFontFamily.system) {
+    return Platform.isWindows
+        ? (fontFamily: 'Segoe UI', fallback: const ['Microsoft YaHei UI'])
+        : (fontFamily: null, fallback: null);
+  }
+  return switch (family) {
+    AppFontFamily.sansSerif => (
+      fontFamily: Platform.isWindows ? 'Arial' : 'sans-serif',
+      fallback: Platform.isWindows ? const ['Microsoft YaHei UI'] : null,
+    ),
+    AppFontFamily.serif => (
+      fontFamily: Platform.isWindows ? 'Times New Roman' : 'serif',
+      fallback: Platform.isWindows ? const ['SimSun'] : null,
+    ),
+    AppFontFamily.monospace => (
+      fontFamily: Platform.isWindows ? 'Consolas' : 'monospace',
+      fallback: Platform.isWindows ? const ['Microsoft YaHei UI'] : null,
+    ),
+    AppFontFamily.system => throw StateError('Handled above'),
+  };
 }

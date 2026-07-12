@@ -56,4 +56,45 @@ void main() {
     expect(emissions.last.categories.single.name, '生活');
     await subscription.cancel();
   });
+
+  test('category order can be changed and persists in reads', () async {
+    final first = await database.createCategory('第一', 0xFF4A90E2);
+    final second = await database.createCategory('第二', 0xFF50E3C2);
+    final third = await database.createCategory('第三', 0xFFFF6B6B);
+
+    await database.reorderCategories([third, first, second]);
+
+    expect((await database.readCategories()).map((category) => category.id), [
+      third,
+      first,
+      second,
+    ]);
+  });
+
+  test('clearing one category does not remove other tasks', () async {
+    final firstCategory = await database.createCategory('工作', 0xFF4A90E2);
+    final secondCategory = await database.createCategory('生活', 0xFF50E3C2);
+    await database.createTask(
+      name: '工作事项',
+      deadlineUtc: DateTime.now().toUtc(),
+      categoryId: firstCategory,
+    );
+    await database.createTask(
+      name: '生活事项',
+      deadlineUtc: DateTime.now().toUtc(),
+      categoryId: secondCategory,
+    );
+    await database.createTask(
+      name: '未分类事项',
+      deadlineUtc: DateTime.now().toUtc(),
+      categoryId: null,
+    );
+
+    await database.clearTasksInCategory(firstCategory);
+
+    expect((await database.readTasks()).map((task) => task.name), [
+      '生活事项',
+      '未分类事项',
+    ]);
+  });
 }

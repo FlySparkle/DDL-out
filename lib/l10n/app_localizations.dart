@@ -322,6 +322,12 @@ abstract class AppLocalizations {
   /// **'清除已完成'**
   String get clearCompleted;
 
+  /// No description provided for @clearCategoryTasks.
+  ///
+  /// In zh, this message translates to:
+  /// **'清空本分类事项'**
+  String get clearCategoryTasks;
+
   /// No description provided for @clearCategories.
   ///
   /// In zh, this message translates to:
@@ -369,6 +375,60 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'Android 12 及以上默认使用系统配色'**
   String get dynamicColorSubtitle;
+
+  /// No description provided for @fontFamily.
+  ///
+  /// In zh, this message translates to:
+  /// **'界面字体'**
+  String get fontFamily;
+
+  /// No description provided for @fontSystem.
+  ///
+  /// In zh, this message translates to:
+  /// **'系统默认'**
+  String get fontSystem;
+
+  /// No description provided for @fontSansSerif.
+  ///
+  /// In zh, this message translates to:
+  /// **'无衬线字体'**
+  String get fontSansSerif;
+
+  /// No description provided for @fontSerif.
+  ///
+  /// In zh, this message translates to:
+  /// **'衬线字体'**
+  String get fontSerif;
+
+  /// No description provided for @fontMonospace.
+  ///
+  /// In zh, this message translates to:
+  /// **'等宽字体'**
+  String get fontMonospace;
+
+  /// No description provided for @fontSize.
+  ///
+  /// In zh, this message translates to:
+  /// **'字号'**
+  String get fontSize;
+
+  /// No description provided for @fontSizeValue.
+  ///
+  /// In zh, this message translates to:
+  /// **'{percent}%'**
+  String fontSizeValue(int percent);
+
+  /// No description provided for @adaptiveDesktopSidebar.
+  ///
+  /// In zh, this message translates to:
+  /// **'自适应桌面侧边栏'**
+  String get adaptiveDesktopSidebar;
+
+  /// No description provided for @adaptiveDesktopSidebarSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'宽窗口固定显示侧边栏；窄窗口收起到边缘，鼠标悬停时展开。'**
+  String get adaptiveDesktopSidebarSubtitle;
 
   /// No description provided for @backup.
   ///
@@ -489,6 +549,18 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'将永久删除 {count} 个已完成事项。'**
   String clearCompletedBody(int count);
+
+  /// No description provided for @clearCategoryTasksTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'清空本分类的事项？'**
+  String get clearCategoryTasksTitle;
+
+  /// No description provided for @clearCategoryTasksBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'将永久删除本分类内的 {count} 个事项。'**
+  String clearCategoryTasksBody(int count);
 
   /// No description provided for @clearCategoriesTitle.
   ///
