@@ -121,6 +121,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearCompleted => 'Clear completed';
 
   @override
+  String get clearCategoryTasks => 'Clear tasks in this category';
+
+  @override
   String get clearCategories => 'Clear categories';
 
   @override
@@ -230,6 +233,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String clearCompletedBody(int count) {
     return 'This will permanently delete $count completed tasks.';
+  }
+
+  @override
+  String get clearCategoryTasksTitle => 'Clear tasks in this category?';
+
+  @override
+  String clearCategoryTasksBody(int count) {
+    return 'This will permanently delete the $count tasks in this category.';
   }
 
   @override

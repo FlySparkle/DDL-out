@@ -26,6 +26,7 @@ abstract interface class TaskRepository {
   Future<void> setCompleted(int taskId, bool completed);
   Future<void> delete(int id);
   Future<void> clearCompleted();
+  Future<void> clearCategory(int? categoryId);
 }
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
@@ -112,4 +113,8 @@ final class DriftTaskRepository implements TaskRepository {
 
   @override
   Future<void> clearCompleted() => _database.clearCompleted();
+
+  @override
+  Future<void> clearCategory(int? categoryId) =>
+      _database.clearTasksInCategory(categoryId);
 }

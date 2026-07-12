@@ -322,6 +322,12 @@ abstract class AppLocalizations {
   /// **'清除已完成'**
   String get clearCompleted;
 
+  /// No description provided for @clearCategoryTasks.
+  ///
+  /// In zh, this message translates to:
+  /// **'清空本分类事项'**
+  String get clearCategoryTasks;
+
   /// No description provided for @clearCategories.
   ///
   /// In zh, this message translates to:
@@ -531,6 +537,18 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'将永久删除 {count} 个已完成事项。'**
   String clearCompletedBody(int count);
+
+  /// No description provided for @clearCategoryTasksTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'清空本分类的事项？'**
+  String get clearCategoryTasksTitle;
+
+  /// No description provided for @clearCategoryTasksBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'将永久删除本分类内的 {count} 个事项。'**
+  String clearCategoryTasksBody(int count);
 
   /// No description provided for @clearCategoriesTitle.
   ///

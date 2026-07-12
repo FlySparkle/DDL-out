@@ -120,6 +120,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get clearCompleted => '清除已完成';
 
   @override
+  String get clearCategoryTasks => '清空本分类事项';
+
+  @override
   String get clearCategories => '清空分类';
 
   @override
@@ -228,6 +231,14 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String clearCompletedBody(int count) {
     return '将永久删除 $count 个已完成事项。';
+  }
+
+  @override
+  String get clearCategoryTasksTitle => '清空本分类的事项？';
+
+  @override
+  String clearCategoryTasksBody(int count) {
+    return '将永久删除本分类内的 $count 个事项。';
   }
 
   @override

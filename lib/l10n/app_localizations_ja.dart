@@ -120,6 +120,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get clearCompleted => '完了済みを削除';
 
   @override
+  String get clearCategoryTasks => 'このカテゴリーのタスクを削除';
+
+  @override
   String get clearCategories => 'カテゴリーを削除';
 
   @override
@@ -228,6 +231,14 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String clearCompletedBody(int count) {
     return '完了済みの $count 件のタスクを完全に削除します。';
+  }
+
+  @override
+  String get clearCategoryTasksTitle => 'このカテゴリーのタスクを削除しますか？';
+
+  @override
+  String clearCategoryTasksBody(int count) {
+    return 'このカテゴリー内の $count 件のタスクを完全に削除します。';
   }
 
   @override

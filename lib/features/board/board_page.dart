@@ -304,6 +304,13 @@ class _CategorySection extends ConsumerWidget {
                               ],
                             ),
                           ),
+                          IconButton(
+                            tooltip: l10n.clearCategoryTasks,
+                            onPressed: tasks.isEmpty
+                                ? null
+                                : () => _clearTasks(context, ref),
+                            icon: const Icon(Icons.cleaning_services_outlined),
+                          ),
                           if (category != null)
                             IconButton(
                               tooltip: l10n.editCategory,
@@ -375,6 +382,19 @@ class _CategorySection extends ConsumerWidget {
     final index = reorderIndex;
     if (index == null) return child;
     return ReorderableDelayedDragStartListener(index: index, child: child);
+  }
+
+  Future<void> _clearTasks(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showConfirmation(
+      context,
+      title: l10n.clearCategoryTasksTitle,
+      body: l10n.clearCategoryTasksBody(tasks.length),
+      destructive: true,
+    );
+    if (confirmed) {
+      await ref.read(taskRepositoryProvider).clearCategory(category?.id);
+    }
   }
 }
 
