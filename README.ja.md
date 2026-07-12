@@ -1,7 +1,7 @@
 # DDL out!
 
 <p align="center">
-  <img src="assets/logo.png" alt="DDL out! logo" />
+  <img src="assets/logo.png" alt="DDL out! logo" style="max-width: 120px;" />
 </p>
 
 [中文](README.md) | [English](README.en.md) | **日本語**
