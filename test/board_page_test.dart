@@ -72,6 +72,7 @@ void main() {
 
     expect(find.byIcon(Icons.menu), findsNothing);
     expect(find.byIcon(Icons.view_sidebar_outlined), findsOneWidget);
+    expect(find.text('No deadlines yet'), findsOneWidget);
     expect(find.text('Deadlines'), findsNothing);
 
     final gesture = await tester.createGesture(
@@ -87,6 +88,75 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
   });
+
+  testWidgets(
+    'adaptive desktop sidebar keeps board content visible when narrow',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({
+        'adaptive_desktop_sidebar': true,
+      });
+      final snapshot = _snapshotWithTask(DateTime(2026, 7, 13, 8));
+      await tester.binding.setSurfaceSize(const Size(720, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            boardProvider.overrideWith((ref) => Stream.value(snapshot)),
+            currentTimeProvider.overrideWith(
+              (ref) => Stream.value(DateTime(2026, 7, 13, 8)),
+            ),
+          ],
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
+            home: const BoardPage(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.menu), findsNothing);
+      expect(find.text('Work'), findsOneWidget);
+      expect(find.text('Ship release'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'adaptive desktop sidebar keeps board content visible when wide',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({
+        'adaptive_desktop_sidebar': true,
+      });
+      final snapshot = _snapshotWithTask(DateTime(2026, 7, 13, 8));
+      await tester.binding.setSurfaceSize(const Size(1240, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            boardProvider.overrideWith((ref) => Stream.value(snapshot)),
+            currentTimeProvider.overrideWith(
+              (ref) => Stream.value(DateTime(2026, 7, 13, 8)),
+            ),
+          ],
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
+            home: const BoardPage(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.menu), findsNothing);
+      expect(find.text('Deadlines'), findsOneWidget);
+      expect(find.text('Work'), findsOneWidget);
+      expect(find.text('Ship release'), findsOneWidget);
+    },
+  );
 
   testWidgets('empty board renders English strings for an English locale', (
     tester,
@@ -158,4 +228,32 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
   });
+}
+
+BoardSnapshot _snapshotWithTask(DateTime now) {
+  final utc = now.toUtc();
+  return BoardSnapshot(
+    categories: [
+      Category(
+        id: 1,
+        name: 'Work',
+        colorArgb: 0xFF4A90E2,
+        sortOrder: 0,
+        createdAtUtc: utc,
+        updatedAtUtc: utc,
+      ),
+    ],
+    tasks: [
+      Task(
+        id: 1,
+        name: 'Ship release',
+        deadlineUtc: utc.add(const Duration(hours: 2)),
+        categoryId: 1,
+        isCompleted: false,
+        createdAtUtc: utc,
+        updatedAtUtc: utc,
+        completedAtUtc: null,
+      ),
+    ],
+  );
 }

@@ -182,7 +182,10 @@ class _AdaptiveDesktopSidebarState extends State<_AdaptiveDesktopSidebar> {
         if (pinned) {
           return Row(
             children: [
-              const _DesktopSidebar(expanded: true),
+              const SizedBox(
+                width: _expandedWidth,
+                child: _DesktopSidebar(expanded: true),
+              ),
               VerticalDivider(
                 width: 1,
                 color: Theme.of(context).colorScheme.outlineVariant,
@@ -193,26 +196,32 @@ class _AdaptiveDesktopSidebarState extends State<_AdaptiveDesktopSidebar> {
         }
 
         return Stack(
+          fit: StackFit.expand,
           children: [
             Positioned.fill(left: _collapsedWidth, child: widget.child),
-            MouseRegion(
-              onEnter: (_) => setState(() => _hovered = true),
-              onExit: (_) => setState(() => _hovered = false),
-              child: SizedBox(
-                width: _hovered ? _expandedWidth : _collapsedWidth,
-                child: Material(
-                  elevation: _hovered ? 8 : 0,
-                  shadowColor: Theme.of(
-                    context,
-                  ).colorScheme.shadow.withValues(alpha: 0.18),
-                  borderRadius: _hovered
-                      ? const BorderRadius.only(
-                          topRight: Radius.circular(8),
-                          bottomRight: Radius.circular(8),
-                        )
-                      : BorderRadius.zero,
-                  clipBehavior: Clip.antiAlias,
-                  child: _DesktopSidebar(expanded: _hovered),
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: _hovered ? _expandedWidth : _collapsedWidth,
+              child: MouseRegion(
+                onEnter: (_) => setState(() => _hovered = true),
+                onExit: (_) => setState(() => _hovered = false),
+                child: SizedBox.expand(
+                  child: Material(
+                    elevation: _hovered ? 8 : 0,
+                    shadowColor: Theme.of(
+                      context,
+                    ).colorScheme.shadow.withValues(alpha: 0.18),
+                    borderRadius: _hovered
+                        ? const BorderRadius.only(
+                            topRight: Radius.circular(8),
+                            bottomRight: Radius.circular(8),
+                          )
+                        : BorderRadius.zero,
+                    clipBehavior: Clip.antiAlias,
+                    child: _DesktopSidebar(expanded: _hovered),
+                  ),
                 ),
               ),
             ),
