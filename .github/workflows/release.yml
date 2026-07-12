@@ -259,9 +259,9 @@ jobs:
           security set-keychain-settings -lut 21600 "$keychain_path"
           security unlock-keychain -p "$IOS_KEYCHAIN_PASSWORD" "$keychain_path"
           security import "$certificate_path" -P "$IOS_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$keychain_path"
-          security set-key-partition-list -S apple-tool:,apple: -s -k "$IOS_KEYCHAIN_PASSWORD" "$keychain_path"
           security default-keychain -s "$keychain_path"
           security list-keychain -d user -s "$keychain_path"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$IOS_KEYCHAIN_PASSWORD" "$keychain_path"
           security find-identity -v -p codesigning "$keychain_path"
       - run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
       - name: Name IPA
@@ -293,7 +293,7 @@ jobs:
           Add-Content $env:GITHUB_PATH "${{ runner.temp }}\flutter\bin"
       - run: flutter doctor
       - run: flutter pub get --enforce-lockfile
-      - run: flutter build windows --release --target-platform windows-arm64
+      - run: flutter build windows --release
       - shell: pwsh
         run: Compress-Archive -Path build/windows/arm64/runner/Release/* -DestinationPath "DDL_out_$env:GITHUB_REF_NAME-windows-arm64-portable.zip" -CompressionLevel Optimal
       - uses: actions/upload-artifact@v4
