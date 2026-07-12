@@ -38,6 +38,36 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('empty board renders English strings for an English locale', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    const snapshot = BoardSnapshot(categories: [], tasks: []);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          boardProvider.overrideWith((ref) => Stream.value(snapshot)),
+          currentTimeProvider.overrideWith(
+            (ref) => Stream.value(DateTime.now()),
+          ),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: const BoardPage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('No deadlines yet'), findsOneWidget);
+    expect(find.text('New category'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('uncategorized group appears for orphan tasks', (tester) async {
     SharedPreferences.setMockInitialValues({});
     final now = DateTime.now();
