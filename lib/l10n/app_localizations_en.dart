@@ -263,5 +263,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retry => 'Retry';
 
   @override
-  String get aboutVersion => 'Version 0.1.0';
+  String aboutVersion(String version) {
+    return 'Version $version';
+  }
 }

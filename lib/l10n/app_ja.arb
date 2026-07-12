@@ -84,5 +84,6 @@
   "@taskCount": {"placeholders": {"count": {"type": "int"}}},
   "errorTitle": "読み込めませんでした",
   "retry": "再試行",
-  "aboutVersion": "バージョン 0.1.0"
+  "aboutVersion": "バージョン {version}",
+  "@aboutVersion": {"placeholders": {"version": {"type": "String"}}}
 }

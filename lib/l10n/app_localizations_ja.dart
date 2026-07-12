@@ -259,5 +259,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get retry => '再試行';
 
   @override
-  String get aboutVersion => 'バージョン 0.1.0';
+  String aboutVersion(String version) {
+    return 'バージョン $version';
+  }
 }

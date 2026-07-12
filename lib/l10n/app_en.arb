@@ -84,5 +84,6 @@
   "@taskCount": {"placeholders": {"count": {"type": "int"}}},
   "errorTitle": "Unable to load",
   "retry": "Retry",
-  "aboutVersion": "Version 0.1.0"
+  "aboutVersion": "Version {version}",
+  "@aboutVersion": {"placeholders": {"version": {"type": "String"}}}
 }
