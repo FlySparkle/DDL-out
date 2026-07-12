@@ -6,11 +6,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 enum DeadlineMode { relative, absolute }
 
+enum AppFontFamily { system, sansSerif, serif, monospace }
+
 @immutable
 class AppSettingsState {
   const AppSettingsState({
     this.themeMode = ThemeMode.system,
     this.dynamicColorEnabled = true,
+    this.fontFamily = AppFontFamily.system,
+    this.textScale = 1,
     this.collapsedCategoryIds = const <int>{},
     this.deadlineMode = DeadlineMode.relative,
     this.relativeDays = 1,
@@ -20,6 +24,8 @@ class AppSettingsState {
 
   final ThemeMode themeMode;
   final bool dynamicColorEnabled;
+  final AppFontFamily fontFamily;
+  final double textScale;
   final Set<int> collapsedCategoryIds;
   final DeadlineMode deadlineMode;
   final int relativeDays;
@@ -29,6 +35,8 @@ class AppSettingsState {
   AppSettingsState copyWith({
     ThemeMode? themeMode,
     bool? dynamicColorEnabled,
+    AppFontFamily? fontFamily,
+    double? textScale,
     Set<int>? collapsedCategoryIds,
     DeadlineMode? deadlineMode,
     int? relativeDays,
@@ -38,6 +46,8 @@ class AppSettingsState {
     return AppSettingsState(
       themeMode: themeMode ?? this.themeMode,
       dynamicColorEnabled: dynamicColorEnabled ?? this.dynamicColorEnabled,
+      fontFamily: fontFamily ?? this.fontFamily,
+      textScale: textScale ?? this.textScale,
       collapsedCategoryIds: collapsedCategoryIds ?? this.collapsedCategoryIds,
       deadlineMode: deadlineMode ?? this.deadlineMode,
       relativeDays: relativeDays ?? this.relativeDays,
@@ -55,6 +65,8 @@ final settingsControllerProvider =
 class SettingsController extends Notifier<AppSettingsState> {
   static const _themeKey = 'theme_mode';
   static const _dynamicColorKey = 'dynamic_color';
+  static const _fontFamilyKey = 'font_family';
+  static const _textScaleKey = 'text_scale';
   static const _collapsedKey = 'collapsed_categories';
   static const _deadlineModeKey = 'deadline_mode';
   static const _relativeDaysKey = 'relative_days';
@@ -77,6 +89,8 @@ class SettingsController extends Notifier<AppSettingsState> {
     state = AppSettingsState(
       themeMode: _parseTheme(preferences.getString(_themeKey)),
       dynamicColorEnabled: preferences.getBool(_dynamicColorKey) ?? true,
+      fontFamily: _parseFontFamily(preferences.getString(_fontFamilyKey)),
+      textScale: (preferences.getDouble(_textScaleKey) ?? 1).clamp(0.8, 1.4),
       collapsedCategoryIds:
           (preferences.getStringList(_collapsedKey) ?? const [])
               .map(int.tryParse)
@@ -97,6 +111,10 @@ class SettingsController extends Notifier<AppSettingsState> {
     _ => ThemeMode.system,
   };
 
+  static AppFontFamily _parseFontFamily(String? value) =>
+      AppFontFamily.values.where((font) => font.name == value).firstOrNull ??
+      AppFontFamily.system;
+
   Future<SharedPreferences> _prefs() async {
     return _preferences ??= await SharedPreferences.getInstance();
   }
@@ -109,6 +127,17 @@ class SettingsController extends Notifier<AppSettingsState> {
   Future<void> setDynamicColorEnabled(bool value) async {
     state = state.copyWith(dynamicColorEnabled: value);
     await (await _prefs()).setBool(_dynamicColorKey, value);
+  }
+
+  Future<void> setFontFamily(AppFontFamily value) async {
+    state = state.copyWith(fontFamily: value);
+    await (await _prefs()).setString(_fontFamilyKey, value.name);
+  }
+
+  Future<void> setTextScale(double value) async {
+    final normalized = value.clamp(0.8, 1.4);
+    state = state.copyWith(textScale: normalized);
+    await (await _prefs()).setDouble(_textScaleKey, normalized);
   }
 
   Future<void> toggleCategory(int id) async {

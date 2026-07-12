@@ -144,6 +144,29 @@ class AppLocalizationsJa extends AppLocalizations {
   String get dynamicColorSubtitle => 'Android 12 以降では、システムの配色をデフォルトで使用します';
 
   @override
+  String get fontFamily => 'UI フォント';
+
+  @override
+  String get fontSystem => 'システム既定';
+
+  @override
+  String get fontSansSerif => 'サンセリフ';
+
+  @override
+  String get fontSerif => 'セリフ';
+
+  @override
+  String get fontMonospace => '等幅';
+
+  @override
+  String get fontSize => '文字サイズ';
+
+  @override
+  String fontSizeValue(int percent) {
+    return '$percent%';
+  }
+
+  @override
   String get backup => 'バックアップをエクスポート';
 
   @override

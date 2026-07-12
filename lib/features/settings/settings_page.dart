@@ -65,6 +65,55 @@ class SettingsPage extends ConsumerWidget {
                     .read(settingsControllerProvider.notifier)
                     .setDynamicColorEnabled,
               ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(top: 14, right: 16),
+                    child: Icon(Icons.font_download_outlined),
+                  ),
+                  Expanded(
+                    child: DropdownButtonFormField<AppFontFamily>(
+                      initialValue: settings.fontFamily,
+                      decoration: InputDecoration(labelText: l10n.fontFamily),
+                      items: [
+                        for (final family in AppFontFamily.values)
+                          DropdownMenuItem(
+                            value: family,
+                            child: Text(_fontLabel(l10n, family)),
+                          ),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          ref
+                              .read(settingsControllerProvider.notifier)
+                              .setFontFamily(value);
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.format_size),
+                title: Text(l10n.fontSize),
+                subtitle: Slider(
+                  value: settings.textScale,
+                  min: 0.8,
+                  max: 1.4,
+                  divisions: 6,
+                  label: l10n.fontSizeValue((settings.textScale * 100).round()),
+                  onChanged: ref
+                      .read(settingsControllerProvider.notifier)
+                      .setTextScale,
+                ),
+                trailing: Text(
+                  l10n.fontSizeValue((settings.textScale * 100).round()),
+                ),
+              ),
               const Divider(height: 32),
               _SectionTitle(l10n.dataSection),
               const SizedBox(height: 8),
@@ -228,6 +277,14 @@ class SettingsPage extends ConsumerWidget {
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(message)));
   }
+
+  String _fontLabel(AppLocalizations l10n, AppFontFamily family) =>
+      switch (family) {
+        AppFontFamily.system => l10n.fontSystem,
+        AppFontFamily.sansSerif => l10n.fontSansSerif,
+        AppFontFamily.serif => l10n.fontSerif,
+        AppFontFamily.monospace => l10n.fontMonospace,
+      };
 }
 
 class _SectionTitle extends StatelessWidget {

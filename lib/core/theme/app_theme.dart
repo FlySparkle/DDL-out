@@ -3,31 +3,49 @@ import 'package:flutter/material.dart';
 abstract final class AppTheme {
   static const brandColor = Color(0xFF4A90E2);
 
-  static ThemeData light([ColorScheme? dynamicScheme]) {
+  static ThemeData light({
+    ColorScheme? dynamicScheme,
+    String? fontFamily,
+    List<String>? fontFamilyFallback,
+  }) {
     return _build(
       dynamicScheme ??
           ColorScheme.fromSeed(
             seedColor: brandColor,
             brightness: Brightness.light,
           ),
+      fontFamily: fontFamily,
+      fontFamilyFallback: fontFamilyFallback,
     );
   }
 
-  static ThemeData dark([ColorScheme? dynamicScheme]) {
+  static ThemeData dark({
+    ColorScheme? dynamicScheme,
+    String? fontFamily,
+    List<String>? fontFamilyFallback,
+  }) {
     return _build(
       dynamicScheme ??
           ColorScheme.fromSeed(
             seedColor: brandColor,
             brightness: Brightness.dark,
           ),
+      fontFamily: fontFamily,
+      fontFamilyFallback: fontFamilyFallback,
     );
   }
 
-  static ThemeData _build(ColorScheme scheme) {
+  static ThemeData _build(
+    ColorScheme scheme, {
+    String? fontFamily,
+    List<String>? fontFamilyFallback,
+  }) {
     final base = ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
       visualDensity: VisualDensity.standard,
+      fontFamily: fontFamily,
+      fontFamilyFallback: fontFamilyFallback,
     );
 
     return base.copyWith(

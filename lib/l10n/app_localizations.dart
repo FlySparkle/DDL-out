@@ -370,6 +370,48 @@ abstract class AppLocalizations {
   /// **'Android 12 及以上默认使用系统配色'**
   String get dynamicColorSubtitle;
 
+  /// No description provided for @fontFamily.
+  ///
+  /// In zh, this message translates to:
+  /// **'界面字体'**
+  String get fontFamily;
+
+  /// No description provided for @fontSystem.
+  ///
+  /// In zh, this message translates to:
+  /// **'系统默认'**
+  String get fontSystem;
+
+  /// No description provided for @fontSansSerif.
+  ///
+  /// In zh, this message translates to:
+  /// **'无衬线字体'**
+  String get fontSansSerif;
+
+  /// No description provided for @fontSerif.
+  ///
+  /// In zh, this message translates to:
+  /// **'衬线字体'**
+  String get fontSerif;
+
+  /// No description provided for @fontMonospace.
+  ///
+  /// In zh, this message translates to:
+  /// **'等宽字体'**
+  String get fontMonospace;
+
+  /// No description provided for @fontSize.
+  ///
+  /// In zh, this message translates to:
+  /// **'字号'**
+  String get fontSize;
+
+  /// No description provided for @fontSizeValue.
+  ///
+  /// In zh, this message translates to:
+  /// **'{percent}%'**
+  String fontSizeValue(int percent);
+
   /// No description provided for @backup.
   ///
   /// In zh, this message translates to:

@@ -146,6 +146,29 @@ class AppLocalizationsEn extends AppLocalizations {
       'Uses the system color scheme by default on Android 12 and later';
 
   @override
+  String get fontFamily => 'Interface font';
+
+  @override
+  String get fontSystem => 'System default';
+
+  @override
+  String get fontSansSerif => 'Sans serif';
+
+  @override
+  String get fontSerif => 'Serif';
+
+  @override
+  String get fontMonospace => 'Monospace';
+
+  @override
+  String get fontSize => 'Text size';
+
+  @override
+  String fontSizeValue(int percent) {
+    return '$percent%';
+  }
+
+  @override
   String get backup => 'Export backup';
 
   @override

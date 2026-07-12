@@ -144,6 +144,29 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dynamicColorSubtitle => 'Android 12 及以上默认使用系统配色';
 
   @override
+  String get fontFamily => '界面字体';
+
+  @override
+  String get fontSystem => '系统默认';
+
+  @override
+  String get fontSansSerif => '无衬线字体';
+
+  @override
+  String get fontSerif => '衬线字体';
+
+  @override
+  String get fontMonospace => '等宽字体';
+
+  @override
+  String get fontSize => '字号';
+
+  @override
+  String fontSizeValue(int percent) {
+    return '$percent%';
+  }
+
+  @override
   String get backup => '导出备份';
 
   @override
