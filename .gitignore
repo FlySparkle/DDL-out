@@ -43,6 +43,7 @@ Desktop.ini
 # Local packaging output
 dist/
 release/
+ddl_out_flutter/
 
 # Android signing material
 **/android/key.properties
