@@ -1,18 +1,17 @@
-name: Extended Platform Builds
+name: Apple Platform Builds
 
 on:
   workflow_dispatch:
     inputs:
       target:
-        description: Platform build to run
+        description: Apple platform build to run
         required: true
         default: all
         type: choice
         options:
           - all
-          - linux
           - ios
-          - windows-arm64
+          - macos
 
 permissions:
   contents: read
@@ -21,43 +20,61 @@ env:
   FLUTTER_VERSION: 3.44.6
 
 jobs:
-  linux:
-    name: Build Linux bundle, DEB, and RPM
-    if: inputs.target == 'all' || inputs.target == 'linux'
-    runs-on: ubuntu-latest
+  ios:
+    name: Build signed iOS IPA
+    if: inputs.target == 'all' || inputs.target == 'ios'
+    runs-on: macos-latest
+    env:
+      IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+      IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+      IOS_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
+      IOS_EXPORT_OPTIONS_PLIST_BASE64: ${{ secrets.IOS_EXPORT_OPTIONS_PLIST_BASE64 }}
+      IOS_KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install Linux packaging dependencies
-        run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev rpm ruby-full
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
       - run: flutter pub get --enforce-lockfile
-      - run: flutter build linux --release
-      - name: Create DEB and RPM packages
+      - name: Configure iOS signing
         shell: bash
         run: |
-          sudo gem install --no-document fpm
+          test -n "$IOS_CERTIFICATE_BASE64"
+          test -n "$IOS_CERTIFICATE_PASSWORD"
+          test -n "$IOS_PROVISION_PROFILE_BASE64"
+          test -n "$IOS_EXPORT_OPTIONS_PLIST_BASE64"
+          test -n "$IOS_KEYCHAIN_PASSWORD"
+          certificate_path="$RUNNER_TEMP/ddl-out-distribution.p12"
+          keychain_path="$RUNNER_TEMP/ddl-out-signing.keychain-db"
+          profile_path="$HOME/Library/MobileDevice/Provisioning Profiles/ddl-out.mobileprovision"
+          printf '%s' "$IOS_CERTIFICATE_BASE64" | base64 -D > "$certificate_path"
+          mkdir -p "$(dirname "$profile_path")"
+          printf '%s' "$IOS_PROVISION_PROFILE_BASE64" | base64 -D > "$profile_path"
+          printf '%s' "$IOS_EXPORT_OPTIONS_PLIST_BASE64" | base64 -D > ios/ExportOptions.plist
+          security create-keychain -p "$IOS_KEYCHAIN_PASSWORD" "$keychain_path"
+          security set-keychain-settings -lut 21600 "$keychain_path"
+          security unlock-keychain -p "$IOS_KEYCHAIN_PASSWORD" "$keychain_path"
+          security import "$certificate_path" -P "$IOS_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$keychain_path"
+          security list-keychain -d user -s "$keychain_path" login.keychain-db
+      - run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+      - name: Name IPA
+        shell: bash
+        run: |
           version=$(awk '/^version:/ {print $2; exit}' pubspec.yaml)
           version=${version%%+*}
-          cd build/linux/x64/release/bundle
-          fpm -s dir -t deb -n ddl-out -v "$version" --architecture amd64 --prefix /opt/ddl-out .
-          fpm -s dir -t rpm -n ddl-out -v "$version" --architecture x86_64 --prefix /opt/ddl-out .
+          mv build/ios/ipa/*.ipa "DDL_out_v${version}-ios.ipa"
       - uses: actions/upload-artifact@v4
         with:
-          name: ddl-out-linux-x64
-          path: |
-            build/linux/x64/release/bundle/
-            build/linux/x64/release/bundle/*.deb
-            build/linux/x64/release/bundle/*.rpm
+          name: ddl-out-ios-ipa
+          path: DDL_out_v*-ios.ipa
           if-no-files-found: error
           retention-days: 14
 
-  ios:
-    name: Build unsigned iOS app
-    if: inputs.target == 'all' || inputs.target == 'ios'
+  macos:
+    name: Build macOS DMG
+    if: inputs.target == 'all' || inputs.target == 'macos'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -67,32 +84,18 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get --enforce-lockfile
-      - run: flutter build ios --release --no-codesign
+      - run: flutter build macos --release
+      - name: Create DMG
+        shell: bash
+        run: |
+          version=$(awk '/^version:/ {print $2; exit}' pubspec.yaml)
+          version=${version%%+*}
+          app=$(find build/macos/Build/Products/Release -maxdepth 1 -type d -name '*.app' -print -quit)
+          test -n "$app"
+          hdiutil create -volname 'DDL out!' -srcfolder "$app" -ov -format UDZO "DDL_out_v${version}-macos.dmg"
       - uses: actions/upload-artifact@v4
         with:
-          name: ddl-out-ios-unsigned
-          path: build/ios/iphoneos/Runner.app
-          if-no-files-found: error
-          retention-days: 14
-
-  windows-arm64:
-    name: Build Windows ARM64 portable app
-    if: inputs.target == 'all' || inputs.target == 'windows-arm64'
-    runs-on: windows-11-arm
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
-      - run: flutter pub get --enforce-lockfile
-      - run: flutter build windows --release --target-platform windows-arm64
-      - shell: pwsh
-        run: Compress-Archive -Path build/windows/arm64/runner/Release/* -DestinationPath ddl-out-windows-arm64.zip -CompressionLevel Optimal
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ddl-out-windows-arm64
-          path: ddl-out-windows-arm64.zip
+          name: ddl-out-macos-dmg
+          path: DDL_out_v*-macos.dmg
           if-no-files-found: error
           retention-days: 14
