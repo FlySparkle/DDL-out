@@ -12,19 +12,19 @@
 git clone https://github.com/FlySparkle/DDL-out.git
 cd DDL-out
 flutter pub get
-dart run build_runner build --force-jit
+dart run build_runner build
 flutter gen-l10n
 flutter run -d windows
 ```
 
-仓库路径含非 ASCII 字符时，`build_runner` 需要使用 `--force-jit`。
+> 仓库路径含非 ASCII 字符时，`dart run build_runner build` 需要添加 `--force-jit` 参数。
 
 ## 提交前检查
 
 从仓库根目录运行：
 
 ```powershell
-dart run build_runner build --force-jit
+dart run build_runner build
 flutter gen-l10n
 dart format --output=none --set-exit-if-changed .
 flutter analyze
@@ -38,8 +38,10 @@ flutter build apk --release
 
 ## 工作流
 
-1. 从最新的 `main` 创建单一目的分支，例如 `feat/backup-preview`、
-   `fix/android-export` 或 `docs/contributing`。
+1. 从最新的 `main` 创建单一目的分支，例如:
+   - `feat/backup-preview`
+   - `fix/android-export`
+   - `docs/contributing`
 2. 保持提交聚焦，并使用清晰的提交说明。
 3. 推送分支后创建 Pull Request。说明用户可见行为、测试结果和关联 issue。
 4. 等待 CI 通过并处理评审意见后再合并。合并后删除分支。
