@@ -62,17 +62,25 @@ jobs:
       - run: flutter pub get --enforce-lockfile
       - run: flutter build windows --release
       - shell: pwsh
-        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath "ddl-out-$env:GITHUB_REF_NAME-windows-x64.zip" -CompressionLevel Optimal
+        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath "DDL_out_$env:GITHUB_REF_NAME-windows-x64-portable.zip" -CompressionLevel Optimal
       - uses: actions/upload-artifact@v4
         with:
           name: windows-release
-          path: ddl-out-*-windows-x64.zip
+          path: DDL_out_v*-windows-x64-portable.zip
           if-no-files-found: error
 
   android:
-    name: Package signed Android release
+    name: Package signed Android ${{ matrix.abi }} release
     needs: verify
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: android-arm64
+            abi: arm64-v8a
+          - target: android-x64
+            abi: x64
     env:
       ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
@@ -107,19 +115,165 @@ jobs:
             echo "keyAlias=$ANDROID_KEY_ALIAS"
             echo "storeFile=release-key.jks"
           } > android/key.properties
-      - run: flutter build apk --release --target-platform android-arm64
+      - run: flutter build apk --release --target-platform ${{ matrix.target }}
       - name: Name release asset
         shell: bash
-        run: mv build/app/outputs/flutter-apk/app-release.apk "ddl-out-$GITHUB_REF_NAME-android.apk"
+        run: mv build/app/outputs/flutter-apk/app-release.apk "DDL_out_$GITHUB_REF_NAME-android-${{ matrix.abi }}.apk"
       - uses: actions/upload-artifact@v4
         with:
-          name: android-release
-          path: ddl-out-*-android.apk
+          name: android-release-${{ matrix.abi }}
+          path: DDL_out_v*-android-${{ matrix.abi }}.apk
+          if-no-files-found: error
+
+  linux:
+    name: Package Linux release
+    needs: verify
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.PROJECT_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Linux packaging dependencies
+        run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev rpm ruby-full
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter build linux --release
+      - name: Create DEB and RPM packages
+        shell: bash
+        run: |
+          sudo gem install --no-document fpm
+          version=$(awk '/^version:/ {print $2; exit}' pubspec.yaml)
+          version=${version%%+*}
+          output_dir="$GITHUB_WORKSPACE/build/linux/x64/release"
+          bundle_dir="$output_dir/bundle"
+          fpm -s dir -t deb -n ddl-out -v "$version" --architecture amd64 --prefix /opt/ddl-out -C "$bundle_dir" -p "$output_dir/DDL_out_v${version}-linux-amd64.deb" .
+          fpm -s dir -t rpm -n ddl-out -v "$version" --architecture x86_64 --prefix /opt/ddl-out -C "$bundle_dir" -p "$output_dir/DDL_out_v${version}-linux-amd64.rpm" .
+          tar -C "$bundle_dir" -czf "$output_dir/DDL_out_v${version}-linux-amd64.tar.gz" .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-release
+          path: |
+            build/linux/x64/release/DDL_out_v*-linux-amd64.deb
+            build/linux/x64/release/DDL_out_v*-linux-amd64.rpm
+            build/linux/x64/release/DDL_out_v*-linux-amd64.tar.gz
+          if-no-files-found: error
+
+  macos:
+    name: Package macOS DMG release
+    needs: verify
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ${{ env.PROJECT_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter build macos --release
+      - name: Create DMG
+        shell: bash
+        run: |
+          version=$(awk '/^version:/ {print $2; exit}' pubspec.yaml)
+          version=${version%%+*}
+          app=$(find build/macos/Build/Products/Release -maxdepth 1 -type d -name '*.app' -print -quit)
+          test -n "$app"
+          hdiutil create -volname 'DDL out!' -srcfolder "$app" -ov -format UDZO "DDL_out_$GITHUB_REF_NAME-macos.dmg"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-release
+          path: DDL_out_v*-macos.dmg
+          if-no-files-found: error
+
+  ios:
+    name: Package signed iOS IPA release
+    needs: verify
+    runs-on: macos-latest
+    env:
+      IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+      IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+      IOS_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
+      IOS_EXPORT_OPTIONS_PLIST_BASE64: ${{ secrets.IOS_EXPORT_OPTIONS_PLIST_BASE64 }}
+      IOS_KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+    defaults:
+      run:
+        working-directory: ${{ env.PROJECT_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - name: Configure iOS signing
+        shell: bash
+        run: |
+          test -n "$IOS_CERTIFICATE_BASE64"
+          test -n "$IOS_CERTIFICATE_PASSWORD"
+          test -n "$IOS_PROVISION_PROFILE_BASE64"
+          test -n "$IOS_EXPORT_OPTIONS_PLIST_BASE64"
+          test -n "$IOS_KEYCHAIN_PASSWORD"
+          certificate_path="$RUNNER_TEMP/ddl-out-distribution.p12"
+          keychain_path="$RUNNER_TEMP/ddl-out-signing.keychain-db"
+          profile_path="$HOME/Library/MobileDevice/Provisioning Profiles/ddl-out.mobileprovision"
+          printf '%s' "$IOS_CERTIFICATE_BASE64" | base64 -D > "$certificate_path"
+          mkdir -p "$(dirname "$profile_path")"
+          printf '%s' "$IOS_PROVISION_PROFILE_BASE64" | base64 -D > "$profile_path"
+          printf '%s' "$IOS_EXPORT_OPTIONS_PLIST_BASE64" | base64 -D > ios/ExportOptions.plist
+          security create-keychain -p "$IOS_KEYCHAIN_PASSWORD" "$keychain_path"
+          security set-keychain-settings -lut 21600 "$keychain_path"
+          security unlock-keychain -p "$IOS_KEYCHAIN_PASSWORD" "$keychain_path"
+          security import "$certificate_path" -P "$IOS_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$keychain_path"
+          security list-keychain -d user -s "$keychain_path" login.keychain-db
+      - run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+      - name: Name IPA
+        shell: bash
+        run: |
+          version=$(awk '/^version:/ {print $2; exit}' pubspec.yaml)
+          version=${version%%+*}
+          mv build/ios/ipa/*.ipa "DDL_out_$GITHUB_REF_NAME-ios.ipa"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-release
+          path: DDL_out_v*-ios.ipa
+          if-no-files-found: error
+
+  windows-arm64:
+    name: Package Windows ARM64 release
+    needs: verify
+    runs-on: windows-11-arm
+    defaults:
+      run:
+        working-directory: ${{ env.PROJECT_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter build windows --release --target-platform windows-arm64
+      - shell: pwsh
+        run: Compress-Archive -Path build/windows/arm64/runner/Release/* -DestinationPath "DDL_out_$env:GITHUB_REF_NAME-windows-arm64-portable.zip" -CompressionLevel Optimal
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-arm64-release
+          path: DDL_out_v*-windows-arm64-portable.zip
           if-no-files-found: error
 
   publish:
     name: Create GitHub release
-    needs: [windows, android]
+    needs: [windows, windows-arm64, android, linux, macos, ios]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4

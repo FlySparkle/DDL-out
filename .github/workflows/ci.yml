@@ -62,17 +62,27 @@ jobs:
       - run: flutter pub get --enforce-lockfile
       - run: flutter build windows --release
       - shell: pwsh
-        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath ddl-out-windows-x64.zip -CompressionLevel Optimal
+        run: |
+          $version = ([regex]::Match((Get-Content pubspec.yaml -Raw), '(?m)^version:\s*([^+\r\n]+)')).Groups[1].Value
+          Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath "DDL_out_v$version-windows-x64-portable.zip" -CompressionLevel Optimal
       - uses: actions/upload-artifact@v4
         with:
           name: windows-x64-${{ github.sha }}
-          path: ddl-out-windows-x64.zip
+          path: DDL_out_v*-windows-x64-portable.zip
           if-no-files-found: error
           retention-days: 14
 
   android:
-    name: Build Android
+    name: Build Android ${{ matrix.abi }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: android-arm64
+            abi: arm64-v8a
+          - target: android-x64
+            abi: x64
     defaults:
       run:
         working-directory: ${{ env.PROJECT_DIR }}
@@ -88,10 +98,16 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get --enforce-lockfile
-      - run: flutter build apk --release --target-platform android-arm64
+      - run: flutter build apk --release --target-platform ${{ matrix.target }}
+      - name: Name APK
+        shell: bash
+        run: |
+          version=$(awk '/^version:/ {print $2; exit}' pubspec.yaml)
+          version=${version%%+*}
+          mv build/app/outputs/flutter-apk/app-release.apk "DDL_out_v${version}-android-${{ matrix.abi }}.apk"
       - uses: actions/upload-artifact@v4
         with:
-          name: android-apk-${{ github.sha }}
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: android-${{ matrix.abi }}-${{ github.sha }}
+          path: DDL_out_v*-android-${{ matrix.abi }}.apk
           if-no-files-found: error
           retention-days: 14
