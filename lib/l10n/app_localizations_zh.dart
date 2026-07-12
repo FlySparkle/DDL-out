@@ -259,5 +259,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get retry => '重试';
 
   @override
-  String get aboutVersion => '版本 0.1.0';
+  String get checkForUpdates => '检查更新';
+
+  @override
+  String get checkForUpdatesSubtitle => '在 GitHub 查看最新版本';
+
+  @override
+  String aboutVersion(String version) {
+    return '版本 $version';
+  }
 }

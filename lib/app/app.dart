@@ -39,7 +39,6 @@ class DdlOutApp extends ConsumerWidget {
           darkTheme: AppTheme.dark(useDynamic ? darkDynamic : null),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('zh'),
         );
       },
     );

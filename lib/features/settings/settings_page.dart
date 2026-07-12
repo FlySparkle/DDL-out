@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/version/app_version.dart';
 import '../../data/backup/backup_service.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/settings/app_settings.dart';
@@ -9,11 +11,16 @@ import '../../l10n/app_localizations.dart';
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
+  static final _latestReleaseUri = Uri.parse(
+    'https://github.com/FlySparkle/DDL-out/releases/latest',
+  );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final settings = ref.watch(settingsControllerProvider);
     final board = ref.watch(boardProvider).value;
+    final appVersion = ref.watch(appVersionProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsTitle)),
@@ -96,9 +103,21 @@ class SettingsPage extends ConsumerWidget {
               const Divider(height: 32),
               ListTile(
                 contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.system_update_outlined),
+                title: Text(l10n.checkForUpdates),
+                subtitle: Text(l10n.checkForUpdatesSubtitle),
+                trailing: const Icon(Icons.open_in_new),
+                onTap: () => _openLatestRelease(context),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.info_outline),
                 title: Text(l10n.appTitle),
-                subtitle: Text(l10n.aboutVersion),
+                subtitle: appVersion.when(
+                  data: (value) => Text(l10n.aboutVersion(value)),
+                  error: (_, _) => const SizedBox.shrink(),
+                  loading: () => const SizedBox.shrink(),
+                ),
               ),
             ],
           ),
@@ -187,6 +206,19 @@ class SettingsPage extends ConsumerWidget {
     );
     if (confirmed == true) {
       await ref.read(appDatabaseProvider).clearAllData();
+    }
+  }
+
+  Future<void> _openLatestRelease(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      final opened = await launchUrl(
+        _latestReleaseUri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!opened && context.mounted) _message(context, l10n.operationFailed);
+    } on Object {
+      if (context.mounted) _message(context, l10n.operationFailed);
     }
   }
 

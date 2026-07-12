@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/version/app_version.dart';
 import '../database/app_database.dart';
 import '../repositories/repositories.dart';
 
@@ -35,20 +36,25 @@ class BackupPreview {
 }
 
 final backupServiceProvider = Provider<BackupService>((ref) {
-  return BackupService(ref.watch(appDatabaseProvider));
+  return BackupService(
+    ref.watch(appDatabaseProvider),
+    ref.watch(appVersionReaderProvider),
+  );
 });
 
 class BackupService {
-  const BackupService(this._database);
+  const BackupService(this._database, this._appVersionReader);
 
   final AppDatabase _database;
+  final AppVersionReader _appVersionReader;
 
   Future<Uint8List> createBackupBytes() async {
     final categories = await _database.readCategories();
     final tasks = await _database.readTasks();
+    final appVersion = await _appVersionReader.read();
     final payload = <String, Object?>{
       'schemaVersion': backupSchemaVersion,
-      'appVersion': '0.1.0',
+      'appVersion': appVersion,
       'exportedAtUtc': DateTime.now().toUtc().toIso8601String(),
       'categories': categories
           .map(
