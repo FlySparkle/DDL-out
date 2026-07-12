@@ -230,15 +230,14 @@ class _CategorySection extends ConsumerWidget {
           ref.read(taskRepositoryProvider).move(details.data, category?.id);
         },
         builder: (context, candidates, rejects) {
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            decoration: BoxDecoration(
-              color: candidates.isEmpty
-                  ? Theme.of(context).colorScheme.surfaceContainerLow
-                  : Theme.of(context).colorScheme.secondaryContainer,
-              borderRadius: BorderRadius.circular(8),
-              border: Border(left: BorderSide(color: color, width: 4)),
-            ),
+          final scheme = Theme.of(context).colorScheme;
+          final cardColor = Color.alphaBlend(
+            color.withValues(alpha: 0.16),
+            scheme.surfaceContainerLow,
+          );
+          return Card(
+            color: candidates.isEmpty ? cardColor : scheme.secondaryContainer,
+            clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
                 InkWell(
