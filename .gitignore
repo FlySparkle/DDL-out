@@ -23,6 +23,8 @@ doc/api/
 
 # IDEs and operating systems
 .idea/
+.trae/
+.vscode/settings.json
 *.iml
 *.code-workspace
 .DS_Store
