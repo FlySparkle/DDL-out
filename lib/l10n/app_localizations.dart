@@ -400,17 +400,47 @@ abstract class AppLocalizations {
   /// **'{percent}%'**
   String fontSizeValue(int percent);
 
-  /// No description provided for @adaptiveDesktopSidebar.
+  /// No description provided for @navigationMode.
   ///
   /// In zh, this message translates to:
-  /// **'自适应桌面侧边栏'**
-  String get adaptiveDesktopSidebar;
+  /// **'边栏模式'**
+  String get navigationMode;
 
-  /// No description provided for @adaptiveDesktopSidebarSubtitle.
+  /// No description provided for @floatingSidebar.
   ///
   /// In zh, this message translates to:
-  /// **'宽窗口固定显示侧边栏；窄窗口收起到边缘，鼠标悬停时展开。'**
-  String get adaptiveDesktopSidebarSubtitle;
+  /// **'浮动边栏'**
+  String get floatingSidebar;
+
+  /// No description provided for @floatingSidebarSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'使用左上角按钮或从页面左侧向右滑动打开边栏。'**
+  String get floatingSidebarSubtitle;
+
+  /// No description provided for @fixedSidebar.
+  ///
+  /// In zh, this message translates to:
+  /// **'固定边栏'**
+  String get fixedSidebar;
+
+  /// No description provided for @fixedSidebarSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'宽度不足时自动切换为浮动边栏；固定时可手动收展或悬停展开。'**
+  String get fixedSidebarSubtitle;
+
+  /// No description provided for @expandSidebar.
+  ///
+  /// In zh, this message translates to:
+  /// **'展开边栏'**
+  String get expandSidebar;
+
+  /// No description provided for @collapseSidebar.
+  ///
+  /// In zh, this message translates to:
+  /// **'收起边栏'**
+  String get collapseSidebar;
 
   /// No description provided for @backup.
   ///

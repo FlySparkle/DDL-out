@@ -161,10 +161,25 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get adaptiveDesktopSidebar => '自适应桌面侧边栏';
+  String get navigationMode => '边栏模式';
 
   @override
-  String get adaptiveDesktopSidebarSubtitle => '宽窗口固定显示侧边栏；窄窗口收起到边缘，鼠标悬停时展开。';
+  String get floatingSidebar => '浮动边栏';
+
+  @override
+  String get floatingSidebarSubtitle => '使用左上角按钮或从页面左侧向右滑动打开边栏。';
+
+  @override
+  String get fixedSidebar => '固定边栏';
+
+  @override
+  String get fixedSidebarSubtitle => '宽度不足时自动切换为浮动边栏；固定时可手动收展或悬停展开。';
+
+  @override
+  String get expandSidebar => '展开边栏';
+
+  @override
+  String get collapseSidebar => '收起边栏';
 
   @override
   String get backup => '导出备份';

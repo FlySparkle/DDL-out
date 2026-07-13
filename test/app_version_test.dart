@@ -27,9 +27,6 @@ void main() {
       buildSignature: '',
     );
 
-    expect(
-      await const PackageInfoAppVersionReader().read(),
-      '0.1.1',
-    );
+    expect(await const PackageInfoAppVersionReader().read(), '0.1.1');
   });
 }

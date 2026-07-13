@@ -164,11 +164,27 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get adaptiveDesktopSidebar => 'Adaptive desktop sidebar';
+  String get navigationMode => 'Sidebar mode';
 
   @override
-  String get adaptiveDesktopSidebarSubtitle =>
-      'On wide windows, keep the sidebar visible. On narrow windows, collapse it until the pointer hovers over the edge.';
+  String get floatingSidebar => 'Floating sidebar';
+
+  @override
+  String get floatingSidebarSubtitle =>
+      'Open it with the top-left button or swipe right from the left edge.';
+
+  @override
+  String get fixedSidebar => 'Fixed sidebar';
+
+  @override
+  String get fixedSidebarSubtitle =>
+      'Falls back to floating when space is limited; otherwise expand it manually or by hovering.';
+
+  @override
+  String get expandSidebar => 'Expand sidebar';
+
+  @override
+  String get collapseSidebar => 'Collapse sidebar';
 
   @override
   String get backup => 'Export backup';

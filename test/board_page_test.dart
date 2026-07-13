@@ -40,16 +40,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('截止事项'), findsOneWidget);
     expect(find.text('设置'), findsOneWidget);
+    expect(find.text('DDL out!'), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
   });
 
-  testWidgets('adaptive desktop sidebar expands from the window edge', (
+  testWidgets('fixed sidebar expands on hover when space is moderate', (
     tester,
   ) async {
-    SharedPreferences.setMockInitialValues({'adaptive_desktop_sidebar': true});
+    SharedPreferences.setMockInitialValues({'navigation_mode': 'fixed'});
     const snapshot = BoardSnapshot(categories: [], tasks: []);
-    await tester.binding.setSurfaceSize(const Size(720, 900));
+    await tester.binding.setSurfaceSize(const Size(900, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     await tester.pumpWidget(
@@ -71,30 +72,33 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byIcon(Icons.menu), findsNothing);
-    expect(find.byIcon(Icons.view_sidebar_outlined), findsOneWidget);
     expect(find.text('No deadlines yet'), findsOneWidget);
-    expect(find.text('Deadlines'), findsNothing);
+    expect(
+      tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
+      isFalse,
+    );
 
     final gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
       pointer: 1,
     );
-    await gesture.addPointer(location: const Offset(8, 120));
-    await gesture.moveTo(const Offset(24, 120));
+    await gesture.addPointer(location: const Offset(8, 160));
+    await gesture.moveTo(const Offset(24, 160));
     await tester.pumpAndSettle();
 
-    expect(find.text('Deadlines'), findsOneWidget);
+    expect(
+      tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
+      isTrue,
+    );
     await gesture.removePointer();
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
   });
 
   testWidgets(
-    'adaptive desktop sidebar keeps board content visible when narrow',
+    'fixed mode falls back to a floating drawer when width is narrow',
     (tester) async {
-      SharedPreferences.setMockInitialValues({
-        'adaptive_desktop_sidebar': true,
-      });
+      SharedPreferences.setMockInitialValues({'navigation_mode': 'fixed'});
       final snapshot = _snapshotWithTask(DateTime(2026, 7, 13, 8));
       await tester.binding.setSurfaceSize(const Size(720, 900));
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -117,46 +121,119 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.menu), findsNothing);
+      expect(find.byIcon(Icons.menu), findsOneWidget);
+      expect(find.byType(NavigationRail), findsNothing);
       expect(find.text('Work'), findsOneWidget);
       expect(find.text('Ship release'), findsOneWidget);
     },
   );
 
-  testWidgets(
-    'adaptive desktop sidebar keeps board content visible when wide',
-    (tester) async {
-      SharedPreferences.setMockInitialValues({
-        'adaptive_desktop_sidebar': true,
-      });
-      final snapshot = _snapshotWithTask(DateTime(2026, 7, 13, 8));
-      await tester.binding.setSurfaceSize(const Size(1240, 900));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
+  testWidgets('fixed sidebar automatically expands when width is sufficient', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({'navigation_mode': 'fixed'});
+    final snapshot = _snapshotWithTask(DateTime(2026, 7, 13, 8));
+    await tester.binding.setSurfaceSize(const Size(1240, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            boardProvider.overrideWith((ref) => Stream.value(snapshot)),
-            currentTimeProvider.overrideWith(
-              (ref) => Stream.value(DateTime(2026, 7, 13, 8)),
-            ),
-          ],
-          child: MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            locale: const Locale('en'),
-            home: const BoardPage(),
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          boardProvider.overrideWith((ref) => Stream.value(snapshot)),
+          currentTimeProvider.overrideWith(
+            (ref) => Stream.value(DateTime(2026, 7, 13, 8)),
           ),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: const BoardPage(),
         ),
-      );
-      await tester.pumpAndSettle();
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.menu), findsNothing);
-      expect(find.text('Deadlines'), findsOneWidget);
-      expect(find.text('Work'), findsOneWidget);
-      expect(find.text('Ship release'), findsOneWidget);
-    },
-  );
+    expect(find.byIcon(Icons.menu), findsNothing);
+    expect(
+      tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
+      isTrue,
+    );
+    expect(find.text('Work'), findsOneWidget);
+    expect(find.text('Ship release'), findsOneWidget);
+  });
+
+  testWidgets('fixed sidebar can be collapsed and expanded manually', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({'navigation_mode': 'fixed'});
+    const snapshot = BoardSnapshot(categories: [], tasks: []);
+    await tester.binding.setSurfaceSize(const Size(1240, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          boardProvider.overrideWith((ref) => Stream.value(snapshot)),
+          currentTimeProvider.overrideWith(
+            (ref) => Stream.value(DateTime.now()),
+          ),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: const BoardPage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('fixed-navigation-toggle')));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
+      isFalse,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('fixed-navigation-toggle')));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
+      isTrue,
+    );
+  });
+
+  testWidgets('floating drawer opens with a swipe from the left edge', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({'navigation_mode': 'floating'});
+    const snapshot = BoardSnapshot(categories: [], tasks: []);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          boardProvider.overrideWith((ref) => Stream.value(snapshot)),
+          currentTimeProvider.overrideWith(
+            (ref) => Stream.value(DateTime.now()),
+          ),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: const BoardPage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.dragFrom(const Offset(1, 300), const Offset(320, 0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Deadlines'), findsOneWidget);
+    expect(find.text('Settings'), findsOneWidget);
+  });
 
   testWidgets('empty board renders English strings for an English locale', (
     tester,
