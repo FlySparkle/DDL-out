@@ -32,7 +32,7 @@ class DdlOutApp extends ConsumerWidget {
     return DynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
         final useDynamic = settings.dynamicColorEnabled;
-        final typography = settings.resolvedFont;
+        final fontFamily = settings.useSystemFont ? null : 'NotoSansSC';
         return MaterialApp.router(
           title: 'DDL out!',
           debugShowCheckedModeBanner: false,
@@ -40,13 +40,11 @@ class DdlOutApp extends ConsumerWidget {
           themeMode: settings.themeMode,
           theme: AppTheme.light(
             dynamicScheme: useDynamic ? lightDynamic : null,
-            fontFamily: typography.fontFamily,
-            fontFamilyFallback: typography.fallback,
+            fontFamily: fontFamily,
           ),
           darkTheme: AppTheme.dark(
             dynamicScheme: useDynamic ? darkDynamic : null,
-            fontFamily: typography.fontFamily,
-            fontFamilyFallback: typography.fallback,
+            fontFamily: fontFamily,
           ),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,

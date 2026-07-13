@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 void main() {
-  test('reads the package version and build number', () async {
+  test('appends git commit when provided', () async {
     PackageInfo.setMockInitialValues(
       appName: 'DDL out!',
       packageName: 'com.flysparkle.ddl_out',
@@ -12,18 +12,24 @@ void main() {
       buildSignature: '',
     );
 
-    expect(await const PackageInfoAppVersionReader().read(), '0.1.1+1');
+    expect(
+      await const PackageInfoAppVersionReader(gitCommit: 'abc1234').read(),
+      '0.1.1+abc1234',
+    );
   });
 
-  test('omits the separator when the package has no build number', () async {
+  test('omits the separator when git commit is empty', () async {
     PackageInfo.setMockInitialValues(
       appName: 'DDL out!',
       packageName: 'com.flysparkle.ddl_out',
       version: '0.1.1',
-      buildNumber: '',
+      buildNumber: '1',
       buildSignature: '',
     );
 
-    expect(await const PackageInfoAppVersionReader().read(), '0.1.1');
+    expect(
+      await const PackageInfoAppVersionReader().read(),
+      '0.1.1',
+    );
   });
 }

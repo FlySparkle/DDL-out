@@ -16,12 +16,14 @@ final appVersionProvider = FutureProvider<String>(
 );
 
 class PackageInfoAppVersionReader implements AppVersionReader {
-  const PackageInfoAppVersionReader();
+  const PackageInfoAppVersionReader({this.gitCommit = _gitCommit});
+
+  final String gitCommit;
 
   @override
   Future<String> read() async {
     final packageInfo = await PackageInfo.fromPlatform();
     final version = packageInfo.version;
-    return _gitCommit.isNotEmpty ? '$version+$_gitCommit' : version;
+    return gitCommit.isNotEmpty ? '$version+$gitCommit' : version;
   }
 }

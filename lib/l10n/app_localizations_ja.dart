@@ -147,19 +147,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get dynamicColorSubtitle => 'Android 12 以降では、システムの配色をデフォルトで使用します';
 
   @override
-  String get fontFamily => 'UI フォント';
+  String get useSystemFont => 'システムのデフォルトフォントを使用';
 
   @override
-  String get fontSystem => 'システム既定';
-
-  @override
-  String get fontSansSerif => 'サンセリフ';
-
-  @override
-  String get fontSerif => 'セリフ';
-
-  @override
-  String get fontMonospace => '等幅';
+  String get useSystemFontSubtitle => 'オフにすると内蔵の Noto Sans SC を使用します';
 
   @override
   String get fontSize => '文字サイズ';

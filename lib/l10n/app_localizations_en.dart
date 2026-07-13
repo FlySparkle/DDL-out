@@ -149,19 +149,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Uses the system color scheme by default on Android 12 and later';
 
   @override
-  String get fontFamily => 'Interface font';
+  String get useSystemFont => 'Use system default font';
 
   @override
-  String get fontSystem => 'System default';
-
-  @override
-  String get fontSansSerif => 'Sans serif';
-
-  @override
-  String get fontSerif => 'Serif';
-
-  @override
-  String get fontMonospace => 'Monospace';
+  String get useSystemFontSubtitle =>
+      'When off, the bundled Noto Sans SC font is used';
 
   @override
   String get fontSize => 'Text size';

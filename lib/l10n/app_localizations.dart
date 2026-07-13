@@ -376,35 +376,17 @@ abstract class AppLocalizations {
   /// **'Android 12 及以上默认使用系统配色'**
   String get dynamicColorSubtitle;
 
-  /// No description provided for @fontFamily.
+  /// No description provided for @useSystemFont.
   ///
   /// In zh, this message translates to:
-  /// **'界面字体'**
-  String get fontFamily;
+  /// **'使用系统默认字体'**
+  String get useSystemFont;
 
-  /// No description provided for @fontSystem.
+  /// No description provided for @useSystemFontSubtitle.
   ///
   /// In zh, this message translates to:
-  /// **'系统默认'**
-  String get fontSystem;
-
-  /// No description provided for @fontSansSerif.
-  ///
-  /// In zh, this message translates to:
-  /// **'无衬线字体'**
-  String get fontSansSerif;
-
-  /// No description provided for @fontSerif.
-  ///
-  /// In zh, this message translates to:
-  /// **'衬线字体'**
-  String get fontSerif;
-
-  /// No description provided for @fontMonospace.
-  ///
-  /// In zh, this message translates to:
-  /// **'等宽字体'**
-  String get fontMonospace;
+  /// **'关闭后使用内嵌的思源黑体'**
+  String get useSystemFontSubtitle;
 
   /// No description provided for @fontSize.
   ///
