@@ -49,14 +49,6 @@ dart format --output=none --set-exit-if-changed .
 flutter analyze
 flutter test
 flutter build windows
-flutter build apk --release
-```
-
-On paths containing non-ASCII characters, force JIT compilation for Drift
-generation:
-
-```powershell
-dart run build_runner build --force-jit
 ```
 
 Add tests in proportion to risk:

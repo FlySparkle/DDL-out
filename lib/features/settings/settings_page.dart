@@ -18,6 +18,9 @@ class SettingsPage extends StatelessWidget {
           ? null
           : const AppNavigationDrawer(selectedIndex: 1),
       drawerEnableOpenDragGesture: !fixedNavigation,
+      drawerEdgeDragWidth: fixedNavigation
+          ? null
+          : AppNavigationLayout.floatingDrawerDragWidth(context),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         leading: fixedNavigation

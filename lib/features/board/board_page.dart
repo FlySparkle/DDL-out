@@ -25,6 +25,9 @@ class BoardPage extends ConsumerWidget {
           ? null
           : const AppNavigationDrawer(selectedIndex: 0),
       drawerEnableOpenDragGesture: !fixedNavigation,
+      drawerEdgeDragWidth: fixedNavigation
+          ? null
+          : AppNavigationLayout.floatingDrawerDragWidth(context),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         leading: fixedNavigation

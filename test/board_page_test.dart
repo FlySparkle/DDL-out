@@ -77,10 +77,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('No deadlines yet'), findsOneWidget);
-    expect(
-      tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
-      isFalse,
-    );
+    expect(_fixedNavigationWidth(tester), 72);
 
     final gesture = await tester.createGesture(
       kind: PointerDeviceKind.mouse,
@@ -90,30 +87,18 @@ void main() {
     await gesture.moveTo(const Offset(24, 160));
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(
-      tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
-      isFalse,
-    );
+    expect(_fixedNavigationWidth(tester), 72);
 
     await tester.pump(const Duration(milliseconds: 60));
     await tester.pumpAndSettle();
 
-    expect(
-      tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
-      isTrue,
-    );
+    expect(_fixedNavigationWidth(tester), 256);
     await gesture.moveTo(const Offset(500, 160));
     await tester.pump(const Duration(milliseconds: 450));
-    expect(
-      tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
-      isTrue,
-    );
+    expect(_fixedNavigationWidth(tester), 256);
     await tester.pump(const Duration(milliseconds: 60));
     await tester.pumpAndSettle();
-    expect(
-      tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
-      isFalse,
-    );
+    expect(_fixedNavigationWidth(tester), 72);
     await gesture.removePointer();
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
@@ -150,7 +135,10 @@ void main() {
         find.byKey(const ValueKey('fixed-navigation-toggle')),
         findsNothing,
       );
-      expect(find.byType(NavigationRail), findsNothing);
+      expect(
+        find.byKey(const ValueKey('fixed-navigation-panel')),
+        findsNothing,
+      );
       expect(find.text('Work'), findsOneWidget);
       expect(find.text('Ship release'), findsOneWidget);
     },
@@ -191,13 +179,36 @@ void main() {
         .where(
           (model) =>
               model.borderRadius ==
-              const BorderRadius.only(topRight: Radius.circular(16)),
+              const BorderRadius.horizontal(right: Radius.circular(16)),
         );
     expect(roundedModels, isNotEmpty);
+    expect(_fixedNavigationWidth(tester), 256);
+    expect(find.text('Deadlines'), findsOneWidget);
+    expect(find.text('Settings'), findsOneWidget);
+    expect(find.text('Collapse sidebar'), findsOneWidget);
+    final destination = find.byKey(const ValueKey('navigation-destination-0'));
+    final toggle = find.byKey(const ValueKey('fixed-navigation-toggle'));
+    final destinationRect = tester.getRect(destination);
+    final toggleRect = tester.getRect(toggle);
+    expect(destinationRect.size, toggleRect.size);
+    expect(destinationRect.height, 56);
+    expect(destinationRect.width, greaterThan(destinationRect.height));
     expect(
-      tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
-      isTrue,
+      tester
+          .widget<Material>(
+            find.descendant(of: destination, matching: find.byType(Material)),
+          )
+          .shape,
+      tester
+          .widget<Material>(
+            find.descendant(of: toggle, matching: find.byType(Material)),
+          )
+          .shape,
     );
+    final secondDestination = tester.getRect(
+      find.byKey(const ValueKey('navigation-destination-1')),
+    );
+    expect(secondDestination.top - destinationRect.bottom, 8);
     expect(find.text('Work'), findsOneWidget);
     expect(find.text('Ship release'), findsOneWidget);
   });
@@ -242,21 +253,29 @@ void main() {
     expect(toggleRect.bottom, greaterThan(830));
 
     await tester.tap(find.byKey(const ValueKey('fixed-navigation-toggle')));
-    await tester.pumpAndSettle();
-    expect(
-      tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
-      isFalse,
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 40));
+
+    final labelTransition = find.byKey(
+      const ValueKey('navigation-label-transition-0'),
     );
+    final labelOpacity = tester.widget<Opacity>(labelTransition);
+    final labelTransform = tester.widget<Transform>(
+      find.descendant(of: labelTransition, matching: find.byType(Transform)),
+    );
+    expect(labelOpacity.opacity, inExclusiveRange(0, 1));
+    expect(labelTransform.transform.getTranslation().x, lessThan(0));
+
+    await tester.pumpAndSettle();
+    expect(_fixedNavigationWidth(tester), 72);
+    expect(labelTransition, findsNothing);
 
     await tester.tap(find.byKey(const ValueKey('fixed-navigation-toggle')));
     await tester.pumpAndSettle();
-    expect(
-      tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
-      isTrue,
-    );
+    expect(_fixedNavigationWidth(tester), 256);
   });
 
-  testWidgets('floating drawer opens with a swipe from the left edge', (
+  testWidgets('mobile floating drawer opens with a swipe from mid-screen', (
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({'navigation_mode': 'floating'});
@@ -271,6 +290,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.android),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('en'),
@@ -280,7 +300,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.dragFrom(const Offset(1, 300), const Offset(320, 0));
+    await tester.dragFrom(const Offset(300, 300), const Offset(320, 0));
     await tester.pumpAndSettle();
 
     expect(find.text('Deadlines'), findsOneWidget);
@@ -357,6 +377,12 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
   });
+}
+
+double _fixedNavigationWidth(WidgetTester tester) {
+  return tester
+      .getSize(find.byKey(const ValueKey('fixed-navigation-panel')))
+      .width;
 }
 
 BoardSnapshot _snapshotWithTask(DateTime now) {
