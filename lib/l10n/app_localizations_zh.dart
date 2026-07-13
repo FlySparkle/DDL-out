@@ -147,19 +147,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dynamicColorSubtitle => 'Android 12 及以上默认使用系统配色';
 
   @override
-  String get fontFamily => '界面字体';
+  String get useSystemFont => '使用系统默认字体';
 
   @override
-  String get fontSystem => '系统默认';
-
-  @override
-  String get fontSansSerif => '无衬线字体';
-
-  @override
-  String get fontSerif => '衬线字体';
-
-  @override
-  String get fontMonospace => '等宽字体';
+  String get useSystemFontSubtitle => '关闭后使用内嵌的思源黑体';
 
   @override
   String get fontSize => '字号';
@@ -170,10 +161,25 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get adaptiveDesktopSidebar => '自适应桌面侧边栏';
+  String get navigationMode => '边栏模式';
 
   @override
-  String get adaptiveDesktopSidebarSubtitle => '宽窗口固定显示侧边栏；窄窗口收起到边缘，鼠标悬停时展开。';
+  String get floatingSidebar => '浮动边栏';
+
+  @override
+  String get floatingSidebarSubtitle => '使用左上角按钮或从页面左侧向右滑动打开边栏。';
+
+  @override
+  String get fixedSidebar => '固定边栏';
+
+  @override
+  String get fixedSidebarSubtitle => '宽度不足时自动切换为浮动边栏；固定时可手动收展或悬停展开。';
+
+  @override
+  String get expandSidebar => '展开边栏';
+
+  @override
+  String get collapseSidebar => '收起边栏';
 
   @override
   String get backup => '导出备份';

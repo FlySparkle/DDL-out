@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/version/app_version.dart';
 import '../database/app_database.dart';
-import '../repositories/repositories.dart';
+import '../repositories/board_providers.dart';
 
 const backupSchemaVersion = 2;
 

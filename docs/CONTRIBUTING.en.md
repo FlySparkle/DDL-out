@@ -32,8 +32,6 @@ flutter gen-l10n
 dart format --output=none --set-exit-if-changed .
 flutter analyze
 flutter test
-flutter build windows --release
-flutter build apk --release
 ```
 
 Add tests commensurate with risk when touching Drift schemas, deadline math,

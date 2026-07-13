@@ -12,7 +12,8 @@ $archive = Join-Path $outputDir "DDL_out_v$version-windows-x64-portable.zip"
 
 Push-Location $project
 try {
-    & flutter build windows --release
+    $gitCommit = (git rev-parse --short HEAD).Trim()
+    & flutter build windows --release --dart-define=GIT_COMMIT=$gitCommit
     if ($LASTEXITCODE -ne 0) { throw 'Flutter Windows build failed.' }
 } finally {
     Pop-Location

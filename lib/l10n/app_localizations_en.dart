@@ -149,19 +149,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Uses the system color scheme by default on Android 12 and later';
 
   @override
-  String get fontFamily => 'Interface font';
+  String get useSystemFont => 'Use system default font';
 
   @override
-  String get fontSystem => 'System default';
-
-  @override
-  String get fontSansSerif => 'Sans serif';
-
-  @override
-  String get fontSerif => 'Serif';
-
-  @override
-  String get fontMonospace => 'Monospace';
+  String get useSystemFontSubtitle =>
+      'When off, the bundled Noto Sans SC font is used';
 
   @override
   String get fontSize => 'Text size';
@@ -172,11 +164,27 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get adaptiveDesktopSidebar => 'Adaptive desktop sidebar';
+  String get navigationMode => 'Sidebar mode';
 
   @override
-  String get adaptiveDesktopSidebarSubtitle =>
-      'On wide windows, keep the sidebar visible. On narrow windows, collapse it until the pointer hovers over the edge.';
+  String get floatingSidebar => 'Floating sidebar';
+
+  @override
+  String get floatingSidebarSubtitle =>
+      'Open it with the top-left button or swipe right from the left edge.';
+
+  @override
+  String get fixedSidebar => 'Fixed sidebar';
+
+  @override
+  String get fixedSidebarSubtitle =>
+      'Falls back to floating when space is limited; otherwise expand it manually or by hovering.';
+
+  @override
+  String get expandSidebar => 'Expand sidebar';
+
+  @override
+  String get collapseSidebar => 'Collapse sidebar';
 
   @override
   String get backup => 'Export backup';

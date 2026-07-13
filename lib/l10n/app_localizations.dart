@@ -376,35 +376,17 @@ abstract class AppLocalizations {
   /// **'Android 12 及以上默认使用系统配色'**
   String get dynamicColorSubtitle;
 
-  /// No description provided for @fontFamily.
+  /// No description provided for @useSystemFont.
   ///
   /// In zh, this message translates to:
-  /// **'界面字体'**
-  String get fontFamily;
+  /// **'使用系统默认字体'**
+  String get useSystemFont;
 
-  /// No description provided for @fontSystem.
+  /// No description provided for @useSystemFontSubtitle.
   ///
   /// In zh, this message translates to:
-  /// **'系统默认'**
-  String get fontSystem;
-
-  /// No description provided for @fontSansSerif.
-  ///
-  /// In zh, this message translates to:
-  /// **'无衬线字体'**
-  String get fontSansSerif;
-
-  /// No description provided for @fontSerif.
-  ///
-  /// In zh, this message translates to:
-  /// **'衬线字体'**
-  String get fontSerif;
-
-  /// No description provided for @fontMonospace.
-  ///
-  /// In zh, this message translates to:
-  /// **'等宽字体'**
-  String get fontMonospace;
+  /// **'关闭后使用内嵌的思源黑体'**
+  String get useSystemFontSubtitle;
 
   /// No description provided for @fontSize.
   ///
@@ -418,17 +400,47 @@ abstract class AppLocalizations {
   /// **'{percent}%'**
   String fontSizeValue(int percent);
 
-  /// No description provided for @adaptiveDesktopSidebar.
+  /// No description provided for @navigationMode.
   ///
   /// In zh, this message translates to:
-  /// **'自适应桌面侧边栏'**
-  String get adaptiveDesktopSidebar;
+  /// **'边栏模式'**
+  String get navigationMode;
 
-  /// No description provided for @adaptiveDesktopSidebarSubtitle.
+  /// No description provided for @floatingSidebar.
   ///
   /// In zh, this message translates to:
-  /// **'宽窗口固定显示侧边栏；窄窗口收起到边缘，鼠标悬停时展开。'**
-  String get adaptiveDesktopSidebarSubtitle;
+  /// **'浮动边栏'**
+  String get floatingSidebar;
+
+  /// No description provided for @floatingSidebarSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'使用左上角按钮或从页面左侧向右滑动打开边栏。'**
+  String get floatingSidebarSubtitle;
+
+  /// No description provided for @fixedSidebar.
+  ///
+  /// In zh, this message translates to:
+  /// **'固定边栏'**
+  String get fixedSidebar;
+
+  /// No description provided for @fixedSidebarSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'宽度不足时自动切换为浮动边栏；固定时可手动收展或悬停展开。'**
+  String get fixedSidebarSubtitle;
+
+  /// No description provided for @expandSidebar.
+  ///
+  /// In zh, this message translates to:
+  /// **'展开边栏'**
+  String get expandSidebar;
+
+  /// No description provided for @collapseSidebar.
+  ///
+  /// In zh, this message translates to:
+  /// **'收起边栏'**
+  String get collapseSidebar;
 
   /// No description provided for @backup.
   ///

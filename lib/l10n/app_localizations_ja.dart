@@ -147,19 +147,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get dynamicColorSubtitle => 'Android 12 以降では、システムの配色をデフォルトで使用します';
 
   @override
-  String get fontFamily => 'UI フォント';
+  String get useSystemFont => 'システムのデフォルトフォントを使用';
 
   @override
-  String get fontSystem => 'システム既定';
-
-  @override
-  String get fontSansSerif => 'サンセリフ';
-
-  @override
-  String get fontSerif => 'セリフ';
-
-  @override
-  String get fontMonospace => '等幅';
+  String get useSystemFontSubtitle => 'オフにすると内蔵の Noto Sans SC を使用します';
 
   @override
   String get fontSize => '文字サイズ';
@@ -170,11 +161,26 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get adaptiveDesktopSidebar => 'デスクトップ用サイドバーを自動調整';
+  String get navigationMode => 'サイドバーのモード';
 
   @override
-  String get adaptiveDesktopSidebarSubtitle =>
-      '広いウィンドウではサイドバーを固定表示し、狭いウィンドウでは端にたたみ、ポインターを重ねると展開します。';
+  String get floatingSidebar => 'フローティング';
+
+  @override
+  String get floatingSidebarSubtitle => '左上のボタン、または画面左端から右へスワイプして開きます。';
+
+  @override
+  String get fixedSidebar => '固定';
+
+  @override
+  String get fixedSidebarSubtitle =>
+      '幅が足りない場合はフローティングに切り替わり、固定時は手動またはホバーで展開できます。';
+
+  @override
+  String get expandSidebar => 'サイドバーを展開';
+
+  @override
+  String get collapseSidebar => 'サイドバーを折りたたむ';
 
   @override
   String get backup => 'バックアップをエクスポート';
