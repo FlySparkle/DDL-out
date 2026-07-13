@@ -32,8 +32,6 @@ flutter gen-l10n
 dart format --output=none --set-exit-if-changed .
 flutter analyze
 flutter test
-flutter build windows --release
-flutter build apk --release
 ```
 
 Drift スキーマ、締切計算、バックアップ/リストア、ドラッグ＆ドロップに関わる変更

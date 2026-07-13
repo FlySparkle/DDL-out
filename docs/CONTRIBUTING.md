@@ -29,8 +29,6 @@ flutter gen-l10n
 dart format --output=none --set-exit-if-changed .
 flutter analyze
 flutter test
-flutter build windows --release
-flutter build apk --release
 ```
 
 涉及 Drift schema、截止时间计算、备份恢复或拖放时，请补充与风险相称的测试。

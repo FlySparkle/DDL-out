@@ -8,17 +8,21 @@ import '../features/board/board_page.dart';
 import '../features/settings/application/settings.dart';
 import '../features/settings/settings_page.dart';
 import '../l10n/app_localizations.dart';
+import 'navigation/app_navigation_shell.dart';
 import 'app_shell.dart';
 
 final _router = GoRouter(
   routes: [
-    // 主页面
-    GoRoute(path: '/', builder: (context, state) => const BoardPage()),
-
-    // 设置页面
-    GoRoute(
-      path: '/settings',
-      builder: (context, state) => const SettingsPage(),
+    ShellRoute(
+      builder: (context, state, child) =>
+          AppNavigationShell(location: state.uri.path, child: child),
+      routes: [
+        GoRoute(path: '/', builder: (context, state) => const BoardPage()),
+        GoRoute(
+          path: '/settings',
+          builder: (context, state) => const SettingsPage(),
+        ),
+      ],
     ),
   ],
 );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../app/navigation/app_navigation_shell.dart';
 import '../../l10n/app_localizations.dart';
 import 'presentation/about_settings_section.dart';
 import 'presentation/appearance_settings_section.dart';
@@ -11,8 +12,23 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final fixedNavigation = AppNavigationScope.maybeOf(context)?.fixed ?? false;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.settingsTitle)),
+      drawer: fixedNavigation
+          ? null
+          : const AppNavigationDrawer(selectedIndex: 1),
+      drawerEnableOpenDragGesture: !fixedNavigation,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: fixedNavigation
+            ? null
+            : Builder(
+                builder: (context) => DrawerButton(
+                  style: AppNavigationVisuals.controlButtonStyle(context),
+                ),
+              ),
+        title: Text(l10n.settingsTitle),
+      ),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(

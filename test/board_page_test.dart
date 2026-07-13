@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:ddl_out/app/navigation/app_navigation_shell.dart';
 import 'package:ddl_out/data/database/app_database.dart';
 import 'package:ddl_out/data/repositories/repositories.dart';
 import 'package:ddl_out/features/board/board_page.dart';
@@ -28,7 +29,7 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('zh'),
-          home: const BoardPage(),
+          home: const AppNavigationShell(location: '/', child: BoardPage()),
         ),
       ),
     );
@@ -65,13 +66,16 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('en'),
-          home: const BoardPage(),
+          home: const AppNavigationShell(location: '/', child: BoardPage()),
         ),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.menu), findsNothing);
+    expect(
+      find.byKey(const ValueKey('fixed-navigation-toggle')),
+      findsOneWidget,
+    );
     expect(find.text('No deadlines yet'), findsOneWidget);
     expect(
       tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
@@ -84,11 +88,31 @@ void main() {
     );
     await gesture.addPointer(location: const Offset(8, 160));
     await gesture.moveTo(const Offset(24, 160));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(
+      tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
+      isFalse,
+    );
+
+    await tester.pump(const Duration(milliseconds: 60));
     await tester.pumpAndSettle();
 
     expect(
       tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
       isTrue,
+    );
+    await gesture.moveTo(const Offset(500, 160));
+    await tester.pump(const Duration(milliseconds: 450));
+    expect(
+      tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
+      isTrue,
+    );
+    await tester.pump(const Duration(milliseconds: 60));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
+      isFalse,
     );
     await gesture.removePointer();
     await tester.pumpWidget(const SizedBox.shrink());
@@ -115,13 +139,17 @@ void main() {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             locale: const Locale('en'),
-            home: const BoardPage(),
+            home: const AppNavigationShell(location: '/', child: BoardPage()),
           ),
         ),
       );
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.menu), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('fixed-navigation-toggle')),
+        findsNothing,
+      );
       expect(find.byType(NavigationRail), findsNothing);
       expect(find.text('Work'), findsOneWidget);
       expect(find.text('Ship release'), findsOneWidget);
@@ -148,13 +176,24 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('en'),
-          home: const BoardPage(),
+          home: const AppNavigationShell(location: '/', child: BoardPage()),
         ),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.menu), findsNothing);
+    expect(
+      find.byKey(const ValueKey('fixed-navigation-toggle')),
+      findsOneWidget,
+    );
+    final roundedModels = tester
+        .widgetList<AnimatedPhysicalModel>(find.byType(AnimatedPhysicalModel))
+        .where(
+          (model) =>
+              model.borderRadius ==
+              const BorderRadius.only(topRight: Radius.circular(16)),
+        );
+    expect(roundedModels, isNotEmpty);
     expect(
       tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
       isTrue,
@@ -183,11 +222,24 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('en'),
-          home: const BoardPage(),
+          home: const AppNavigationShell(location: '/', child: BoardPage()),
         ),
       ),
     );
     await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('fixed-navigation-toggle')),
+        matching: find.byIcon(Icons.menu),
+      ),
+      findsOneWidget,
+    );
+    final toggleRect = tester.getRect(
+      find.byKey(const ValueKey('fixed-navigation-toggle')),
+    );
+    expect(toggleRect.left, lessThan(16));
+    expect(toggleRect.bottom, greaterThan(830));
 
     await tester.tap(find.byKey(const ValueKey('fixed-navigation-toggle')));
     await tester.pumpAndSettle();
@@ -222,7 +274,7 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('en'),
-          home: const BoardPage(),
+          home: const AppNavigationShell(location: '/', child: BoardPage()),
         ),
       ),
     );
@@ -253,7 +305,7 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('en'),
-          home: const BoardPage(),
+          home: const AppNavigationShell(location: '/', child: BoardPage()),
         ),
       ),
     );
@@ -294,7 +346,7 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('zh'),
-          home: const BoardPage(),
+          home: const AppNavigationShell(location: '/', child: BoardPage()),
         ),
       ),
     );
