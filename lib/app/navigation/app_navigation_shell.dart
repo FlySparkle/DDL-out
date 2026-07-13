@@ -190,8 +190,8 @@ class _FixedAppNavigationState extends State<FixedAppNavigation> {
                   elevation: _hovered && !expanded ? 8 : 0,
                   shadowColor: theme.colorScheme.shadow,
                   color: navigationBackground,
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(16),
+                  borderRadius: const BorderRadius.horizontal(
+                    right: Radius.circular(16),
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: _AppNavigationRail(
