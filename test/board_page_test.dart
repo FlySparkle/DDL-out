@@ -253,8 +253,22 @@ void main() {
     expect(toggleRect.bottom, greaterThan(830));
 
     await tester.tap(find.byKey(const ValueKey('fixed-navigation-toggle')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 40));
+
+    final labelTransition = find.byKey(
+      const ValueKey('navigation-label-transition-0'),
+    );
+    final labelOpacity = tester.widget<Opacity>(labelTransition);
+    final labelTransform = tester.widget<Transform>(
+      find.descendant(of: labelTransition, matching: find.byType(Transform)),
+    );
+    expect(labelOpacity.opacity, inExclusiveRange(0, 1));
+    expect(labelTransform.transform.getTranslation().x, lessThan(0));
+
     await tester.pumpAndSettle();
     expect(_fixedNavigationWidth(tester), 72);
+    expect(labelTransition, findsNothing);
 
     await tester.tap(find.byKey(const ValueKey('fixed-navigation-toggle')));
     await tester.pumpAndSettle();

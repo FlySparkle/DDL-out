@@ -265,54 +265,69 @@ class _AppNavigationPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final destinations = _destinations(l10n);
-    return AnimatedSize(
+    final targetWidth = expanded
+        ? AppNavigationLayout.expandedWidth
+        : AppNavigationLayout.collapsedWidth;
+    return TweenAnimationBuilder<double>(
       key: onToggle == null
           ? const ValueKey('floating-navigation-panel')
           : const ValueKey('fixed-navigation-panel'),
+      tween: Tween(end: targetWidth),
       duration: AppNavigationLayout.expansionDuration,
       curve: Curves.easeInOutCubicEmphasized,
-      alignment: Alignment.centerLeft,
-      child: SizedBox(
-        width: expanded
-            ? AppNavigationLayout.expandedWidth
-            : AppNavigationLayout.collapsedWidth,
-        child: ColoredBox(
-          color: AppNavigationVisuals.backgroundColor(context),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 12),
-              for (var index = 0; index < destinations.length; index++) ...[
-                _AppNavigationButton(
-                  key: ValueKey('navigation-destination-$index'),
-                  destination: destinations[index],
-                  selected: index == selectedIndex,
-                  expanded: expanded,
-                  onPressed: () => onDestinationSelected(index),
-                ),
-                if (index != destinations.length - 1) const SizedBox(height: 8),
-              ],
-              if (onToggle != null) ...[
-                const Spacer(),
-                _AppNavigationButton(
-                  key: const ValueKey('fixed-navigation-toggle'),
-                  destination: _AppNavigationDestination(
-                    label: pinnedExpanded!
-                        ? l10n.collapseSidebar
-                        : l10n.expandSidebar,
-                    icon: Icons.menu,
-                    selectedIcon: Icons.menu,
-                  ),
-                  selected: false,
-                  expanded: expanded,
-                  onPressed: onToggle!,
-                ),
+      builder: (context, width, _) {
+        final expansionProgress =
+            ((width - AppNavigationLayout.collapsedWidth) /
+                    (AppNavigationLayout.expandedWidth -
+                        AppNavigationLayout.collapsedWidth))
+                .clamp(0.0, 1.0);
+        return SizedBox(
+          width: width,
+          child: ColoredBox(
+            color: AppNavigationVisuals.backgroundColor(context),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
                 const SizedBox(height: 12),
+                for (var index = 0; index < destinations.length; index++) ...[
+                  _AppNavigationButton(
+                    key: ValueKey('navigation-destination-$index'),
+                    labelTransitionKey: ValueKey(
+                      'navigation-label-transition-$index',
+                    ),
+                    destination: destinations[index],
+                    selected: index == selectedIndex,
+                    expansionProgress: expansionProgress,
+                    onPressed: () => onDestinationSelected(index),
+                  ),
+                  if (index != destinations.length - 1)
+                    const SizedBox(height: 8),
+                ],
+                if (onToggle != null) ...[
+                  const Spacer(),
+                  _AppNavigationButton(
+                    key: const ValueKey('fixed-navigation-toggle'),
+                    labelTransitionKey: const ValueKey(
+                      'fixed-navigation-toggle-label-transition',
+                    ),
+                    destination: _AppNavigationDestination(
+                      label: pinnedExpanded!
+                          ? l10n.collapseSidebar
+                          : l10n.expandSidebar,
+                      icon: Icons.menu,
+                      selectedIcon: Icons.menu,
+                    ),
+                    selected: false,
+                    expansionProgress: expansionProgress,
+                    onPressed: onToggle!,
+                  ),
+                  const SizedBox(height: 12),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -321,15 +336,17 @@ class _AppNavigationButton extends StatelessWidget {
   const _AppNavigationButton({
     required this.destination,
     required this.selected,
-    required this.expanded,
+    required this.expansionProgress,
     required this.onPressed,
+    this.labelTransitionKey,
     super.key,
   });
 
   final _AppNavigationDestination destination;
   final bool selected;
-  final bool expanded;
+  final double expansionProgress;
   final VoidCallback onPressed;
+  final Key? labelTransitionKey;
 
   @override
   Widget build(BuildContext context) {
@@ -341,6 +358,8 @@ class _AppNavigationButton extends StatelessWidget {
       color: foreground,
       fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
     );
+    final labelOpacity = Curves.easeOutCubic.transform(expansionProgress);
+    final horizontalMargin = 8 + (4 * expansionProgress);
     final button = Material(
       color: selected ? scheme.secondaryContainer : Colors.transparent,
       shape: AppNavigationVisuals.navigationShape,
@@ -350,38 +369,62 @@ class _AppNavigationButton extends StatelessWidget {
         onTap: onPressed,
         child: SizedBox(
           height: 56,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Icon(
-                  selected ? destination.selectedIcon : destination.icon,
-                  color: foreground,
-                  size: 24,
-                ),
-                if (expanded) ...[
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      destination.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.clip,
-                      softWrap: false,
-                      style: labelStyle,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final labelWidth = (constraints.maxWidth - 68).clamp(
+                0.0,
+                double.infinity,
+              );
+              return Stack(
+                children: [
+                  Positioned(
+                    left: 16,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: Icon(
+                        selected ? destination.selectedIcon : destination.icon,
+                        color: foreground,
+                        size: 24,
+                      ),
                     ),
                   ),
+                  if (expansionProgress > 0 && labelWidth > 0)
+                    Positioned(
+                      left: 52,
+                      top: 0,
+                      bottom: 0,
+                      width: labelWidth,
+                      child: Opacity(
+                        key: labelTransitionKey,
+                        opacity: labelOpacity,
+                        child: Transform.translate(
+                          offset: Offset(-12 * (1 - expansionProgress), 0),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              destination.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.clip,
+                              softWrap: false,
+                              style: labelStyle,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
     );
     final padded = Padding(
-      padding: EdgeInsets.symmetric(horizontal: expanded ? 12 : 8),
+      padding: EdgeInsets.symmetric(horizontal: horizontalMargin),
       child: button,
     );
-    return expanded
+    return expansionProgress > 0
         ? padded
         : Tooltip(message: destination.label, child: padded);
   }
