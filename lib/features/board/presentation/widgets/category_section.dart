@@ -1,0 +1,209 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/time/deadline_service.dart';
+import '../../../../data/database/app_database.dart';
+import '../../../../data/repositories/board_providers.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../settings/application/settings_controller.dart';
+import '../../application/current_time_provider.dart';
+import '../dialogs/category_editor.dart';
+import '../dialogs/confirmation_dialog.dart';
+import '../dialogs/task_editor.dart';
+import 'task_card.dart';
+
+class CategorySection extends ConsumerWidget {
+  const CategorySection({
+    required this.snapshot,
+    required this.category,
+    required this.title,
+    required this.color,
+    required this.tasks,
+    this.reorderIndex,
+    super.key,
+  });
+
+  final BoardSnapshot snapshot;
+  final Category? category;
+  final String title;
+  final Color color;
+  final List<Task> tasks;
+  final int? reorderIndex;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final settings = ref.watch(settingsControllerProvider);
+    final collapsed =
+        category != null &&
+        settings.collapsedCategoryIds.contains(category!.id);
+    final now = ref.watch(currentTimeProvider).value ?? DateTime.now();
+    final activeDurations = tasks
+        .where((task) => !task.isCompleted)
+        .map((task) => DeadlineService.remaining(task.deadlineUtc, now: now))
+        .where((duration) => duration > Duration.zero);
+    final longest = activeDurations.fold<Duration>(
+      Duration.zero,
+      (current, value) => value > current ? value : current,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: DragTarget<int>(
+        onWillAcceptWithDetails: (details) {
+          final task = snapshot.tasks
+              .where((task) => task.id == details.data)
+              .firstOrNull;
+          return task != null && task.categoryId != category?.id;
+        },
+        onAcceptWithDetails: (details) {
+          ref.read(taskRepositoryProvider).move(details.data, category?.id);
+        },
+        builder: (context, candidates, rejects) {
+          final scheme = Theme.of(context).colorScheme;
+          final cardColor = Color.alphaBlend(
+            color.withValues(alpha: 0.16),
+            scheme.surfaceContainerLow,
+          );
+          return Card(
+            color: candidates.isEmpty ? cardColor : scheme.secondaryContainer,
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              children: [
+                _reorderableHeader(_buildHeader(context, ref, collapsed)),
+                AnimatedCrossFade(
+                  duration: const Duration(milliseconds: 220),
+                  crossFadeState: collapsed
+                      ? CrossFadeState.showFirst
+                      : CrossFadeState.showSecond,
+                  firstChild: const SizedBox(width: double.infinity),
+                  secondChild: Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                    child: tasks.isEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 18),
+                            child: Text(
+                              l10n.noTasks,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          )
+                        : Column(
+                            children: [
+                              for (final task in tasks)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: TaskCard(
+                                    task: task,
+                                    snapshot: snapshot,
+                                    categoryColor: color,
+                                    longestRemaining: longest,
+                                    now: now,
+                                  ),
+                                ),
+                            ],
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, WidgetRef ref, bool collapsed) {
+    final l10n = AppLocalizations.of(context);
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: category == null
+          ? null
+          : () => ref
+                .read(settingsControllerProvider.notifier)
+                .toggleCategory(category!.id),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 56),
+        child: Row(
+          children: [
+            if (category != null)
+              IconButton(
+                tooltip: collapsed
+                    ? l10n.expandCategory
+                    : l10n.collapseCategory,
+                onPressed: () => ref
+                    .read(settingsControllerProvider.notifier)
+                    .toggleCategory(category!.id),
+                icon: AnimatedRotation(
+                  turns: collapsed ? -0.25 : 0,
+                  duration: const Duration(milliseconds: 180),
+                  child: const Icon(Icons.expand_more),
+                ),
+              )
+            else
+              const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  Text(
+                    l10n.taskCount(tasks.length),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              tooltip: l10n.clearCategoryTasks,
+              onPressed: tasks.isEmpty ? null : () => _clearTasks(context, ref),
+              icon: const Icon(Icons.cleaning_services_outlined),
+            ),
+            if (category != null)
+              IconButton(
+                tooltip: l10n.editCategory,
+                onPressed: () => showCategoryEditor(
+                  context,
+                  category: category,
+                  taskCount: tasks.length,
+                ),
+                icon: const Icon(Icons.edit_outlined),
+              ),
+            IconButton(
+              tooltip: l10n.addTask,
+              onPressed: () => showTaskEditor(
+                context,
+                snapshot: snapshot,
+                initialCategoryId: category?.id,
+              ),
+              icon: const Icon(Icons.add),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _reorderableHeader(Widget child) {
+    final index = reorderIndex;
+    if (index == null) return child;
+    return ReorderableDelayedDragStartListener(index: index, child: child);
+  }
+
+  Future<void> _clearTasks(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showConfirmation(
+      context,
+      title: l10n.clearCategoryTasksTitle,
+      body: l10n.clearCategoryTasksBody(tasks.length),
+      destructive: true,
+    );
+    if (confirmed) {
+      await ref.read(taskRepositoryProvider).clearCategory(category?.id);
+    }
+  }
+}
