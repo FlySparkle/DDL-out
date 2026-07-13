@@ -1,20 +1,21 @@
-import 'dart:io';
-
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/theme/app_theme.dart';
-import '../data/settings/app_settings.dart';
 import '../features/board/board_page.dart';
+import '../features/settings/application/settings.dart';
 import '../features/settings/settings_page.dart';
-import '../features/update/update_prompt.dart';
 import '../l10n/app_localizations.dart';
+import 'app_shell.dart';
 
 final _router = GoRouter(
   routes: [
+    // 主页面
     GoRoute(path: '/', builder: (context, state) => const BoardPage()),
+
+    // 设置页面
     GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsPage(),
@@ -30,8 +31,8 @@ class DdlOutApp extends ConsumerWidget {
     final settings = ref.watch(settingsControllerProvider);
     return DynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
-        final useDynamic = settings.dynamicColorEnabled && Platform.isAndroid;
-        final typography = _typographyFor(settings.fontFamily);
+        final useDynamic = settings.dynamicColorEnabled;
+        final typography = settings.resolvedFont;
         return MaterialApp.router(
           title: 'DDL out!',
           debugShowCheckedModeBanner: false,
@@ -49,44 +50,9 @@ class DdlOutApp extends ConsumerWidget {
           ),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          builder: (context, child) {
-            final mediaQuery = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQuery.copyWith(
-                textScaler: TextScaler.linear(settings.textScale),
-              ),
-              child: UpdateCheckOnLaunch(
-                child: child ?? const SizedBox.shrink(),
-              ),
-            );
-          },
+          builder: (_, child) => AppShell(child: child!),
         );
       },
     );
   }
-}
-
-({String? fontFamily, List<String>? fallback}) _typographyFor(
-  AppFontFamily family,
-) {
-  if (family == AppFontFamily.system) {
-    return Platform.isWindows
-        ? (fontFamily: 'Segoe UI', fallback: const ['Microsoft YaHei UI'])
-        : (fontFamily: null, fallback: null);
-  }
-  return switch (family) {
-    AppFontFamily.sansSerif => (
-      fontFamily: Platform.isWindows ? 'Arial' : 'sans-serif',
-      fallback: Platform.isWindows ? const ['Microsoft YaHei UI'] : null,
-    ),
-    AppFontFamily.serif => (
-      fontFamily: Platform.isWindows ? 'Times New Roman' : 'serif',
-      fallback: Platform.isWindows ? const ['SimSun'] : null,
-    ),
-    AppFontFamily.monospace => (
-      fontFamily: Platform.isWindows ? 'Consolas' : 'monospace',
-      fallback: Platform.isWindows ? const ['Microsoft YaHei UI'] : null,
-    ),
-    AppFontFamily.system => throw StateError('Handled above'),
-  };
 }

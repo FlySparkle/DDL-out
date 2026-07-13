@@ -9,11 +9,11 @@ import 'app/app.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (Platform.isWindows) {
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await windowManager.ensureInitialized();
     const options = WindowOptions(
-      size: Size(450, 1000),
-      minimumSize: Size(360, 800),
+      size: Size(540, 960),
+      minimumSize: Size(360, 480),
       center: true,
       title: 'DDL out!',
     );
