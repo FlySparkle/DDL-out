@@ -1,4 +1,8 @@
 import 'package:ddl_out/app/navigation/app_navigation_shell.dart';
+import 'package:ddl_out/core/theme/app_theme.dart';
+import 'package:ddl_out/data/database/app_database.dart';
+import 'package:ddl_out/data/repositories/board_providers.dart';
+import 'package:ddl_out/features/settings/settings_page.dart';
 import 'package:ddl_out/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,51 +26,87 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('board-content'), findsOneWidget);
-    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(_fixedNavigationWidth(tester), 256);
     expect(
-      tester.widget<NavigationRail>(find.byType(NavigationRail)).selectedIndex,
-      0,
+      find.descendant(
+        of: find.byKey(const ValueKey('navigation-destination-0')),
+        matching: find.byIcon(Icons.home),
+      ),
+      findsOneWidget,
     );
 
     await tester.tap(find.byKey(const ValueKey('fixed-navigation-toggle')));
     await tester.pumpAndSettle();
-    expect(
-      tester.widget<NavigationRail>(find.byType(NavigationRail)).extended,
-      isFalse,
-    );
+    expect(_fixedNavigationWidth(tester), 72);
 
-    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.tap(find.byKey(const ValueKey('navigation-destination-1')));
     await tester.pumpAndSettle();
 
     expect(find.text('board-content'), findsNothing);
     expect(find.text('settings-content'), findsOneWidget);
-    expect(find.byType(NavigationRail), findsOneWidget);
-    final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
-    expect(rail.selectedIndex, 1);
-    expect(rail.extended, isFalse);
+    expect(_fixedNavigationWidth(tester), 72);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('navigation-destination-1')),
+        matching: find.byIcon(Icons.settings),
+      ),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('floating mode replaces the whole route content', (tester) async {
+  testWidgets('floating drawer navigation keeps a route to return to', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({'navigation_mode': 'floating'});
+    final router = _router(realSettingsPage: true);
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(_testApp(router, mobile: true));
+    await tester.pumpAndSettle();
+
+    expect(find.text('board-content'), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.menu));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SettingsPage), findsOneWidget);
+    expect(find.text('board-content'), findsNothing);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text('board-content'), findsOneWidget);
+    expect(find.byType(SettingsPage), findsNothing);
+  });
+
+  testWidgets('sidebar labels use the global font', (tester) async {
     SharedPreferences.setMockInitialValues({'navigation_mode': 'floating'});
     final router = _router();
     addTearDown(router.dispose);
 
-    await tester.pumpWidget(_testApp(router));
+    await tester.pumpWidget(
+      _testApp(router, theme: AppTheme.light(fontFamily: 'NotoSansSC')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
 
-    expect(find.text('board-content'), findsOneWidget);
-    expect(find.byType(NavigationRail), findsNothing);
+    final label = tester.widget<Text>(find.text('Settings'));
+    expect(label.style?.fontFamily, 'NotoSansSC');
 
-    router.go('/settings');
-    await tester.pumpAndSettle();
-
-    expect(find.text('board-content'), findsNothing);
-    expect(find.text('settings-content'), findsOneWidget);
-    expect(find.byType(NavigationRail), findsNothing);
+    final destination = find.byKey(const ValueKey('navigation-destination-0'));
+    final destinationRect = tester.getRect(destination);
+    final material = tester.widget<Material>(
+      find.descendant(of: destination, matching: find.byType(Material)),
+    );
+    expect(destinationRect.height, 56);
+    expect(destinationRect.width, greaterThan(destinationRect.height));
+    expect(material.shape, AppNavigationVisuals.navigationShape);
   });
 }
 
-GoRouter _router() {
+GoRouter _router({bool realSettingsPage = false}) {
   return GoRouter(
     routes: [
       ShellRoute(
@@ -76,12 +116,16 @@ GoRouter _router() {
           GoRoute(
             path: '/',
             builder: (context, state) =>
-                const Scaffold(body: Center(child: Text('board-content'))),
+                const _TestPage(selectedIndex: 0, content: 'board-content'),
           ),
           GoRoute(
             path: '/settings',
-            builder: (context, state) =>
-                const Scaffold(body: Center(child: Text('settings-content'))),
+            builder: (context, state) => realSettingsPage
+                ? const SettingsPage()
+                : const _TestPage(
+                    selectedIndex: 1,
+                    content: 'settings-content',
+                  ),
           ),
         ],
       ),
@@ -89,13 +133,53 @@ GoRouter _router() {
   );
 }
 
-Widget _testApp(GoRouter router) {
+Widget _testApp(GoRouter router, {ThemeData? theme, bool mobile = false}) {
   return ProviderScope(
+    overrides: [
+      boardProvider.overrideWith(
+        (ref) => Stream.value(const BoardSnapshot(categories: [], tasks: [])),
+      ),
+    ],
     child: MaterialApp.router(
       routerConfig: router,
+      theme:
+          theme ??
+          (mobile ? ThemeData(platform: TargetPlatform.android) : null),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: const Locale('en'),
     ),
   );
+}
+
+class _TestPage extends StatelessWidget {
+  const _TestPage({required this.selectedIndex, required this.content});
+
+  final int selectedIndex;
+  final String content;
+
+  @override
+  Widget build(BuildContext context) {
+    final fixed = AppNavigationScope.maybeOf(context)?.fixed ?? false;
+    return Scaffold(
+      drawer: fixed ? null : AppNavigationDrawer(selectedIndex: selectedIndex),
+      drawerEnableOpenDragGesture: !fixed,
+      drawerEdgeDragWidth: fixed
+          ? null
+          : AppNavigationLayout.floatingDrawerDragWidth(context),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: fixed
+            ? null
+            : Builder(builder: (context) => const DrawerButton()),
+      ),
+      body: Center(child: Text(content)),
+    );
+  }
+}
+
+double _fixedNavigationWidth(WidgetTester tester) {
+  return tester
+      .getSize(find.byKey(const ValueKey('fixed-navigation-panel')))
+      .width;
 }

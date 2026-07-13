@@ -47,29 +47,6 @@ abstract final class AppTheme {
       fontFamily: fontFamily,
       fontFamilyFallback: fontFamilyFallback,
     );
-    final navigationIndicatorShape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
-    );
-    final navigationBackground = scheme.surfaceContainerLow;
-    final navigationLabelStyle = WidgetStateProperty.resolveWith<TextStyle?>(
-      (states) => TextStyle(
-        color: states.contains(WidgetState.selected)
-            ? scheme.onSecondaryContainer
-            : scheme.onSurfaceVariant,
-        fontWeight: states.contains(WidgetState.selected)
-            ? FontWeight.w600
-            : FontWeight.w500,
-      ),
-    );
-    final navigationIconTheme = WidgetStateProperty.resolveWith<IconThemeData?>(
-      (states) => IconThemeData(
-        color: states.contains(WidgetState.selected)
-            ? scheme.onSecondaryContainer
-            : scheme.onSurfaceVariant,
-        size: 24,
-      ),
-    );
-
     return base.copyWith(
       scaffoldBackgroundColor: scheme.surface,
       appBarTheme: AppBarTheme(
@@ -77,38 +54,6 @@ abstract final class AppTheme {
         scrolledUnderElevation: 1,
         backgroundColor: scheme.surface,
         foregroundColor: scheme.onSurface,
-      ),
-      navigationDrawerTheme: NavigationDrawerThemeData(
-        backgroundColor: navigationBackground,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        indicatorColor: scheme.secondaryContainer,
-        indicatorShape: navigationIndicatorShape,
-        labelTextStyle: navigationLabelStyle,
-        iconTheme: navigationIconTheme,
-      ),
-      navigationRailTheme: NavigationRailThemeData(
-        backgroundColor: navigationBackground,
-        elevation: 0,
-        useIndicator: true,
-        indicatorColor: scheme.secondaryContainer,
-        indicatorShape: navigationIndicatorShape,
-        unselectedLabelTextStyle: TextStyle(
-          color: scheme.onSurfaceVariant,
-          fontWeight: FontWeight.w500,
-        ),
-        selectedLabelTextStyle: TextStyle(
-          color: scheme.onSecondaryContainer,
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedIconTheme: IconThemeData(
-          color: scheme.onSurfaceVariant,
-          size: 24,
-        ),
-        selectedIconTheme: IconThemeData(
-          color: scheme.onSecondaryContainer,
-          size: 24,
-        ),
       ),
       cardTheme: CardThemeData(
         elevation: 0,
@@ -156,7 +101,9 @@ abstract final class AppTheme {
           color: scheme.inverseSurface,
           borderRadius: BorderRadius.circular(4),
         ),
-        textStyle: TextStyle(color: scheme.onInverseSurface),
+        textStyle: base.textTheme.bodySmall?.copyWith(
+          color: scheme.onInverseSurface,
+        ),
       ),
     );
   }
