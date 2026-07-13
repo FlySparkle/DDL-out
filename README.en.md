@@ -39,21 +39,6 @@ and Material 3.
 - Keep data in a local SQLite database; timestamps are stored in UTC and shown
   in the local time zone.
 
-## Platform Plan
-
-| Platform and distribution | Status | Automation |
-| --- | --- | --- |
-| Windows x64 portable | Buildable | CI and tag releases |
-| Windows ARM64 portable | Reserved | Manual extended-platform workflow |
-| Windows MSIX | Reserved | Enabled after app identity and signing are configured |
-| Linux x64 bundle, DEB, RPM | Reserved | Manual extended-platform workflow |
-| Android arm64-v8a APK | Buildable | CI and tag releases |
-| iOS | Reserved | Unsigned macOS build; releases require Apple signing |
-| macOS | Reserved | Native host exists; release signing remains to be configured |
-
-Reserved means that a native host or workflow entry point exists. It does not
-mean a production installable package has been released.
-
 ## Quick Start
 
 Install Flutter Stable, which includes Dart, then run these commands from the
@@ -61,7 +46,7 @@ repository root:
 
 ```powershell
 flutter pub get
-dart run build_runner build --force-jit
+dart run build_runner build
 flutter gen-l10n
 flutter run -d windows
 ```

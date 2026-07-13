@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+const _gitCommit = String.fromEnvironment('GIT_COMMIT');
+
 abstract interface class AppVersionReader {
   Future<String> read();
 }
@@ -19,9 +21,7 @@ class PackageInfoAppVersionReader implements AppVersionReader {
   @override
   Future<String> read() async {
     final packageInfo = await PackageInfo.fromPlatform();
-    final buildNumber = packageInfo.buildNumber;
-    return buildNumber.isEmpty
-        ? packageInfo.version
-        : '${packageInfo.version}+$buildNumber';
+    final version = packageInfo.version;
+    return _gitCommit.isNotEmpty ? '$version+$_gitCommit' : version;
   }
 }

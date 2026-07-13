@@ -84,7 +84,7 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get --enforce-lockfile
-      - run: flutter build windows --release
+      - run: flutter build windows --release --dart-define=GIT_COMMIT=$(git rev-parse --short HEAD).Trim()
       - shell: pwsh
         run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath "DDL_out_$env:GITHUB_REF_NAME-windows-x64-portable.zip" -CompressionLevel Optimal
       - uses: actions/upload-artifact@v4
@@ -140,7 +140,7 @@ jobs:
             echo "keyAlias=$ANDROID_KEY_ALIAS"
             echo "storeFile=release-key.jks"
           } > android/key.properties
-      - run: flutter build apk --release --target-platform ${{ matrix.target }}
+      - run: flutter build apk --release --target-platform ${{ matrix.target }} --dart-define=GIT_COMMIT=$(git rev-parse --short HEAD)
       - name: Name release asset
         shell: bash
         run: mv build/app/outputs/flutter-apk/app-release.apk "DDL_out_$GITHUB_REF_NAME-android-${{ matrix.abi }}.apk"
@@ -167,7 +167,7 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get --enforce-lockfile
-      - run: flutter build linux --release
+      - run: flutter build linux --release --dart-define=GIT_COMMIT=$(git rev-parse --short HEAD)
       - name: Create DEB and RPM packages
         shell: bash
         run: |
@@ -203,7 +203,7 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get --enforce-lockfile
-      - run: flutter build macos --release
+      - run: flutter build macos --release --dart-define=GIT_COMMIT=$(git rev-parse --short HEAD)
       - name: Create DMG
         shell: bash
         run: |
@@ -302,7 +302,7 @@ jobs:
         id: signed_ipa
         if: steps.signing.outcome == 'success'
         continue-on-error: true
-        run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+        run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist --dart-define=GIT_COMMIT=$(git rev-parse --short HEAD)
       - name: Name signed IPA
         if: steps.signed_ipa.outcome == 'success'
         shell: bash
@@ -312,7 +312,7 @@ jobs:
         if: steps.signing.outcome != 'success' || steps.signed_ipa.outcome == 'failure'
         shell: bash
         run: |
-          flutter build ios --release --no-codesign
+          flutter build ios --release --no-codesign --dart-define=GIT_COMMIT=$(git rev-parse --short HEAD)
           rm -rf Payload
           ln -s build/ios/iphoneos Payload
           if [ -d Payload/Runner.app/Frameworks ]; then
@@ -342,7 +342,7 @@ jobs:
           Add-Content $env:GITHUB_PATH "${{ runner.temp }}\flutter\bin"
       - run: flutter doctor
       - run: flutter pub get --enforce-lockfile
-      - run: flutter build windows --release
+      - run: flutter build windows --release --dart-define=GIT_COMMIT=$(git rev-parse --short HEAD).Trim()
       - shell: pwsh
         run: Compress-Archive -Path build/windows/arm64/runner/Release/* -DestinationPath "DDL_out_$env:GITHUB_REF_NAME-windows-arm64-portable.zip" -CompressionLevel Optimal
       - uses: actions/upload-artifact@v4

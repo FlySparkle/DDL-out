@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 abstract final class AppTheme {
-  static const brandColor = Color(0xFF4A90E2);
+  static const brandColor = Color.fromARGB(255, 250, 180, 17);
 
   static ThemeData light({
     ColorScheme? dynamicScheme,
