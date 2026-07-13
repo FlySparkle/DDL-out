@@ -310,12 +310,14 @@ jobs:
         continue-on-error: true
         run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist --dart-define=GIT_COMMIT=${{ needs.verify.outputs.git_commit }}
       - name: Name signed IPA
+        id: named_signed_ipa
         if: steps.signed_ipa.outcome == 'success'
+        continue-on-error: true
         shell: bash
         run: |
           mv build/ios/ipa/*.ipa "DDL_out_$GITHUB_REF_NAME-ios.ipa"
       - name: Build unsigned iOS IPA fallback
-        if: steps.signing.outcome != 'success' || steps.signed_ipa.outcome == 'failure'
+        if: steps.signing.outcome != 'success' || steps.signed_ipa.outcome == 'failure' || steps.named_signed_ipa.outcome == 'failure'
         shell: bash
         run: |
           flutter build ios --release --no-codesign --dart-define=GIT_COMMIT=${{ needs.verify.outputs.git_commit }}
