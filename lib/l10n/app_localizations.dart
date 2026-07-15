@@ -118,6 +118,30 @@ abstract class AppLocalizations {
   /// **'设置'**
   String get settingsTitle;
 
+  /// No description provided for @appearanceSettingsTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'外观与个性化'**
+  String get appearanceSettingsTitle;
+
+  /// No description provided for @systemDataSettingsTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'系统与数据'**
+  String get systemDataSettingsTitle;
+
+  /// No description provided for @aboutSettingsTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'关于'**
+  String get aboutSettingsTitle;
+
+  /// No description provided for @communitySettingsTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'社区与支持'**
+  String get communitySettingsTitle;
+
   /// No description provided for @newCategory.
   ///
   /// In zh, this message translates to:
@@ -692,6 +716,156 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'版本 {version}'**
   String aboutVersion(String version);
+
+  /// No description provided for @updateSection.
+  ///
+  /// In zh, this message translates to:
+  /// **'更新'**
+  String get updateSection;
+
+  /// No description provided for @checkUpdatesOnStartup.
+  ///
+  /// In zh, this message translates to:
+  /// **'启动时自动检查更新'**
+  String get checkUpdatesOnStartup;
+
+  /// No description provided for @checkUpdatesOnStartupSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'开启后每次启动会连接 GitHub 检查正式版本'**
+  String get checkUpdatesOnStartupSubtitle;
+
+  /// No description provided for @openLinkFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'无法打开链接，请稍后重试'**
+  String get openLinkFailed;
+
+  /// No description provided for @documentLoadFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'文档加载失败'**
+  String get documentLoadFailed;
+
+  /// No description provided for @viewRepositorySource.
+  ///
+  /// In zh, this message translates to:
+  /// **'查看仓库原文'**
+  String get viewRepositorySource;
+
+  /// No description provided for @authorsSection.
+  ///
+  /// In zh, this message translates to:
+  /// **'作者'**
+  String get authorsSection;
+
+  /// No description provided for @legalSection.
+  ///
+  /// In zh, this message translates to:
+  /// **'法律与许可'**
+  String get legalSection;
+
+  /// No description provided for @openSourceLicense.
+  ///
+  /// In zh, this message translates to:
+  /// **'开源许可证'**
+  String get openSourceLicense;
+
+  /// No description provided for @openSourceLicenseSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'GNU GPLv3'**
+  String get openSourceLicenseSubtitle;
+
+  /// No description provided for @thirdPartyLicenses.
+  ///
+  /// In zh, this message translates to:
+  /// **'第三方软件许可'**
+  String get thirdPartyLicenses;
+
+  /// No description provided for @thirdPartyLicensesSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'查看依赖与内嵌字体的许可证'**
+  String get thirdPartyLicensesSubtitle;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In zh, this message translates to:
+  /// **'隐私政策'**
+  String get privacyPolicy;
+
+  /// No description provided for @termsOfService.
+  ///
+  /// In zh, this message translates to:
+  /// **'服务协议'**
+  String get termsOfService;
+
+  /// No description provided for @projectSection.
+  ///
+  /// In zh, this message translates to:
+  /// **'项目与反馈'**
+  String get projectSection;
+
+  /// No description provided for @sourceCode.
+  ///
+  /// In zh, this message translates to:
+  /// **'源代码'**
+  String get sourceCode;
+
+  /// No description provided for @reportBug.
+  ///
+  /// In zh, this message translates to:
+  /// **'报告缺陷'**
+  String get reportBug;
+
+  /// No description provided for @requestFeature.
+  ///
+  /// In zh, this message translates to:
+  /// **'提出功能建议'**
+  String get requestFeature;
+
+  /// No description provided for @discussions.
+  ///
+  /// In zh, this message translates to:
+  /// **'社区讨论'**
+  String get discussions;
+
+  /// No description provided for @communityGuidelinesSection.
+  ///
+  /// In zh, this message translates to:
+  /// **'参与与规范'**
+  String get communityGuidelinesSection;
+
+  /// No description provided for @contributingGuide.
+  ///
+  /// In zh, this message translates to:
+  /// **'贡献指南'**
+  String get contributingGuide;
+
+  /// No description provided for @codeOfConduct.
+  ///
+  /// In zh, this message translates to:
+  /// **'社区行为准则'**
+  String get codeOfConduct;
+
+  /// No description provided for @codeOfConductSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'离线阅读社区参与规范'**
+  String get codeOfConductSubtitle;
+
+  /// No description provided for @reportSecurityIssue.
+  ///
+  /// In zh, this message translates to:
+  /// **'私密报告安全漏洞'**
+  String get reportSecurityIssue;
+
+  /// No description provided for @reportSecurityIssueSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'通过 GitHub 私密安全报告提交，请勿公开漏洞细节'**
+  String get reportSecurityIssueSubtitle;
 }
 
 class _AppLocalizationsDelegate

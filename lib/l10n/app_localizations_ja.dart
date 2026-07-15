@@ -18,6 +18,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsTitle => '設定';
 
   @override
+  String get appearanceSettingsTitle => '外観とカスタマイズ';
+
+  @override
+  String get systemDataSettingsTitle => 'システムとデータ';
+
+  @override
+  String get aboutSettingsTitle => 'このアプリについて';
+
+  @override
+  String get communitySettingsTitle => 'コミュニティとサポート';
+
+  @override
   String get newCategory => 'カテゴリーを作成';
 
   @override
@@ -329,4 +341,80 @@ class AppLocalizationsJa extends AppLocalizations {
   String aboutVersion(String version) {
     return 'バージョン $version';
   }
+
+  @override
+  String get updateSection => '更新';
+
+  @override
+  String get checkUpdatesOnStartup => '起動時に更新を確認';
+
+  @override
+  String get checkUpdatesOnStartupSubtitle => '起動時に GitHub へ接続して正式版を確認します';
+
+  @override
+  String get openLinkFailed => 'リンクを開けませんでした。後でもう一度お試しください';
+
+  @override
+  String get documentLoadFailed => '文書を読み込めませんでした';
+
+  @override
+  String get viewRepositorySource => 'リポジトリの原文を見る';
+
+  @override
+  String get authorsSection => '作者';
+
+  @override
+  String get legalSection => '法的情報とライセンス';
+
+  @override
+  String get openSourceLicense => 'オープンソースライセンス';
+
+  @override
+  String get openSourceLicenseSubtitle => 'GNU GPLv3';
+
+  @override
+  String get thirdPartyLicenses => '第三者ソフトウェアのライセンス';
+
+  @override
+  String get thirdPartyLicensesSubtitle => '依存関係と同梱フォントのライセンス';
+
+  @override
+  String get privacyPolicy => 'プライバシーポリシー';
+
+  @override
+  String get termsOfService => 'サービス利用規約';
+
+  @override
+  String get projectSection => 'プロジェクトとフィードバック';
+
+  @override
+  String get sourceCode => 'ソースコード';
+
+  @override
+  String get reportBug => '不具合を報告';
+
+  @override
+  String get requestFeature => '機能を提案';
+
+  @override
+  String get discussions => 'コミュニティディスカッション';
+
+  @override
+  String get communityGuidelinesSection => '参加とガイドライン';
+
+  @override
+  String get contributingGuide => '貢献ガイド';
+
+  @override
+  String get codeOfConduct => 'コミュニティ行動規範';
+
+  @override
+  String get codeOfConductSubtitle => 'コミュニティ規範をオフラインで読む';
+
+  @override
+  String get reportSecurityIssue => '脆弱性を非公開で報告';
+
+  @override
+  String get reportSecurityIssueSubtitle =>
+      'GitHub の非公開報告を使用し、脆弱性の詳細を公開しないでください';
 }

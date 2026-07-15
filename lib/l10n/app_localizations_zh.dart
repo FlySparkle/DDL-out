@@ -18,6 +18,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsTitle => '设置';
 
   @override
+  String get appearanceSettingsTitle => '外观与个性化';
+
+  @override
+  String get systemDataSettingsTitle => '系统与数据';
+
+  @override
+  String get aboutSettingsTitle => '关于';
+
+  @override
+  String get communitySettingsTitle => '社区与支持';
+
+  @override
   String get newCategory => '新建分类';
 
   @override
@@ -328,4 +340,79 @@ class AppLocalizationsZh extends AppLocalizations {
   String aboutVersion(String version) {
     return '版本 $version';
   }
+
+  @override
+  String get updateSection => '更新';
+
+  @override
+  String get checkUpdatesOnStartup => '启动时自动检查更新';
+
+  @override
+  String get checkUpdatesOnStartupSubtitle => '开启后每次启动会连接 GitHub 检查正式版本';
+
+  @override
+  String get openLinkFailed => '无法打开链接，请稍后重试';
+
+  @override
+  String get documentLoadFailed => '文档加载失败';
+
+  @override
+  String get viewRepositorySource => '查看仓库原文';
+
+  @override
+  String get authorsSection => '作者';
+
+  @override
+  String get legalSection => '法律与许可';
+
+  @override
+  String get openSourceLicense => '开源许可证';
+
+  @override
+  String get openSourceLicenseSubtitle => 'GNU GPLv3';
+
+  @override
+  String get thirdPartyLicenses => '第三方软件许可';
+
+  @override
+  String get thirdPartyLicensesSubtitle => '查看依赖与内嵌字体的许可证';
+
+  @override
+  String get privacyPolicy => '隐私政策';
+
+  @override
+  String get termsOfService => '服务协议';
+
+  @override
+  String get projectSection => '项目与反馈';
+
+  @override
+  String get sourceCode => '源代码';
+
+  @override
+  String get reportBug => '报告缺陷';
+
+  @override
+  String get requestFeature => '提出功能建议';
+
+  @override
+  String get discussions => '社区讨论';
+
+  @override
+  String get communityGuidelinesSection => '参与与规范';
+
+  @override
+  String get contributingGuide => '贡献指南';
+
+  @override
+  String get codeOfConduct => '社区行为准则';
+
+  @override
+  String get codeOfConductSubtitle => '离线阅读社区参与规范';
+
+  @override
+  String get reportSecurityIssue => '私密报告安全漏洞';
+
+  @override
+  String get reportSecurityIssueSubtitle => '通过 GitHub 私密安全报告提交，请勿公开漏洞细节';
 }

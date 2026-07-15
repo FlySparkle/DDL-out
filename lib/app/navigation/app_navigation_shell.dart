@@ -66,13 +66,18 @@ class AppNavigationShell extends ConsumerWidget {
         final fixed =
             sidebarMode == SidebarMode.fixed &&
             AppNavigationLayout.canUseFixed(constraints.maxWidth);
-        final selectedIndex = location.startsWith('/settings') ? 1 : 0;
+        final selectedDestination = AppNavigationDestinationId.fromLocation(
+          location,
+        );
         return ColoredBox(
           color: Theme.of(context).scaffoldBackgroundColor,
           child: AppNavigationScope(
             fixed: fixed,
             child: fixed
-                ? FixedAppNavigation(selectedIndex: selectedIndex, child: child)
+                ? FixedAppNavigation(
+                    selectedDestination: selectedDestination,
+                    child: child,
+                  )
                 : child,
           ),
         );
@@ -101,9 +106,9 @@ class AppNavigationScope extends InheritedWidget {
 }
 
 class AppNavigationDrawer extends StatelessWidget {
-  const AppNavigationDrawer({required this.selectedIndex, super.key});
+  const AppNavigationDrawer({required this.selectedDestination, super.key});
 
-  final int selectedIndex;
+  final AppNavigationDestinationId selectedDestination;
 
   @override
   Widget build(BuildContext context) {
@@ -117,38 +122,68 @@ class AppNavigationDrawer extends StatelessWidget {
       ),
       child: SafeArea(
         child: _AppNavigationPanel(
-          selectedIndex: selectedIndex,
+          selectedDestination: selectedDestination,
           expanded: true,
-          onDestinationSelected: (index) => _selectDestination(context, index),
+          onDestinationSelected: (destination) =>
+              _selectDestination(context, destination),
         ),
       ),
     );
   }
 
-  void _selectDestination(BuildContext context, int index) {
+  void _selectDestination(
+    BuildContext context,
+    AppNavigationDestinationId destination,
+  ) {
     final router = GoRouter.maybeOf(context);
     Navigator.pop(context);
-    if (router == null || index == selectedIndex) return;
-    _navigateToDestination(router, index);
+    if (router == null || destination == selectedDestination) return;
+    _navigateToDestination(router, selectedDestination, destination);
   }
 }
 
-void _navigateToDestination(GoRouter router, int index) {
-  if (index == 0) {
+void _navigateToDestination(
+  GoRouter router,
+  AppNavigationDestinationId current,
+  AppNavigationDestinationId destination,
+) {
+  if (destination == AppNavigationDestinationId.board) {
     router.go('/');
+  } else if (current == AppNavigationDestinationId.board) {
+    router.push(destination.route);
   } else {
-    router.push('/settings');
+    router.replace(destination.route);
+  }
+}
+
+enum AppNavigationDestinationId {
+  board('/'),
+  appearance('/settings/appearance'),
+  systemData('/settings/system-data'),
+  about('/settings/about'),
+  community('/settings/community');
+
+  const AppNavigationDestinationId(this.route);
+
+  final String route;
+
+  static AppNavigationDestinationId fromLocation(String location) {
+    if (location.startsWith('/settings/system-data')) return systemData;
+    if (location.startsWith('/settings/about')) return about;
+    if (location.startsWith('/settings/community')) return community;
+    if (location.startsWith('/settings')) return appearance;
+    return board;
   }
 }
 
 class FixedAppNavigation extends StatefulWidget {
   const FixedAppNavigation({
-    required this.selectedIndex,
+    required this.selectedDestination,
     required this.child,
     super.key,
   });
 
-  final int selectedIndex;
+  final AppNavigationDestinationId selectedDestination;
   final Widget child;
 
   @override
@@ -210,11 +245,15 @@ class _FixedAppNavigationState extends State<FixedAppNavigation> {
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: _AppNavigationPanel(
-                    selectedIndex: widget.selectedIndex,
+                    selectedDestination: widget.selectedDestination,
                     expanded: visuallyExpanded,
-                    onDestinationSelected: (index) {
-                      if (index == widget.selectedIndex) return;
-                      _navigateToDestination(GoRouter.of(context), index);
+                    onDestinationSelected: (destination) {
+                      if (destination == widget.selectedDestination) return;
+                      _navigateToDestination(
+                        GoRouter.of(context),
+                        widget.selectedDestination,
+                        destination,
+                      );
                     },
                     pinnedExpanded: expanded,
                     onToggle: () {
@@ -248,16 +287,16 @@ class _FixedAppNavigationState extends State<FixedAppNavigation> {
 
 class _AppNavigationPanel extends StatelessWidget {
   const _AppNavigationPanel({
-    required this.selectedIndex,
+    required this.selectedDestination,
     required this.expanded,
     required this.onDestinationSelected,
     this.pinnedExpanded,
     this.onToggle,
   });
 
-  final int selectedIndex;
+  final AppNavigationDestinationId selectedDestination;
   final bool expanded;
-  final ValueChanged<int> onDestinationSelected;
+  final ValueChanged<AppNavigationDestinationId> onDestinationSelected;
   final bool? pinnedExpanded;
   final VoidCallback? onToggle;
 
@@ -289,18 +328,54 @@ class _AppNavigationPanel extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 12),
-                for (var index = 0; index < destinations.length; index++) ...[
-                  _AppNavigationButton(
-                    key: ValueKey('navigation-destination-$index'),
-                    labelTransitionKey: ValueKey(
-                      'navigation-label-transition-$index',
-                    ),
-                    destination: destinations[index],
-                    selected: index == selectedIndex,
-                    expansionProgress: expansionProgress,
-                    onPressed: () => onDestinationSelected(index),
+                _AppNavigationButton(
+                  key: ValueKey(
+                    'navigation-destination-${destinations.first.id.name}',
                   ),
-                  if (index != destinations.length - 1)
+                  labelTransitionKey: ValueKey(
+                    'navigation-label-transition-${destinations.first.id.name}',
+                  ),
+                  destination: destinations.first,
+                  selected: destinations.first.id == selectedDestination,
+                  expansionProgress: expansionProgress,
+                  onPressed: () => onDestinationSelected(destinations.first.id),
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12 + (4 * expansionProgress),
+                  ),
+                  child: const Divider(height: 1),
+                ),
+                SizedBox(
+                  height: 36,
+                  child: Opacity(
+                    opacity: expansionProgress,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 16, top: 12),
+                      child: Text(
+                        l10n.settingsTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.clip,
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                    ),
+                  ),
+                ),
+                for (final destination in destinations.skip(1)) ...[
+                  _AppNavigationButton(
+                    key: ValueKey(
+                      'navigation-destination-${destination.id.name}',
+                    ),
+                    labelTransitionKey: ValueKey(
+                      'navigation-label-transition-${destination.id.name}',
+                    ),
+                    destination: destination,
+                    selected: destination.id == selectedDestination,
+                    expansionProgress: expansionProgress,
+                    onPressed: () => onDestinationSelected(destination.id),
+                  ),
+                  if (destination != destinations.last)
                     const SizedBox(height: 8),
                 ],
                 if (onToggle != null) ...[
@@ -311,6 +386,7 @@ class _AppNavigationPanel extends StatelessWidget {
                       'fixed-navigation-toggle-label-transition',
                     ),
                     destination: _AppNavigationDestination(
+                      id: AppNavigationDestinationId.board,
                       label: pinnedExpanded!
                           ? l10n.collapseSidebar
                           : l10n.expandSidebar,
@@ -432,11 +508,13 @@ class _AppNavigationButton extends StatelessWidget {
 
 class _AppNavigationDestination {
   const _AppNavigationDestination({
+    required this.id,
     required this.label,
     required this.icon,
     required this.selectedIcon,
   });
 
+  final AppNavigationDestinationId id;
   final String label;
   final IconData icon;
   final IconData selectedIcon;
@@ -444,13 +522,33 @@ class _AppNavigationDestination {
 
 List<_AppNavigationDestination> _destinations(AppLocalizations l10n) => [
   _AppNavigationDestination(
+    id: AppNavigationDestinationId.board,
     label: l10n.boardTitle,
     icon: Icons.home_outlined,
     selectedIcon: Icons.home,
   ),
   _AppNavigationDestination(
-    label: l10n.settingsTitle,
-    icon: Icons.settings_outlined,
-    selectedIcon: Icons.settings,
+    id: AppNavigationDestinationId.appearance,
+    label: l10n.appearanceSettingsTitle,
+    icon: Icons.palette_outlined,
+    selectedIcon: Icons.palette,
+  ),
+  _AppNavigationDestination(
+    id: AppNavigationDestinationId.systemData,
+    label: l10n.systemDataSettingsTitle,
+    icon: Icons.tune_outlined,
+    selectedIcon: Icons.tune,
+  ),
+  _AppNavigationDestination(
+    id: AppNavigationDestinationId.about,
+    label: l10n.aboutSettingsTitle,
+    icon: Icons.info_outline,
+    selectedIcon: Icons.info,
+  ),
+  _AppNavigationDestination(
+    id: AppNavigationDestinationId.community,
+    label: l10n.communitySettingsTitle,
+    icon: Icons.groups_outlined,
+    selectedIcon: Icons.groups,
   ),
 ];

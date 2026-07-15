@@ -1,51 +1,61 @@
 import 'package:flutter/material.dart';
 
 import '../../app/navigation/app_navigation_shell.dart';
-import '../../l10n/app_localizations.dart';
-import 'presentation/about_settings_section.dart';
-import 'presentation/appearance_settings_section.dart';
-import 'presentation/data_settings_section.dart';
 
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+class SettingsPageScaffold extends StatelessWidget {
+  const SettingsPageScaffold({
+    required this.destination,
+    required this.title,
+    required this.body,
+    this.showBackButton = false,
+    super.key,
+  });
+
+  final AppNavigationDestinationId destination;
+  final String title;
+  final Widget body;
+  final bool showBackButton;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final fixedNavigation = AppNavigationScope.maybeOf(context)?.fixed ?? false;
     return Scaffold(
       drawer: fixedNavigation
           ? null
-          : const AppNavigationDrawer(selectedIndex: 1),
+          : AppNavigationDrawer(selectedDestination: destination),
       drawerEnableOpenDragGesture: !fixedNavigation,
       drawerEdgeDragWidth: fixedNavigation
           ? null
           : AppNavigationLayout.floatingDrawerDragWidth(context),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        leading: fixedNavigation
+        leading: showBackButton
+            ? BackButton(
+                style: AppNavigationVisuals.controlButtonStyle(context),
+                onPressed: () => Navigator.of(context).maybePop(),
+              )
+            : fixedNavigation
             ? null
             : Builder(
                 builder: (context) => DrawerButton(
                   style: AppNavigationVisuals.controlButtonStyle(context),
                 ),
               ),
-        title: Text(l10n.settingsTitle),
+        title: Text(title),
       ),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 680),
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-            children: const [
-              AppearanceSettingsSection(),
-              DataSettingsSection(),
-              AboutSettingsSection(),
-            ],
-          ),
+          child: SizedBox(width: double.infinity, child: body),
         ),
       ),
     );
   }
+}
+
+void showSettingsMessage(BuildContext context, String message) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(message)));
 }

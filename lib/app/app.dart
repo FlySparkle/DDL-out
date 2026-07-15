@@ -6,7 +6,12 @@ import 'package:go_router/go_router.dart';
 import '../core/theme/app_theme.dart';
 import '../features/board/board_page.dart';
 import '../features/settings/application/settings.dart';
-import '../features/settings/settings_page.dart';
+import '../features/settings/about_settings_page.dart';
+import '../features/settings/appearance_settings_page.dart';
+import '../features/settings/community_settings_page.dart';
+import '../features/settings/domain/legal_document.dart';
+import '../features/settings/presentation/legal_document_page.dart';
+import '../features/settings/system_data_settings_page.dart';
 import '../l10n/app_localizations.dart';
 import 'navigation/app_navigation_shell.dart';
 import 'app_shell.dart';
@@ -18,9 +23,47 @@ final _router = GoRouter(
           AppNavigationShell(location: state.uri.path, child: child),
       routes: [
         GoRoute(path: '/', builder: (context, state) => const BoardPage()),
+        GoRoute(path: '/settings', redirect: (_, _) => '/settings/appearance'),
         GoRoute(
-          path: '/settings',
-          builder: (context, state) => const SettingsPage(),
+          path: '/settings/appearance',
+          builder: (context, state) => const AppearanceSettingsPage(),
+        ),
+        GoRoute(
+          path: '/settings/system-data',
+          builder: (context, state) => const SystemDataSettingsPage(),
+        ),
+        GoRoute(
+          path: '/settings/about',
+          builder: (context, state) => const AboutSettingsPage(),
+          routes: [
+            GoRoute(
+              path: 'license',
+              builder: (context, state) =>
+                  const LegalDocumentPage(kind: LegalDocumentKind.gpl),
+            ),
+            GoRoute(
+              path: 'privacy',
+              builder: (context, state) =>
+                  const LegalDocumentPage(kind: LegalDocumentKind.privacy),
+            ),
+            GoRoute(
+              path: 'terms',
+              builder: (context, state) =>
+                  const LegalDocumentPage(kind: LegalDocumentKind.terms),
+            ),
+          ],
+        ),
+        GoRoute(
+          path: '/settings/community',
+          builder: (context, state) => const CommunitySettingsPage(),
+          routes: [
+            GoRoute(
+              path: 'code-of-conduct',
+              builder: (context, state) => const LegalDocumentPage(
+                kind: LegalDocumentKind.codeOfConduct,
+              ),
+            ),
+          ],
         ),
       ],
     ),

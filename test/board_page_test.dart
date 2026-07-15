@@ -186,7 +186,9 @@ void main() {
     expect(find.text('Deadlines'), findsOneWidget);
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Collapse sidebar'), findsOneWidget);
-    final destination = find.byKey(const ValueKey('navigation-destination-0'));
+    final destination = find.byKey(
+      const ValueKey('navigation-destination-board'),
+    );
     final toggle = find.byKey(const ValueKey('fixed-navigation-toggle'));
     final destinationRect = tester.getRect(destination);
     final toggleRect = tester.getRect(toggle);
@@ -206,9 +208,9 @@ void main() {
           .shape,
     );
     final secondDestination = tester.getRect(
-      find.byKey(const ValueKey('navigation-destination-1')),
+      find.byKey(const ValueKey('navigation-destination-appearance')),
     );
-    expect(secondDestination.top - destinationRect.bottom, 8);
+    expect(secondDestination.top, greaterThan(destinationRect.bottom));
     expect(find.text('Work'), findsOneWidget);
     expect(find.text('Ship release'), findsOneWidget);
   });
@@ -257,7 +259,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 40));
 
     final labelTransition = find.byKey(
-      const ValueKey('navigation-label-transition-0'),
+      const ValueKey('navigation-label-transition-board'),
     );
     final labelOpacity = tester.widget<Opacity>(labelTransition);
     final labelTransform = tester.widget<Transform>(

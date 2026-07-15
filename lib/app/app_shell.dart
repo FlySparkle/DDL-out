@@ -7,32 +7,39 @@ import '../features/update/update_prompt.dart';
 import '../l10n/app_localizations.dart';
 
 /// App 级外壳：注入文字缩放、触发启动时更新检查。
-class AppShell extends ConsumerWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({required this.child, super.key});
 
   final Widget child;
 
-  static bool _checkScheduled = false;
+  @override
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends ConsumerState<AppShell> {
+  bool _checkScheduled = false;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final settings = ref.watch(settingsControllerProvider);
-    _scheduleUpdateCheck(context, ref);
+    if (settings.hydrated && settings.checkForUpdatesOnStartup) {
+      _scheduleUpdateCheck();
+    }
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaler: settings.textScaler),
-      child: child,
+      child: widget.child,
     );
   }
 
-  static void _scheduleUpdateCheck(BuildContext context, WidgetRef ref) {
+  void _scheduleUpdateCheck() {
     if (_checkScheduled) return;
     _checkScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
         final update = await ref.read(updateCheckerProvider).checkForUpdate();
-        if (update == null || !context.mounted) return;
+        if (update == null || !mounted) return;
         final result = await showUpdatePrompt(context, update);
-        if (result == UpdatePromptResult.downloadFailed && context.mounted) {
+        if (result == UpdatePromptResult.downloadFailed && mounted) {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(

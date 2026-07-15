@@ -18,6 +18,7 @@ class SettingsController extends Notifier<AppSettingsState> {
   static const _legacyFontFamilyKey = 'font_family';
   static const _textScaleKey = 'text_scale';
   static const _navigationModeKey = 'navigation_mode';
+  static const _checkForUpdatesOnStartupKey = 'check_updates_on_startup';
   static const _legacyAdaptiveDesktopSidebarKey = 'adaptive_desktop_sidebar';
   static const _collapsedKey = 'collapsed_categories';
   static const _deadlineModeKey = 'deadline_mode';
@@ -39,11 +40,14 @@ class SettingsController extends Notifier<AppSettingsState> {
     if (!ref.mounted) return;
 
     state = AppSettingsState(
+      hydrated: true,
       themeMode: _parseTheme(preferences.getString(_themeKey)),
       dynamicColorEnabled: preferences.getBool(_dynamicColorKey) ?? true,
       useSystemFont: _readUseSystemFont(preferences),
       textScale: (preferences.getDouble(_textScaleKey) ?? 1).clamp(0.8, 1.4),
       sidebarMode: _readSidebarMode(preferences),
+      checkForUpdatesOnStartup:
+          preferences.getBool(_checkForUpdatesOnStartupKey) ?? true,
       collapsedCategoryIds:
           (preferences.getStringList(_collapsedKey) ?? const [])
               .map(int.tryParse)
@@ -112,6 +116,11 @@ class SettingsController extends Notifier<AppSettingsState> {
   Future<void> setSidebarMode(SidebarMode value) async {
     state = state.copyWith(sidebarMode: value);
     await (await _prefs()).setString(_navigationModeKey, value.name);
+  }
+
+  Future<void> setCheckForUpdatesOnStartup(bool value) async {
+    state = state.copyWith(checkForUpdatesOnStartup: value);
+    await (await _prefs()).setBool(_checkForUpdatesOnStartupKey, value);
   }
 
   Future<void> toggleCategory(int id) async {

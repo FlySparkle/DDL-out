@@ -23,7 +23,9 @@ class BoardPage extends ConsumerWidget {
     return Scaffold(
       drawer: fixedNavigation
           ? null
-          : const AppNavigationDrawer(selectedIndex: 0),
+          : const AppNavigationDrawer(
+              selectedDestination: AppNavigationDestinationId.board,
+            ),
       drawerEnableOpenDragGesture: !fixedNavigation,
       drawerEdgeDragWidth: fixedNavigation
           ? null

@@ -18,6 +18,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsTitle => 'Settings';
 
   @override
+  String get appearanceSettingsTitle => 'Appearance & personalization';
+
+  @override
+  String get systemDataSettingsTitle => 'System & data';
+
+  @override
+  String get aboutSettingsTitle => 'About';
+
+  @override
+  String get communitySettingsTitle => 'Community & support';
+
+  @override
   String get newCategory => 'New category';
 
   @override
@@ -335,4 +347,82 @@ class AppLocalizationsEn extends AppLocalizations {
   String aboutVersion(String version) {
     return 'Version $version';
   }
+
+  @override
+  String get updateSection => 'Updates';
+
+  @override
+  String get checkUpdatesOnStartup => 'Check for updates on startup';
+
+  @override
+  String get checkUpdatesOnStartupSubtitle =>
+      'Connect to GitHub on launch to check for stable releases';
+
+  @override
+  String get openLinkFailed => 'Could not open the link. Try again later.';
+
+  @override
+  String get documentLoadFailed => 'Could not load this document';
+
+  @override
+  String get viewRepositorySource => 'View repository source';
+
+  @override
+  String get authorsSection => 'Authors';
+
+  @override
+  String get legalSection => 'Legal & licences';
+
+  @override
+  String get openSourceLicense => 'Open-source licence';
+
+  @override
+  String get openSourceLicenseSubtitle => 'GNU GPLv3';
+
+  @override
+  String get thirdPartyLicenses => 'Third-party software licences';
+
+  @override
+  String get thirdPartyLicensesSubtitle =>
+      'Licences for dependencies and bundled fonts';
+
+  @override
+  String get privacyPolicy => 'Privacy policy';
+
+  @override
+  String get termsOfService => 'Terms of service';
+
+  @override
+  String get projectSection => 'Project & feedback';
+
+  @override
+  String get sourceCode => 'Source code';
+
+  @override
+  String get reportBug => 'Report a bug';
+
+  @override
+  String get requestFeature => 'Request a feature';
+
+  @override
+  String get discussions => 'Community discussions';
+
+  @override
+  String get communityGuidelinesSection => 'Participation & guidelines';
+
+  @override
+  String get contributingGuide => 'Contributing guide';
+
+  @override
+  String get codeOfConduct => 'Community code of conduct';
+
+  @override
+  String get codeOfConductSubtitle => 'Read the community guidelines offline';
+
+  @override
+  String get reportSecurityIssue => 'Report a security vulnerability privately';
+
+  @override
+  String get reportSecurityIssueSubtitle =>
+      'Use GitHub private reporting; do not disclose vulnerability details publicly';
 }
