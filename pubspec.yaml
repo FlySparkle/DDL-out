@@ -83,6 +83,7 @@ flutter:
   assets:
     - LICENSE
     - assets/logo.png
+    - assets/icon/LICENSE-FONT-AWESOME.txt
     - assets/fonts/OFL-NotoSansSC.txt
     - assets/legal/zh/
     - assets/legal/en/
@@ -96,11 +97,17 @@ flutter:
 flutter_launcher_icons:
   image_path: assets/icon/app_icon.png
   android: true
+  ios: true
+  remove_alpha_ios: true
+  background_color_ios: "#287ff0"
   min_sdk_android: 24
   windows:
     generate: true
     image_path: assets/icon/app_icon.png
     icon_size: 256
+  macos:
+    generate: true
+    image_path: assets/icon/app_icon.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
