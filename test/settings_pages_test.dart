@@ -8,6 +8,8 @@ import 'package:ddl_out/features/settings/appearance_settings_page.dart';
 import 'package:ddl_out/features/settings/community_settings_page.dart';
 import 'package:ddl_out/features/settings/domain/legal_document.dart';
 import 'package:ddl_out/features/settings/presentation/legal_document_page.dart';
+import 'package:ddl_out/features/settings/presentation/settings_tile_group.dart';
+import 'package:ddl_out/features/settings/settings_page.dart';
 import 'package:ddl_out/features/settings/system_data_settings_page.dart';
 import 'package:ddl_out/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +34,53 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text(entry.$2), findsOneWidget);
     }
+  });
+
+  testWidgets('content tiles use the navigation shape and edge inset', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final launcher = _FakeLauncher(true);
+    await tester.pumpWidget(_app(const AppearanceSettingsPage(), launcher));
+    await tester.pumpAndSettle();
+
+    final tile = find.widgetWithText(SwitchListTile, 'Use system default font');
+    final inkWell = find.descendant(of: tile, matching: find.byType(InkWell));
+    final scrollable = find.byType(ListView);
+
+    expect(tile, findsOneWidget);
+    expect(inkWell, findsOneWidget);
+    expect(
+      tester.widget<InkWell>(inkWell).customBorder,
+      AppNavigationVisuals.navigationShape,
+    );
+    expect(
+      tester.getTopLeft(tile).dx - tester.getTopLeft(scrollable).dx,
+      SettingsPageScaffold.contentPadding.left,
+    );
+    expect(
+      tester.getTopRight(scrollable).dx - tester.getTopRight(tile).dx,
+      SettingsPageScaffold.contentPadding.right,
+    );
+  });
+
+  testWidgets('content tiles keep vertical space between hover surfaces', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final launcher = _FakeLauncher(true);
+    await tester.pumpWidget(_app(const CommunitySettingsPage(), launcher));
+    await tester.pumpAndSettle();
+
+    final sourceCode = find.widgetWithText(ListTile, 'Source code');
+    final reportBug = find.widgetWithText(ListTile, 'Report a bug');
+
+    expect(sourceCode, findsOneWidget);
+    expect(reportBug, findsOneWidget);
+    expect(
+      tester.getTopLeft(reportBug).dy - tester.getBottomLeft(sourceCode).dy,
+      SettingsTileGroup.spacing,
+    );
   });
 
   testWidgets('author links use the shared external launcher', (tester) async {
@@ -80,6 +129,13 @@ void main() {
 
     expect(find.byType(BackButton), findsOneWidget);
     expect(find.text('Could not load this document'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.widgetWithText(OutlinedButton, 'View repository source'),
+      ),
+      findsOneWidget,
+    );
   });
 }
 

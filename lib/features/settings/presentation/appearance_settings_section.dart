@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/settings.dart';
 import 'settings_section_title.dart';
+import 'settings_tile_group.dart';
 
 class AppearanceSettingsSection extends ConsumerWidget {
   const AppearanceSettingsSection({super.key});
@@ -43,22 +44,25 @@ class AppearanceSettingsSection extends ConsumerWidget {
           },
         ),
         const SizedBox(height: 12),
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          secondary: const Icon(Icons.palette_outlined),
-          title: Text(l10n.dynamicColor),
-          subtitle: Text(l10n.dynamicColorSubtitle),
-          value: settings.dynamicColorEnabled,
-          onChanged: controller.setDynamicColorEnabled,
-        ),
-        const SizedBox(height: 8),
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          secondary: const Icon(Icons.font_download_outlined),
-          title: Text(l10n.useSystemFont),
-          subtitle: Text(l10n.useSystemFontSubtitle),
-          value: settings.useSystemFont,
-          onChanged: controller.setUseSystemFont,
+        SettingsTileGroup(
+          children: [
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              secondary: const Icon(Icons.palette_outlined),
+              title: Text(l10n.dynamicColor),
+              subtitle: Text(l10n.dynamicColorSubtitle),
+              value: settings.dynamicColorEnabled,
+              onChanged: controller.setDynamicColorEnabled,
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              secondary: const Icon(Icons.font_download_outlined),
+              title: Text(l10n.useSystemFont),
+              subtitle: Text(l10n.useSystemFontSubtitle),
+              value: settings.useSystemFont,
+              onChanged: controller.setUseSystemFont,
+            ),
+          ],
         ),
         const SizedBox(height: 12),
         ListTile(

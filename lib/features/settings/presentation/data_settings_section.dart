@@ -5,6 +5,7 @@ import '../../../data/backup/backup_service.dart';
 import '../../../data/repositories/board_providers.dart';
 import '../../../l10n/app_localizations.dart';
 import 'settings_section_title.dart';
+import 'settings_tile_group.dart';
 
 class DataSettingsSection extends ConsumerWidget {
   const DataSettingsSection({super.key});
@@ -19,33 +20,37 @@ class DataSettingsSection extends ConsumerWidget {
         const Divider(height: 32),
         SettingsSectionTitle(l10n.dataSection),
         const SizedBox(height: 8),
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.file_upload_outlined),
-          title: Text(l10n.backup),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => _export(context, ref),
-        ),
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.file_download_outlined),
-          title: Text(l10n.restore),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => _restore(context, ref),
-        ),
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          textColor: Theme.of(context).colorScheme.error,
-          iconColor: Theme.of(context).colorScheme.error,
-          leading: const Icon(Icons.delete_forever_outlined),
-          title: Text(l10n.clearAllData),
-          subtitle: Text(
-            l10n.dataCount(
-              board?.categories.length ?? 0,
-              board?.tasks.length ?? 0,
+        SettingsTileGroup(
+          children: [
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.file_upload_outlined),
+              title: Text(l10n.backup),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _export(context, ref),
             ),
-          ),
-          onTap: () => _clearAll(context, ref),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.file_download_outlined),
+              title: Text(l10n.restore),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _restore(context, ref),
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              textColor: Theme.of(context).colorScheme.error,
+              iconColor: Theme.of(context).colorScheme.error,
+              leading: const Icon(Icons.delete_forever_outlined),
+              title: Text(l10n.clearAllData),
+              subtitle: Text(
+                l10n.dataCount(
+                  board?.categories.length ?? 0,
+                  board?.tasks.length ?? 0,
+                ),
+              ),
+              onTap: () => _clearAll(context, ref),
+            ),
+          ],
         ),
       ],
     );

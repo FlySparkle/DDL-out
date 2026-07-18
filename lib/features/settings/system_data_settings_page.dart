@@ -20,7 +20,7 @@ class SystemDataSettingsPage extends ConsumerWidget {
       destination: AppNavigationDestinationId.systemData,
       title: l10n.systemDataSettingsTitle,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        padding: SettingsPageScaffold.contentPadding,
         children: [
           SettingsSectionTitle(l10n.updateSection),
           const SizedBox(height: 8),

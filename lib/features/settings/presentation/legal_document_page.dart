@@ -34,6 +34,17 @@ class LegalDocumentPage extends ConsumerWidget {
       destination: destination,
       title: title,
       showBackButton: true,
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: OutlinedButton.icon(
+            onPressed: () =>
+                openExternalLink(context, ref, descriptor.sourceUri),
+            icon: const Icon(Icons.open_in_new),
+            label: Text(l10n.viewRepositorySource),
+          ),
+        ),
+      ],
       body: FutureBuilder<String>(
         future: DefaultAssetBundle.of(context).loadString(descriptor.assetPath),
         builder: (context, snapshot) {
@@ -43,42 +54,22 @@ class LegalDocumentPage extends ConsumerWidget {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
-          final sourceButton = Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: OutlinedButton.icon(
-                onPressed: () =>
-                    openExternalLink(context, ref, descriptor.sourceUri),
-                icon: const Icon(Icons.open_in_new),
-                label: Text(l10n.viewRepositorySource),
-              ),
-            ),
-          );
           if (!descriptor.markdown) {
             return SelectionArea(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-                children: [sourceButton, SelectableText(snapshot.data!)],
+                children: [SelectableText(snapshot.data!)],
               ),
             );
           }
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              sourceButton,
-              Expanded(
-                child: Markdown(
-                  data: snapshot.data!,
-                  selectable: true,
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-                  onTapLink: (_, href, _) {
-                    final uri = href == null ? null : Uri.tryParse(href);
-                    if (uri != null) openExternalLink(context, ref, uri);
-                  },
-                ),
-              ),
-            ],
+          return Markdown(
+            data: snapshot.data!,
+            selectable: true,
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+            onTapLink: (_, href, _) {
+              final uri = href == null ? null : Uri.tryParse(href);
+              if (uri != null) openExternalLink(context, ref, uri);
+            },
           );
         },
       ),

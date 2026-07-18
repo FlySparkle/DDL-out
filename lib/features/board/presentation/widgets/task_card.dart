@@ -47,6 +47,7 @@ class TaskCard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(6),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
+          borderRadius: BorderRadius.circular(6),
           onTap: () => showTaskEditor(
             context,
             snapshot: snapshot,

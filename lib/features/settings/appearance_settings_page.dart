@@ -15,7 +15,7 @@ class AppearanceSettingsPage extends StatelessWidget {
       destination: AppNavigationDestinationId.appearance,
       title: l10n.appearanceSettingsTitle,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        padding: SettingsPageScaffold.contentPadding,
         children: const [AppearanceSettingsSection()],
       ),
     );

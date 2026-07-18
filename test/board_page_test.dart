@@ -170,18 +170,17 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(const ValueKey('fixed-navigation-toggle')),
-      findsOneWidget,
+    final toggle = find.byKey(const ValueKey('fixed-navigation-toggle'));
+    expect(toggle, findsOneWidget);
+    final navigationModel = find.ancestor(
+      of: toggle,
+      matching: find.byType(AnimatedPhysicalModel),
     );
-    final roundedModels = tester
-        .widgetList<AnimatedPhysicalModel>(find.byType(AnimatedPhysicalModel))
-        .where(
-          (model) =>
-              model.borderRadius ==
-              const BorderRadius.horizontal(right: Radius.circular(16)),
-        );
-    expect(roundedModels, isNotEmpty);
+    expect(navigationModel, findsOneWidget);
+    expect(
+      tester.widget<AnimatedPhysicalModel>(navigationModel).borderRadius,
+      BorderRadius.zero,
+    );
     expect(_fixedNavigationWidth(tester), 256);
     expect(find.text('Deadlines'), findsOneWidget);
     expect(find.text('Settings'), findsOneWidget);
@@ -189,7 +188,6 @@ void main() {
     final destination = find.byKey(
       const ValueKey('navigation-destination-board'),
     );
-    final toggle = find.byKey(const ValueKey('fixed-navigation-toggle'));
     final destinationRect = tester.getRect(destination);
     final toggleRect = tester.getRect(toggle);
     expect(destinationRect.size, toggleRect.size);

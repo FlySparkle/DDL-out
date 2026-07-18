@@ -15,7 +15,7 @@ class AboutSettingsPage extends StatelessWidget {
       destination: AppNavigationDestinationId.about,
       title: l10n.aboutSettingsTitle,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        padding: SettingsPageScaffold.contentPadding,
         children: const [AboutSettingsSection()],
       ),
     );

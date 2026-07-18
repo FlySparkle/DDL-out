@@ -31,7 +31,7 @@ class BoardContent extends ConsumerWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 680),
         child: ReorderableListView.builder(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 96),
+          padding: const EdgeInsets.fromLTRB(12, 8, 16, 96),
           buildDefaultDragHandles: false,
           header: uncategorized.isEmpty
               ? null

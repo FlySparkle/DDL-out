@@ -8,6 +8,7 @@ class SettingsPageScaffold extends StatelessWidget {
     required this.title,
     required this.body,
     this.showBackButton = false,
+    this.actions,
     super.key,
   });
 
@@ -15,6 +16,9 @@ class SettingsPageScaffold extends StatelessWidget {
   final String title;
   final Widget body;
   final bool showBackButton;
+  final List<Widget>? actions;
+
+  static const contentPadding = EdgeInsets.fromLTRB(16, 8, 16, 32);
 
   @override
   Widget build(BuildContext context) {
@@ -42,12 +46,16 @@ class SettingsPageScaffold extends StatelessWidget {
                 ),
               ),
         title: Text(title),
+        actions: actions,
       ),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 680),
-          child: SizedBox(width: double.infinity, child: body),
+          child: ListTileTheme.merge(
+            shape: AppNavigationVisuals.navigationShape,
+            child: SizedBox(width: double.infinity, child: body),
+          ),
         ),
       ),
     );
