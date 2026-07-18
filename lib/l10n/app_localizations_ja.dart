@@ -141,6 +141,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get clearAllData => 'すべてのデータを削除';
 
   @override
+  String get appLanguage => '言語';
+
+  @override
+  String get languageSystem => 'システム設定に従う';
+
+  @override
+  String get languageSimplifiedChinese => '简体中文';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get languageJapanese => '日本語';
+
+  @override
   String get themeMode => 'テーマ';
 
   @override
@@ -187,6 +202,18 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get fixedSidebarSubtitle =>
       '幅が足りない場合はフローティングに切り替わり、固定時は手動またはホバーで展開できます。';
+
+  @override
+  String get sidebarAlignment => 'サイドバーの配置';
+
+  @override
+  String get sidebarAlignBetween => '上下に分割';
+
+  @override
+  String get sidebarAlignStart => '上寄せ';
+
+  @override
+  String get sidebarAlignEnd => '下寄せ';
 
   @override
   String get expandSidebar => 'サイドバーを展開';

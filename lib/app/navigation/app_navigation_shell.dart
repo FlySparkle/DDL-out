@@ -283,7 +283,7 @@ class _FixedAppNavigationState extends State<FixedAppNavigation> {
   }
 }
 
-class _AppNavigationPanel extends StatelessWidget {
+class _AppNavigationPanel extends ConsumerWidget {
   const _AppNavigationPanel({
     required this.selectedDestination,
     required this.expanded,
@@ -299,9 +299,14 @@ class _AppNavigationPanel extends StatelessWidget {
   final VoidCallback? onToggle;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final destinations = _destinations(l10n);
+    final alignment = ref.watch(
+      settingsControllerProvider.select(
+        (settings) => settings.sidebarAlignment,
+      ),
+    );
     final targetWidth = expanded
         ? AppNavigationLayout.expandedWidth
         : AppNavigationLayout.collapsedWidth;
@@ -325,59 +330,22 @@ class _AppNavigationPanel extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 12),
-                _AppNavigationButton(
-                  key: ValueKey(
-                    'navigation-destination-${destinations.first.id.name}',
-                  ),
-                  labelTransitionKey: ValueKey(
-                    'navigation-label-transition-${destinations.first.id.name}',
-                  ),
-                  destination: destinations.first,
-                  selected: destinations.first.id == selectedDestination,
-                  expansionProgress: expansionProgress,
-                  onPressed: () => onDestinationSelected(destinations.first.id),
-                ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 12 + (4 * expansionProgress),
-                  ),
-                  child: const Divider(height: 1),
-                ),
-                SizedBox(
-                  height: 36,
-                  child: Opacity(
-                    opacity: expansionProgress,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 16, top: 12),
-                      child: Text(
-                        l10n.settingsTitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.clip,
-                        style: Theme.of(context).textTheme.labelMedium,
-                      ),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      top: 12,
+                      bottom: onToggle == null ? 12 : 8,
+                    ),
+                    child: _AppNavigationDestinations(
+                      destinations: destinations,
+                      selectedDestination: selectedDestination,
+                      alignment: alignment,
+                      expansionProgress: expansionProgress,
+                      onDestinationSelected: onDestinationSelected,
                     ),
                   ),
                 ),
-                for (final destination in destinations.skip(1)) ...[
-                  _AppNavigationButton(
-                    key: ValueKey(
-                      'navigation-destination-${destination.id.name}',
-                    ),
-                    labelTransitionKey: ValueKey(
-                      'navigation-label-transition-${destination.id.name}',
-                    ),
-                    destination: destination,
-                    selected: destination.id == selectedDestination,
-                    expansionProgress: expansionProgress,
-                    onPressed: () => onDestinationSelected(destination.id),
-                  ),
-                  if (destination != destinations.last)
-                    const SizedBox(height: 8),
-                ],
                 if (onToggle != null) ...[
-                  const Spacer(),
                   _AppNavigationButton(
                     key: const ValueKey('fixed-navigation-toggle'),
                     labelTransitionKey: const ValueKey(
@@ -402,6 +370,89 @@ class _AppNavigationPanel extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _AppNavigationDestinations extends StatelessWidget {
+  const _AppNavigationDestinations({
+    required this.destinations,
+    required this.selectedDestination,
+    required this.alignment,
+    required this.expansionProgress,
+    required this.onDestinationSelected,
+  });
+
+  final List<_AppNavigationDestination> destinations;
+  final AppNavigationDestinationId selectedDestination;
+  final SidebarAlignment alignment;
+  final double expansionProgress;
+  final ValueChanged<AppNavigationDestinationId> onDestinationSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final boardDestination = destinations.first;
+    final boardButton = _destinationButton(boardDestination);
+    final settingsGroup = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: 12 + (4 * expansionProgress),
+          ),
+          child: const Divider(height: 1),
+        ),
+        SizedBox(
+          height: 36,
+          child: Opacity(
+            opacity: expansionProgress,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16, top: 12),
+              child: Text(
+                l10n.settingsTitle,
+                maxLines: 1,
+                overflow: TextOverflow.clip,
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+            ),
+          ),
+        ),
+        for (final destination in destinations.skip(1)) ...[
+          _destinationButton(destination),
+          if (destination != destinations.last) const SizedBox(height: 8),
+        ],
+      ],
+    );
+
+    return Column(
+      key: const ValueKey('navigation-destinations'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisAlignment: switch (alignment) {
+        SidebarAlignment.start => MainAxisAlignment.start,
+        SidebarAlignment.end => MainAxisAlignment.end,
+        SidebarAlignment.alignBetween => MainAxisAlignment.spaceBetween,
+      },
+      children: [
+        boardButton,
+        if (alignment != SidebarAlignment.alignBetween)
+          const SizedBox(height: 8),
+        settingsGroup,
+      ],
+    );
+  }
+
+  Widget _destinationButton(_AppNavigationDestination destination) {
+    return _AppNavigationButton(
+      key: ValueKey('navigation-destination-${destination.id.name}'),
+      labelTransitionKey: ValueKey(
+        'navigation-label-transition-${destination.id.name}',
+      ),
+      destination: destination,
+      selected: destination.id == selectedDestination,
+      expansionProgress: expansionProgress,
+      onPressed: () => onDestinationSelected(destination.id),
     );
   }
 }

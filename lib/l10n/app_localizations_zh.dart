@@ -141,6 +141,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get clearAllData => '清空全部数据';
 
   @override
+  String get appLanguage => '语言';
+
+  @override
+  String get languageSystem => '跟随系统';
+
+  @override
+  String get languageSimplifiedChinese => '简体中文';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get languageJapanese => '日本語';
+
+  @override
   String get themeMode => '外观模式';
 
   @override
@@ -186,6 +201,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get fixedSidebarSubtitle => '宽度不足时自动切换为浮动边栏；固定时可手动收展或悬停展开。';
+
+  @override
+  String get sidebarAlignment => '边栏排放方式';
+
+  @override
+  String get sidebarAlignBetween => '两端';
+
+  @override
+  String get sidebarAlignStart => '靠上';
+
+  @override
+  String get sidebarAlignEnd => '靠下';
 
   @override
   String get expandSidebar => '展开边栏';

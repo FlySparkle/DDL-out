@@ -84,6 +84,7 @@ class DdlOutApp extends ConsumerWidget {
           title: 'DDL out!',
           debugShowCheckedModeBanner: false,
           routerConfig: _router,
+          locale: settings.language.locale,
           themeMode: settings.themeMode,
           theme: AppTheme.light(
             dynamicScheme: useDynamic ? lightDynamic : null,

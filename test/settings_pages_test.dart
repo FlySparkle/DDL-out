@@ -4,6 +4,7 @@ import 'package:ddl_out/core/version/app_version.dart';
 import 'package:ddl_out/data/database/app_database.dart';
 import 'package:ddl_out/data/repositories/board_providers.dart';
 import 'package:ddl_out/features/settings/about_settings_page.dart';
+import 'package:ddl_out/features/settings/application/settings.dart';
 import 'package:ddl_out/features/settings/appearance_settings_page.dart';
 import 'package:ddl_out/features/settings/community_settings_page.dart';
 import 'package:ddl_out/features/settings/domain/legal_document.dart';
@@ -62,6 +63,31 @@ void main() {
       tester.getTopRight(scrollable).dx - tester.getTopRight(tile).dx,
       SettingsPageScaffold.contentPadding.right,
     );
+  });
+
+  testWidgets('appearance settings persist the selected language', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final launcher = _FakeLauncher(true);
+    await tester.pumpWidget(_app(const AppearanceSettingsPage(), launcher));
+    await tester.pumpAndSettle();
+
+    final languageTile = find.widgetWithText(ListTile, 'Language');
+    expect(languageTile, findsOneWidget);
+
+    await tester.tap(
+      find.descendant(
+        of: languageTile,
+        matching: find.byType(DropdownButton<AppLanguage>),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('日本語').last);
+    await tester.pumpAndSettle();
+
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getString('app_language'), 'ja');
   });
 
   testWidgets('content tiles keep vertical space between hover surfaces', (

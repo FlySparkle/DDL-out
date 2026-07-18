@@ -148,6 +148,44 @@ void main() {
     expect(destinationRect.width, greaterThan(destinationRect.height));
     expect(material.shape, AppNavigationVisuals.navigationShape);
   });
+
+  testWidgets('sidebar placement supports between, start, and end', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1240, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final positions = <String, ({Rect board, Rect appearance})>{};
+
+    for (final alignment in ['align-between', 'start', 'end']) {
+      SharedPreferences.setMockInitialValues({
+        'navigation_mode': 'fixed',
+        'sidebar_alignment': alignment,
+      });
+      final router = _router();
+      await tester.pumpWidget(_testApp(router));
+      await tester.pumpAndSettle();
+
+      positions[alignment] = (
+        board: tester.getRect(
+          find.byKey(const ValueKey('navigation-destination-board')),
+        ),
+        appearance: tester.getRect(
+          find.byKey(const ValueKey('navigation-destination-appearance')),
+        ),
+      );
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      router.dispose();
+    }
+
+    final between = positions['align-between']!;
+    final start = positions['start']!;
+    final end = positions['end']!;
+    expect(between.board.top, closeTo(start.board.top, 0.01));
+    expect(between.appearance.top, greaterThan(start.appearance.top + 100));
+    expect(end.board.top, greaterThan(between.board.top + 100));
+    expect(end.appearance.bottom, closeTo(between.appearance.bottom, 0.01));
+  });
 }
 
 GoRouter _router({String? initialLocation}) {

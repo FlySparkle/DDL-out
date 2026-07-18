@@ -142,6 +142,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearAllData => 'Clear all data';
 
   @override
+  String get appLanguage => 'Language';
+
+  @override
+  String get languageSystem => 'Follow system';
+
+  @override
+  String get languageSimplifiedChinese => '简体中文';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get languageJapanese => '日本語';
+
+  @override
   String get themeMode => 'Theme';
 
   @override
@@ -191,6 +206,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get fixedSidebarSubtitle =>
       'Falls back to floating when space is limited; otherwise expand it manually or by hovering.';
+
+  @override
+  String get sidebarAlignment => 'Sidebar arrangement';
+
+  @override
+  String get sidebarAlignBetween => 'Between';
+
+  @override
+  String get sidebarAlignStart => 'Top';
+
+  @override
+  String get sidebarAlignEnd => 'Bottom';
 
   @override
   String get expandSidebar => 'Expand sidebar';

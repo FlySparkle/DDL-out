@@ -20,6 +20,38 @@ class AppearanceSettingsSection extends ConsumerWidget {
       children: [
         SettingsSectionTitle(l10n.appearanceSection),
         const SizedBox(height: 8),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.language),
+          title: Text(l10n.appLanguage),
+          trailing: DropdownButtonHideUnderline(
+            child: DropdownButton<AppLanguage>(
+              value: settings.language,
+              items: [
+                DropdownMenuItem(
+                  value: AppLanguage.system,
+                  child: Text(l10n.languageSystem),
+                ),
+                DropdownMenuItem(
+                  value: AppLanguage.simplifiedChinese,
+                  child: Text(l10n.languageSimplifiedChinese),
+                ),
+                DropdownMenuItem(
+                  value: AppLanguage.english,
+                  child: Text(l10n.languageEnglish),
+                ),
+                DropdownMenuItem(
+                  value: AppLanguage.japanese,
+                  child: Text(l10n.languageJapanese),
+                ),
+              ],
+              onChanged: (language) {
+                if (language != null) controller.setLanguage(language);
+              },
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
         SegmentedButton<ThemeMode>(
           segments: [
             ButtonSegment(
@@ -108,6 +140,32 @@ class AppearanceSettingsSection extends ConsumerWidget {
               ? l10n.floatingSidebarSubtitle
               : l10n.fixedSidebarSubtitle,
           style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 12),
+        Text(l10n.sidebarAlignment),
+        const SizedBox(height: 8),
+        SegmentedButton<SidebarAlignment>(
+          segments: [
+            ButtonSegment(
+              value: SidebarAlignment.alignBetween,
+              icon: const Icon(Icons.vertical_align_center),
+              label: Text(l10n.sidebarAlignBetween),
+            ),
+            ButtonSegment(
+              value: SidebarAlignment.start,
+              icon: const Icon(Icons.vertical_align_top),
+              label: Text(l10n.sidebarAlignStart),
+            ),
+            ButtonSegment(
+              value: SidebarAlignment.end,
+              icon: const Icon(Icons.vertical_align_bottom),
+              label: Text(l10n.sidebarAlignEnd),
+            ),
+          ],
+          selected: {settings.sidebarAlignment},
+          onSelectionChanged: (selection) {
+            controller.setSidebarAlignment(selection.single);
+          },
         ),
       ],
     );

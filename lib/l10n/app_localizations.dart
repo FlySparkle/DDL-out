@@ -364,6 +364,36 @@ abstract class AppLocalizations {
   /// **'清空全部数据'**
   String get clearAllData;
 
+  /// No description provided for @appLanguage.
+  ///
+  /// In zh, this message translates to:
+  /// **'语言'**
+  String get appLanguage;
+
+  /// No description provided for @languageSystem.
+  ///
+  /// In zh, this message translates to:
+  /// **'跟随系统'**
+  String get languageSystem;
+
+  /// No description provided for @languageSimplifiedChinese.
+  ///
+  /// In zh, this message translates to:
+  /// **'简体中文'**
+  String get languageSimplifiedChinese;
+
+  /// No description provided for @languageEnglish.
+  ///
+  /// In zh, this message translates to:
+  /// **'English'**
+  String get languageEnglish;
+
+  /// No description provided for @languageJapanese.
+  ///
+  /// In zh, this message translates to:
+  /// **'日本語'**
+  String get languageJapanese;
+
   /// No description provided for @themeMode.
   ///
   /// In zh, this message translates to:
@@ -453,6 +483,30 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'宽度不足时自动切换为浮动边栏；固定时可手动收展或悬停展开。'**
   String get fixedSidebarSubtitle;
+
+  /// No description provided for @sidebarAlignment.
+  ///
+  /// In zh, this message translates to:
+  /// **'边栏排放方式'**
+  String get sidebarAlignment;
+
+  /// No description provided for @sidebarAlignBetween.
+  ///
+  /// In zh, this message translates to:
+  /// **'两端'**
+  String get sidebarAlignBetween;
+
+  /// No description provided for @sidebarAlignStart.
+  ///
+  /// In zh, this message translates to:
+  /// **'靠上'**
+  String get sidebarAlignStart;
+
+  /// No description provided for @sidebarAlignEnd.
+  ///
+  /// In zh, this message translates to:
+  /// **'靠下'**
+  String get sidebarAlignEnd;
 
   /// No description provided for @expandSidebar.
   ///
