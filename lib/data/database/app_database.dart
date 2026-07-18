@@ -213,12 +213,14 @@ class AppDatabase extends _$AppDatabase {
   Future<void> clearCompleted() =>
       (delete(tasks)..where((row) => row.isCompleted.equals(true))).go();
 
-  Future<void> clearTasksInCategory(int? categoryId) {
+  Future<void> clearCompletedInCategory(int? categoryId) {
     final query = delete(tasks);
     query.where(
-      (row) => categoryId == null
-          ? row.categoryId.isNull()
-          : row.categoryId.equals(categoryId),
+      (row) =>
+          row.isCompleted.equals(true) &
+          (categoryId == null
+              ? row.categoryId.isNull()
+              : row.categoryId.equals(categoryId)),
     );
     return query.go();
   }

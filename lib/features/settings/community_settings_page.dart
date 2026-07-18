@@ -6,6 +6,7 @@ import '../../app/navigation/app_navigation_shell.dart';
 import '../../core/links/external_link_launcher.dart';
 import '../../l10n/app_localizations.dart';
 import 'presentation/settings_section_title.dart';
+import 'presentation/settings_tile_group.dart';
 import 'settings_page.dart';
 
 class CommunitySettingsPage extends ConsumerWidget {
@@ -32,66 +33,76 @@ class CommunitySettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     return SettingsPageScaffold(
-      destination: AppNavigationDestinationId.community,
+      destination: AppNavigationDestinationId.settings,
+      showBackButton: true,
       title: l10n.communitySettingsTitle,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        padding: SettingsPageScaffold.contentPadding,
         children: [
           SettingsSectionTitle(l10n.projectSection),
           const SizedBox(height: 8),
-          _externalTile(
-            context,
-            ref,
-            icon: Icons.code,
-            title: l10n.sourceCode,
-            uri: _repository,
-          ),
-          _externalTile(
-            context,
-            ref,
-            icon: Icons.bug_report_outlined,
-            title: l10n.reportBug,
-            uri: _bugReport,
-          ),
-          _externalTile(
-            context,
-            ref,
-            icon: Icons.lightbulb_outline,
-            title: l10n.requestFeature,
-            uri: _featureRequest,
-          ),
-          _externalTile(
-            context,
-            ref,
-            icon: Icons.forum_outlined,
-            title: l10n.discussions,
-            uri: _discussions,
+          SettingsTileGroup(
+            children: [
+              _externalTile(
+                context,
+                ref,
+                icon: Icons.code,
+                title: l10n.sourceCode,
+                uri: _repository,
+              ),
+              _externalTile(
+                context,
+                ref,
+                icon: Icons.bug_report_outlined,
+                title: l10n.reportBug,
+                uri: _bugReport,
+              ),
+              _externalTile(
+                context,
+                ref,
+                icon: Icons.lightbulb_outline,
+                title: l10n.requestFeature,
+                uri: _featureRequest,
+              ),
+              _externalTile(
+                context,
+                ref,
+                icon: Icons.forum_outlined,
+                title: l10n.discussions,
+                uri: _discussions,
+              ),
+            ],
           ),
           const Divider(height: 32),
           SettingsSectionTitle(l10n.communityGuidelinesSection),
           const SizedBox(height: 8),
-          _externalTile(
-            context,
-            ref,
-            icon: Icons.volunteer_activism_outlined,
-            title: l10n.contributingGuide,
-            uri: _contributing,
-          ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.groups_outlined),
-            title: Text(l10n.codeOfConduct),
-            subtitle: Text(l10n.codeOfConductSubtitle),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/settings/community/code-of-conduct'),
-          ),
-          _externalTile(
-            context,
-            ref,
-            icon: Icons.security_outlined,
-            title: l10n.reportSecurityIssue,
-            subtitle: l10n.reportSecurityIssueSubtitle,
-            uri: _security,
+          SettingsTileGroup(
+            children: [
+              _externalTile(
+                context,
+                ref,
+                icon: Icons.volunteer_activism_outlined,
+                title: l10n.contributingGuide,
+                uri: _contributing,
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.groups_outlined),
+                title: Text(l10n.codeOfConduct),
+                subtitle: Text(l10n.codeOfConductSubtitle),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () =>
+                    context.push('/settings/community/code-of-conduct'),
+              ),
+              _externalTile(
+                context,
+                ref,
+                icon: Icons.security_outlined,
+                title: l10n.reportSecurityIssue,
+                subtitle: l10n.reportSecurityIssueSubtitle,
+                uri: _security,
+              ),
+            ],
           ),
         ],
       ),

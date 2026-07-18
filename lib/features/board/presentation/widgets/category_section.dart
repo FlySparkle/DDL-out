@@ -12,6 +12,13 @@ import '../dialogs/confirmation_dialog.dart';
 import '../dialogs/task_editor.dart';
 import 'task_card.dart';
 
+@immutable
+class CategoryDragData {
+  const CategoryDragData(this.id);
+
+  final int id;
+}
+
 class CategorySection extends ConsumerWidget {
   const CategorySection({
     required this.snapshot,
@@ -19,7 +26,6 @@ class CategorySection extends ConsumerWidget {
     required this.title,
     required this.color,
     required this.tasks,
-    this.reorderIndex,
     super.key,
   });
 
@@ -28,7 +34,6 @@ class CategorySection extends ConsumerWidget {
   final String title;
   final Color color;
   final List<Task> tasks;
-  final int? reorderIndex;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -38,15 +43,15 @@ class CategorySection extends ConsumerWidget {
         category != null &&
         settings.collapsedCategoryIds.contains(category!.id);
     final now = ref.watch(currentTimeProvider).value ?? DateTime.now();
+    final completedCount = tasks.where((task) => task.isCompleted).length;
     final activeDurations = tasks
         .where((task) => !task.isCompleted)
         .map((task) => DeadlineService.remaining(task.deadlineUtc, now: now))
         .where((duration) => duration > Duration.zero);
-    final longest = activeDurations.fold<Duration>(
+    final longestRemaining = activeDurations.fold<Duration>(
       Duration.zero,
-      (current, value) => value > current ? value : current,
+      (longest, duration) => duration > longest ? duration : longest,
     );
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: DragTarget<int>(
@@ -56,9 +61,7 @@ class CategorySection extends ConsumerWidget {
               .firstOrNull;
           return task != null && task.categoryId != category?.id;
         },
-        onAcceptWithDetails: (details) {
-          ref.read(taskRepositoryProvider).move(details.data, category?.id);
-        },
+        onAcceptWithDetails: (details) => _moveTask(context, ref, details.data),
         builder: (context, candidates, rejects) {
           final scheme = Theme.of(context).colorScheme;
           final cardColor = Color.alphaBlend(
@@ -70,7 +73,12 @@ class CategorySection extends ConsumerWidget {
             clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
-                _reorderableHeader(_buildHeader(context, ref, collapsed)),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 160),
+                  height: candidates.isEmpty ? 0 : 4,
+                  color: scheme.secondary,
+                ),
+                _buildHeader(context, ref, collapsed, completedCount),
                 AnimatedCrossFade(
                   duration: const Duration(milliseconds: 220),
                   crossFadeState: collapsed
@@ -96,7 +104,7 @@ class CategorySection extends ConsumerWidget {
                                     task: task,
                                     snapshot: snapshot,
                                     categoryColor: color,
-                                    longestRemaining: longest,
+                                    longestRemaining: longestRemaining,
                                     now: now,
                                   ),
                                 ),
@@ -112,98 +120,231 @@ class CategorySection extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, WidgetRef ref, bool collapsed) {
+  Widget _buildHeader(
+    BuildContext context,
+    WidgetRef ref,
+    bool collapsed,
+    int completedCount,
+  ) {
     final l10n = AppLocalizations.of(context);
-    return InkWell(
-      borderRadius: BorderRadius.circular(8),
-      onTap: category == null
-          ? null
-          : () => ref
-                .read(settingsControllerProvider.notifier)
-                .toggleCategory(category!.id),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 56),
-        child: Row(
-          children: [
-            if (category != null)
-              IconButton(
-                tooltip: collapsed
-                    ? l10n.expandCategory
-                    : l10n.collapseCategory,
-                onPressed: () => ref
-                    .read(settingsControllerProvider.notifier)
-                    .toggleCategory(category!.id),
-                icon: AnimatedRotation(
-                  turns: collapsed ? -0.25 : 0,
-                  duration: const Duration(milliseconds: 180),
-                  child: const Icon(Icons.expand_more),
-                ),
-              )
-            else
-              const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  Text(
-                    l10n.taskCount(tasks.length),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
+    void toggle() => ref
+        .read(settingsControllerProvider.notifier)
+        .toggleCategory(category!.id);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 56),
+      child: Row(
+        children: [
+          if (category != null)
             IconButton(
-              tooltip: l10n.clearCategoryTasks,
-              onPressed: tasks.isEmpty ? null : () => _clearTasks(context, ref),
-              icon: const Icon(Icons.cleaning_services_outlined),
-            ),
-            if (category != null)
-              IconButton(
-                tooltip: l10n.editCategory,
-                onPressed: () => showCategoryEditor(
-                  context,
-                  category: category,
-                  taskCount: tasks.length,
+              tooltip: collapsed ? l10n.expandCategory : l10n.collapseCategory,
+              onPressed: toggle,
+              icon: AnimatedRotation(
+                turns: collapsed ? -0.25 : 0,
+                duration: const Duration(milliseconds: 180),
+                child: const Icon(Icons.expand_more),
+              ),
+            )
+          else
+            const SizedBox(width: 16),
+          Expanded(
+            child: InkWell(
+              onTap: category == null ? null : toggle,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    Text(
+                      l10n.taskCount(tasks.length),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
                 ),
-                icon: const Icon(Icons.edit_outlined),
               ),
-            IconButton(
-              tooltip: l10n.addTask,
-              onPressed: () => showTaskEditor(
-                context,
-                snapshot: snapshot,
-                initialCategoryId: category?.id,
-              ),
-              icon: const Icon(Icons.add),
             ),
-          ],
-        ),
+          ),
+          IconButton(
+            tooltip: l10n.addTask,
+            onPressed: () => showTaskEditor(
+              context,
+              snapshot: snapshot,
+              initialCategoryId: category?.id,
+            ),
+            icon: const Icon(Icons.add),
+          ),
+          IconButton(
+            tooltip: l10n.clearCategoryTasks,
+            onPressed: completedCount == 0
+                ? null
+                : () => _clearTasks(context, ref, completedCount),
+            icon: const Icon(Icons.playlist_remove),
+          ),
+          if (category != null)
+            PopupMenuButton<String>(
+              tooltip: l10n.categoryActions,
+              onSelected: (value) {
+                switch (value) {
+                  case 'edit':
+                    showCategoryEditor(
+                      context,
+                      category: category,
+                      taskCount: tasks.length,
+                    );
+                    break;
+                  case 'delete':
+                    _deleteCategory(context, ref);
+                    break;
+                }
+              },
+              itemBuilder: (context) => [
+                if (category != null)
+                  PopupMenuItem(
+                    value: 'edit',
+                    child: ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.edit_outlined),
+                      title: Text(l10n.editCategory),
+                    ),
+                  ),
+                if (category != null)
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      textColor: Theme.of(context).colorScheme.error,
+                      iconColor: Theme.of(context).colorScheme.error,
+                      leading: const Icon(Icons.delete_outline),
+                      title: Text(l10n.deleteCategory),
+                    ),
+                  ),
+              ],
+            ),
+          if (category != null) _categoryDragHandle(context),
+        ],
       ),
     );
   }
 
-  Widget _reorderableHeader(Widget child) {
-    final index = reorderIndex;
-    if (index == null) return child;
-    return ReorderableDelayedDragStartListener(index: index, child: child);
-  }
-
-  Future<void> _clearTasks(BuildContext context, WidgetRef ref) async {
+  Future<void> _clearTasks(
+    BuildContext context,
+    WidgetRef ref,
+    int completedCount,
+  ) async {
     final l10n = AppLocalizations.of(context);
     final confirmed = await showConfirmation(
       context,
       title: l10n.clearCategoryTasksTitle,
-      body: l10n.clearCategoryTasksBody(tasks.length),
+      body: l10n.clearCategoryTasksBody(completedCount),
       destructive: true,
+      confirmLabel: l10n.clearCategoryTasksConfirm,
     );
     if (confirmed) {
-      await ref.read(taskRepositoryProvider).clearCategory(category?.id);
+      await ref
+          .read(taskRepositoryProvider)
+          .clearCompletedInCategory(category?.id);
     }
+  }
+
+  Future<void> _deleteCategory(BuildContext context, WidgetRef ref) async {
+    final currentCategory = category;
+    if (currentCategory == null) return;
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showConfirmation(
+      context,
+      title: l10n.deleteCategoryTitle,
+      body: l10n.deleteCategoryBody(tasks.length),
+      destructive: true,
+      confirmLabel: l10n.deleteCategoryConfirm,
+    );
+    if (!confirmed) return;
+    await ref.read(categoryRepositoryProvider).delete(currentCategory.id);
+    await ref
+        .read(settingsControllerProvider.notifier)
+        .removeCategoryPreference(currentCategory.id);
+  }
+
+  Future<void> _moveTask(
+    BuildContext context,
+    WidgetRef ref,
+    int taskId,
+  ) async {
+    final task = snapshot.tasks.where((task) => task.id == taskId).firstOrNull;
+    if (task == null || task.categoryId == category?.id) return;
+    final previousCategoryId = task.categoryId;
+    await ref.read(taskRepositoryProvider).move(taskId, category?.id);
+    if (!context.mounted) return;
+    final l10n = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(l10n.taskMovedTo(title)),
+          action: SnackBarAction(
+            label: l10n.undo,
+            onPressed: () => ref
+                .read(taskRepositoryProvider)
+                .move(taskId, previousCategoryId),
+          ),
+        ),
+      );
+  }
+
+  Widget _categoryDragHandle(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final handle = Tooltip(
+      message: l10n.reorderCategory,
+      child: const Padding(
+        padding: EdgeInsets.all(12),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.grab,
+          child: Icon(Icons.drag_indicator),
+        ),
+      ),
+    );
+    final feedback = Material(
+      elevation: 8,
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox(
+        width: 280,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              const Icon(Icons.drag_indicator),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    final data = CategoryDragData(category!.id);
+    if (Theme.of(context).platform == TargetPlatform.android) {
+      return LongPressDraggable<CategoryDragData>(
+        data: data,
+        feedback: feedback,
+        dragAnchorStrategy: pointerDragAnchorStrategy,
+        child: handle,
+      );
+    }
+    return Draggable<CategoryDragData>(
+      data: data,
+      feedback: feedback,
+      dragAnchorStrategy: pointerDragAnchorStrategy,
+      child: handle,
+    );
   }
 }

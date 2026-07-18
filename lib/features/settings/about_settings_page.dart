@@ -12,10 +12,11 @@ class AboutSettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return SettingsPageScaffold(
-      destination: AppNavigationDestinationId.about,
+      destination: AppNavigationDestinationId.settings,
+      showBackButton: true,
       title: l10n.aboutSettingsTitle,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        padding: SettingsPageScaffold.contentPadding,
         children: const [AboutSettingsSection()],
       ),
     );

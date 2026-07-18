@@ -45,6 +45,6 @@ final class DriftTaskRepository implements TaskRepository {
   Future<void> clearCompleted() => _database.clearCompleted();
 
   @override
-  Future<void> clearCategory(int? categoryId) =>
-      _database.clearTasksInCategory(categoryId);
+  Future<void> clearCompletedInCategory(int? categoryId) =>
+      _database.clearCompletedInCategory(categoryId);
 }

@@ -57,6 +57,7 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
   late DeadlineMode _mode;
   late DateTime _absoluteLocal;
   late int _categoryValue;
+  late bool _relativeDirty;
   bool _saving = false;
 
   @override
@@ -69,6 +70,7 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
         widget.initialCategoryId ??
         _uncategorizedValue;
     _mode = widget.task == null ? settings.deadlineMode : DeadlineMode.absolute;
+    _relativeDirty = widget.task == null && _mode == DeadlineMode.relative;
 
     final now = DateTime.now();
     final initialAbsolute =
@@ -152,7 +154,34 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
               },
             ),
             const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ActionChip(
+                  avatar: const Icon(Icons.timer_outlined, size: 18),
+                  label: Text(l10n.inOneHour),
+                  onPressed: () => _applyQuickDeadline(
+                    DateTime.now().add(const Duration(hours: 1)),
+                  ),
+                ),
+                ActionChip(
+                  label: Text(l10n.today),
+                  onPressed: () => _applyQuickDeadline(_endOfDay(0)),
+                ),
+                ActionChip(
+                  label: Text(l10n.tomorrow),
+                  onPressed: () => _applyQuickDeadline(_endOfDay(1)),
+                ),
+                ActionChip(
+                  label: Text(l10n.thisWeekend),
+                  onPressed: () => _applyQuickDeadline(_endOfThisWeek()),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
             SegmentedButton<DeadlineMode>(
+              key: const ValueKey('deadline-mode'),
               segments: [
                 ButtonSegment(
                   value: DeadlineMode.relative,
@@ -215,6 +244,7 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
         LengthLimitingTextInputFormatter(3),
       ],
       decoration: InputDecoration(suffixText: suffix),
+      onChanged: (_) => _relativeDirty = true,
       onEditingComplete: () {
         _normalizeRelative();
         FocusScope.of(context).nextFocus();
@@ -250,12 +280,16 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
     if (_mode == next) return;
     setState(() {
       if (next == DeadlineMode.absolute) {
-        final value = _normalizeRelative();
-        _absoluteLocal = DateTime.now().add(
-          Duration(minutes: value.totalMinutes),
-        );
+        if (_relativeDirty) {
+          final value = _normalizeRelative();
+          _absoluteLocal = DateTime.now().add(
+            Duration(minutes: value.totalMinutes),
+          );
+          _relativeDirty = false;
+        }
       } else {
         _setRelative(_durationFromAbsolute(_absoluteLocal));
+        _relativeDirty = false;
       }
       _mode = next;
     });
@@ -298,6 +332,7 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
         _absoluteLocal.hour,
         _absoluteLocal.minute,
       );
+      _relativeDirty = false;
     });
   }
 
@@ -315,6 +350,7 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
         value.hour,
         value.minute,
       );
+      _relativeDirty = false;
     });
   }
 
@@ -323,7 +359,7 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
     setState(() => _saving = true);
     final normalized = _normalizeRelative();
     final deadline = DeadlineService.resolveUtc(
-      _mode == DeadlineMode.relative
+      _mode == DeadlineMode.relative && _relativeDirty
           ? RelativeDeadline(
               days: normalized.days,
               hours: normalized.hours,
@@ -360,6 +396,32 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
     if (mounted) Navigator.pop(context);
   }
 
+  void _applyQuickDeadline(DateTime value) {
+    setState(() {
+      _absoluteLocal = DateTime(
+        value.year,
+        value.month,
+        value.day,
+        value.hour,
+        value.minute,
+      );
+      _setRelative(_durationFromAbsolute(_absoluteLocal));
+      _relativeDirty = false;
+      _mode = DeadlineMode.absolute;
+    });
+  }
+
+  DateTime _endOfDay(int daysFromToday) {
+    final now = DateTime.now().add(Duration(days: daysFromToday));
+    return DateTime(now.year, now.month, now.day, 23, 59);
+  }
+
+  DateTime _endOfThisWeek() {
+    final now = DateTime.now();
+    final daysUntilSunday = DateTime.sunday - now.weekday;
+    return DateTime(now.year, now.month, now.day + daysUntilSunday, 23, 59);
+  }
+
   Future<void> _delete() async {
     final l10n = AppLocalizations.of(context);
     final confirmed = await showConfirmation(
@@ -367,6 +429,7 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
       title: l10n.deleteTaskTitle,
       body: l10n.deleteTaskBody,
       destructive: true,
+      confirmLabel: l10n.deleteTaskConfirm,
     );
     if (!confirmed) return;
     await ref.read(taskRepositoryProvider).delete(widget.task!.id);

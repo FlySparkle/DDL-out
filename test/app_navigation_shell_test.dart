@@ -39,17 +39,17 @@ void main() {
     expect(_fixedNavigationWidth(tester), 72);
 
     await tester.tap(
-      find.byKey(const ValueKey('navigation-destination-appearance')),
+      find.byKey(const ValueKey('navigation-destination-settings')),
     );
     await tester.pumpAndSettle();
 
     expect(find.text('board-content'), findsNothing);
-    expect(find.text('appearance-content'), findsOneWidget);
+    expect(find.text('settings-content'), findsOneWidget);
     expect(_fixedNavigationWidth(tester), 72);
     expect(
       find.descendant(
-        of: find.byKey(const ValueKey('navigation-destination-appearance')),
-        matching: find.byIcon(Icons.palette),
+        of: find.byKey(const ValueKey('navigation-destination-settings')),
+        matching: find.byIcon(Icons.settings),
       ),
       findsOneWidget,
     );
@@ -68,20 +68,20 @@ void main() {
     expect(find.text('board-content'), findsOneWidget);
     await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Appearance & personalization'));
+    await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
 
-    expect(find.text('appearance-content'), findsOneWidget);
+    expect(find.text('settings-content'), findsOneWidget);
     expect(find.text('board-content'), findsNothing);
 
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
 
     expect(find.text('board-content'), findsOneWidget);
-    expect(find.text('appearance-content'), findsNothing);
+    expect(find.text('settings-content'), findsNothing);
   });
 
-  testWidgets('switching settings destinations does not stack settings pages', (
+  testWidgets('settings detail routes keep the single settings destination', (
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({'navigation_mode': 'floating'});
@@ -90,24 +90,20 @@ void main() {
 
     await tester.pumpWidget(_testApp(router, mobile: true));
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.menu));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Appearance & personalization'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.menu));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('About'));
+    router.go('/settings/about');
     await tester.pumpAndSettle();
 
     expect(find.text('about-content'), findsOneWidget);
-    await tester.binding.handlePopRoute();
+    await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
-
-    expect(find.text('board-content'), findsOneWidget);
-    expect(find.text('appearance-content'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('navigation-destination-settings')),
+      findsOneWidget,
+    );
+    expect(find.text('Appearance & personalization'), findsNothing);
   });
 
-  testWidgets('legacy settings route redirects to appearance', (tester) async {
+  testWidgets('settings route opens the settings hub', (tester) async {
     SharedPreferences.setMockInitialValues({'navigation_mode': 'floating'});
     final router = _router(initialLocation: '/settings');
     addTearDown(router.dispose);
@@ -115,11 +111,8 @@ void main() {
     await tester.pumpWidget(_testApp(router, mobile: true));
     await tester.pumpAndSettle();
 
-    expect(find.text('appearance-content'), findsOneWidget);
-    expect(
-      router.routeInformationProvider.value.uri.path,
-      '/settings/appearance',
-    );
+    expect(find.text('settings-content'), findsOneWidget);
+    expect(router.routeInformationProvider.value.uri.path, '/settings');
   });
 
   testWidgets('sidebar labels use the global font', (tester) async {
@@ -148,6 +141,44 @@ void main() {
     expect(destinationRect.width, greaterThan(destinationRect.height));
     expect(material.shape, AppNavigationVisuals.navigationShape);
   });
+
+  testWidgets('sidebar placement supports between, start, and end', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1240, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final positions = <String, ({Rect board, Rect settings})>{};
+
+    for (final alignment in ['align-between', 'start', 'end']) {
+      SharedPreferences.setMockInitialValues({
+        'navigation_mode': 'fixed',
+        'sidebar_alignment': alignment,
+      });
+      final router = _router();
+      await tester.pumpWidget(_testApp(router));
+      await tester.pumpAndSettle();
+
+      positions[alignment] = (
+        board: tester.getRect(
+          find.byKey(const ValueKey('navigation-destination-board')),
+        ),
+        settings: tester.getRect(
+          find.byKey(const ValueKey('navigation-destination-settings')),
+        ),
+      );
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      router.dispose();
+    }
+
+    final between = positions['align-between']!;
+    final start = positions['start']!;
+    final end = positions['end']!;
+    expect(between.board.top, closeTo(start.board.top, 0.01));
+    expect(between.settings.top, greaterThan(start.settings.top + 100));
+    expect(end.board.top, greaterThan(between.board.top + 100));
+    expect(end.settings.bottom, closeTo(between.settings.bottom, 0.01));
+  });
 }
 
 GoRouter _router({String? initialLocation}) {
@@ -167,33 +198,36 @@ GoRouter _router({String? initialLocation}) {
           ),
           GoRoute(
             path: '/settings',
-            redirect: (_, _) => '/settings/appearance',
+            builder: (context, state) => const _TestPage(
+              selectedDestination: AppNavigationDestinationId.settings,
+              content: 'settings-content',
+            ),
           ),
           GoRoute(
             path: '/settings/appearance',
             builder: (context, state) => const _TestPage(
-              selectedDestination: AppNavigationDestinationId.appearance,
+              selectedDestination: AppNavigationDestinationId.settings,
               content: 'appearance-content',
             ),
           ),
           GoRoute(
             path: '/settings/system-data',
             builder: (context, state) => const _TestPage(
-              selectedDestination: AppNavigationDestinationId.systemData,
+              selectedDestination: AppNavigationDestinationId.settings,
               content: 'system-data-content',
             ),
           ),
           GoRoute(
             path: '/settings/about',
             builder: (context, state) => const _TestPage(
-              selectedDestination: AppNavigationDestinationId.about,
+              selectedDestination: AppNavigationDestinationId.settings,
               content: 'about-content',
             ),
           ),
           GoRoute(
             path: '/settings/community',
             builder: (context, state) => const _TestPage(
-              selectedDestination: AppNavigationDestinationId.community,
+              selectedDestination: AppNavigationDestinationId.settings,
               content: 'community-content',
             ),
           ),

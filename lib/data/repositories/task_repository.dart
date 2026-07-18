@@ -18,5 +18,5 @@ abstract interface class TaskRepository {
   Future<void> setCompleted(int taskId, bool completed);
   Future<void> delete(int id);
   Future<void> clearCompleted();
-  Future<void> clearCategory(int? categoryId);
+  Future<void> clearCompletedInCategory(int? categoryId);
 }

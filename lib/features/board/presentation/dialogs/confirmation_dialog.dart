@@ -7,6 +7,7 @@ Future<bool> showConfirmation(
   required String title,
   required String body,
   bool destructive = false,
+  String? confirmLabel,
 }) async {
   final l10n = AppLocalizations.of(context);
   return await showDialog<bool>(
@@ -27,7 +28,7 @@ Future<bool> showConfirmation(
                     )
                   : null,
               onPressed: () => Navigator.pop(context, true),
-              child: Text(l10n.confirm),
+              child: Text(confirmLabel ?? l10n.confirm),
             ),
           ],
         ),

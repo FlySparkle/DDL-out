@@ -71,30 +71,40 @@ void main() {
     ]);
   });
 
-  test('clearing one category does not remove other tasks', () async {
-    final firstCategory = await database.createCategory('工作', 0xFF4A90E2);
-    final secondCategory = await database.createCategory('生活', 0xFF50E3C2);
-    await database.createTask(
-      name: '工作事项',
-      deadlineUtc: DateTime.now().toUtc(),
-      categoryId: firstCategory,
-    );
-    await database.createTask(
-      name: '生活事项',
-      deadlineUtc: DateTime.now().toUtc(),
-      categoryId: secondCategory,
-    );
-    await database.createTask(
-      name: '未分类事项',
-      deadlineUtc: DateTime.now().toUtc(),
-      categoryId: null,
-    );
+  test(
+    'clearing completed in one category preserves active and other tasks',
+    () async {
+      final firstCategory = await database.createCategory('工作', 0xFF4A90E2);
+      final secondCategory = await database.createCategory('生活', 0xFF50E3C2);
+      final completedTask = await database.createTask(
+        name: '已完成工作事项',
+        deadlineUtc: DateTime.now().toUtc(),
+        categoryId: firstCategory,
+      );
+      await database.setTaskCompleted(completedTask, true);
+      await database.createTask(
+        name: '进行中工作事项',
+        deadlineUtc: DateTime.now().toUtc(),
+        categoryId: firstCategory,
+      );
+      await database.createTask(
+        name: '生活事项',
+        deadlineUtc: DateTime.now().toUtc(),
+        categoryId: secondCategory,
+      );
+      await database.createTask(
+        name: '未分类事项',
+        deadlineUtc: DateTime.now().toUtc(),
+        categoryId: null,
+      );
 
-    await database.clearTasksInCategory(firstCategory);
+      await database.clearCompletedInCategory(firstCategory);
 
-    expect((await database.readTasks()).map((task) => task.name), [
-      '生活事项',
-      '未分类事项',
-    ]);
-  });
+      expect((await database.readTasks()).map((task) => task.name), [
+        '进行中工作事项',
+        '生活事项',
+        '未分类事项',
+      ]);
+    },
+  );
 }

@@ -9,6 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../update/update_prompt.dart';
 import '../settings_page.dart';
 import 'settings_section_title.dart';
+import 'settings_tile_group.dart';
 
 class AboutSettingsSection extends ConsumerWidget {
   const AboutSettingsSection({super.key});
@@ -56,52 +57,60 @@ class AboutSettingsSection extends ConsumerWidget {
         const Divider(height: 32),
         SettingsSectionTitle(l10n.authorsSection),
         const SizedBox(height: 8),
-        for (final author in _authors)
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.account_circle_outlined),
-            title: Text(author.$1),
-            subtitle: Text(author.$2.toString()),
-            trailing: const Icon(Icons.open_in_new),
-            onTap: () => openExternalLink(context, ref, author.$2),
-          ),
+        SettingsTileGroup(
+          children: [
+            for (final author in _authors)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.account_circle_outlined),
+                title: Text(author.$1),
+                subtitle: Text(author.$2.toString()),
+                trailing: const Icon(Icons.open_in_new),
+                onTap: () => openExternalLink(context, ref, author.$2),
+              ),
+          ],
+        ),
         const Divider(height: 32),
         SettingsSectionTitle(l10n.legalSection),
         const SizedBox(height: 8),
-        _documentTile(
-          context,
-          icon: Icons.balance_outlined,
-          title: l10n.openSourceLicense,
-          subtitle: l10n.openSourceLicenseSubtitle,
-          route: '/settings/about/license',
-        ),
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.inventory_2_outlined),
-          title: Text(l10n.thirdPartyLicenses),
-          subtitle: Text(l10n.thirdPartyLicensesSubtitle),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => showLicensePage(
-            context: context,
-            applicationName: l10n.appTitle,
-            applicationVersion: appVersion.value,
-            applicationIcon: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Image.asset('assets/logo.png', width: 64, height: 64),
+        SettingsTileGroup(
+          children: [
+            _documentTile(
+              context,
+              icon: Icons.balance_outlined,
+              title: l10n.openSourceLicense,
+              subtitle: l10n.openSourceLicenseSubtitle,
+              route: '/settings/about/license',
             ),
-          ),
-        ),
-        _documentTile(
-          context,
-          icon: Icons.privacy_tip_outlined,
-          title: l10n.privacyPolicy,
-          route: '/settings/about/privacy',
-        ),
-        _documentTile(
-          context,
-          icon: Icons.description_outlined,
-          title: l10n.termsOfService,
-          route: '/settings/about/terms',
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.inventory_2_outlined),
+              title: Text(l10n.thirdPartyLicenses),
+              subtitle: Text(l10n.thirdPartyLicensesSubtitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => showLicensePage(
+                context: context,
+                applicationName: l10n.appTitle,
+                applicationVersion: appVersion.value,
+                applicationIcon: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Image.asset('assets/logo.png', width: 64, height: 64),
+                ),
+              ),
+            ),
+            _documentTile(
+              context,
+              icon: Icons.privacy_tip_outlined,
+              title: l10n.privacyPolicy,
+              route: '/settings/about/privacy',
+            ),
+            _documentTile(
+              context,
+              icon: Icons.description_outlined,
+              title: l10n.termsOfService,
+              route: '/settings/about/terms',
+            ),
+          ],
         ),
       ],
     );
