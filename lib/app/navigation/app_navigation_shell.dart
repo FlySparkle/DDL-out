@@ -241,7 +241,7 @@ class _FixedAppNavigationState extends State<FixedAppNavigation> {
                   shadowColor: theme.colorScheme.shadow,
                   color: navigationBackground,
                   borderRadius: const BorderRadius.horizontal(
-                    right: Radius.circular(16),
+                    right: Radius.circular(0),
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: _AppNavigationPanel(

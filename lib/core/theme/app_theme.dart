@@ -52,7 +52,8 @@ abstract final class AppTheme {
       appBarTheme: AppBarTheme(
         elevation: 0,
         scrolledUnderElevation: 1,
-        backgroundColor: scheme.surface,
+        surfaceTintColor: Colors.transparent,
+        backgroundColor: scheme.surfaceContainerLow,
         foregroundColor: scheme.onSurface,
       ),
       cardTheme: CardThemeData(
