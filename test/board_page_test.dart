@@ -4,6 +4,7 @@ import 'package:ddl_out/app/navigation/app_navigation_shell.dart';
 import 'package:ddl_out/data/database/app_database.dart';
 import 'package:ddl_out/data/repositories/repositories.dart';
 import 'package:ddl_out/features/board/board_page.dart';
+import 'package:ddl_out/features/board/presentation/widgets/category_section.dart';
 import 'package:ddl_out/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -425,6 +426,71 @@ void main() {
     expect(tester.widget<IconButton>(categoryClearButton).onPressed, isNull);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('category drag reorders without framework assertions', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final now = DateTime(2026, 7, 19, 12).toUtc();
+    final snapshot = BoardSnapshot(
+      categories: [
+        Category(
+          id: 1,
+          name: 'First',
+          colorArgb: 0xFF4A90E2,
+          sortOrder: 0,
+          createdAtUtc: now,
+          updatedAtUtc: now,
+        ),
+        Category(
+          id: 2,
+          name: 'Second',
+          colorArgb: 0xFF50E3C2,
+          sortOrder: 1,
+          createdAtUtc: now,
+          updatedAtUtc: now,
+        ),
+      ],
+      tasks: const [],
+    );
+    final repository = _RecordingCategoryRepository();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          boardProvider.overrideWith((ref) => Stream.value(snapshot)),
+          currentTimeProvider.overrideWith((ref) => Stream.value(now)),
+          categoryRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.windows),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: const AppNavigationShell(location: '/', child: BoardPage()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final handles = find.byTooltip('Drag to reorder category');
+    expect(handles, findsNWidgets(2));
+    final dragListeners = find.byType(Draggable<CategoryDragData>);
+    expect(dragListeners, findsNWidgets(2));
+    final firstHandle = dragListeners.first;
+    final gesture = await tester.startGesture(
+      tester.getCenter(firstHandle),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.text('Second')));
+    await tester.pump(const Duration(milliseconds: 300));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(repository.lastOrder, [2, 1]);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 double _fixedNavigationWidth(WidgetTester tester) {
@@ -459,4 +525,25 @@ BoardSnapshot _snapshotWithTask(DateTime now) {
       ),
     ],
   );
+}
+
+class _RecordingCategoryRepository implements CategoryRepository {
+  List<int>? lastOrder;
+
+  @override
+  Future<void> clear() async {}
+
+  @override
+  Future<int> create(String name, int colorArgb) async => 1;
+
+  @override
+  Future<void> delete(int id) async {}
+
+  @override
+  Future<void> reorder(List<int> categoryIds) async {
+    lastOrder = List.of(categoryIds);
+  }
+
+  @override
+  Future<void> update(Category category, String name, int colorArgb) async {}
 }

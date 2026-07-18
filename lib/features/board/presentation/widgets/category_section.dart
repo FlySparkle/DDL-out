@@ -11,6 +11,13 @@ import '../dialogs/confirmation_dialog.dart';
 import '../dialogs/task_editor.dart';
 import 'task_card.dart';
 
+@immutable
+class CategoryDragData {
+  const CategoryDragData(this.id);
+
+  final int id;
+}
+
 class CategorySection extends ConsumerWidget {
   const CategorySection({
     required this.snapshot,
@@ -18,7 +25,6 @@ class CategorySection extends ConsumerWidget {
     required this.title,
     required this.color,
     required this.tasks,
-    this.reorderIndex,
     super.key,
   });
 
@@ -27,7 +33,6 @@ class CategorySection extends ConsumerWidget {
   final String title;
   final Color color;
   final List<Task> tasks;
-  final int? reorderIndex;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -210,20 +215,7 @@ class CategorySection extends ConsumerWidget {
                   ),
               ],
             ),
-          if (reorderIndex != null)
-            Tooltip(
-              message: l10n.reorderCategory,
-              child: ReorderableDragStartListener(
-                index: reorderIndex!,
-                child: const Padding(
-                  padding: EdgeInsets.all(12),
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.grab,
-                    child: Icon(Icons.drag_indicator),
-                  ),
-                ),
-              ),
-            ),
+          if (category != null) _categoryDragHandle(context),
         ],
       ),
     );
@@ -291,5 +283,58 @@ class CategorySection extends ConsumerWidget {
           ),
         ),
       );
+  }
+
+  Widget _categoryDragHandle(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final handle = Tooltip(
+      message: l10n.reorderCategory,
+      child: const Padding(
+        padding: EdgeInsets.all(12),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.grab,
+          child: Icon(Icons.drag_indicator),
+        ),
+      ),
+    );
+    final feedback = Material(
+      elevation: 8,
+      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox(
+        width: 280,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              const Icon(Icons.drag_indicator),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    final data = CategoryDragData(category!.id);
+    if (Theme.of(context).platform == TargetPlatform.android) {
+      return LongPressDraggable<CategoryDragData>(
+        data: data,
+        feedback: feedback,
+        dragAnchorStrategy: pointerDragAnchorStrategy,
+        child: handle,
+      );
+    }
+    return Draggable<CategoryDragData>(
+      data: data,
+      feedback: feedback,
+      dragAnchorStrategy: pointerDragAnchorStrategy,
+      child: handle,
+    );
   }
 }
