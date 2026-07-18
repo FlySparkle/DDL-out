@@ -34,6 +34,7 @@ void main() {
               task: task,
               snapshot: snapshot,
               categoryColor: Colors.blue,
+              longestRemaining: const Duration(hours: 4),
               now: now,
             ),
           ),
@@ -57,6 +58,13 @@ void main() {
       ),
       findsNothing,
     );
-    expect(find.byType(AnimatedFractionallySizedBox), findsNothing);
+    final band = tester.widget<Positioned>(
+      find.byKey(const ValueKey('task-drag-band')),
+    );
+    expect(band.width, 48);
+    final progress = tester.widget<AnimatedFractionallySizedBox>(
+      find.byKey(const ValueKey('deadline-progress')),
+    );
+    expect(progress.widthFactor, 0.5);
   });
 }

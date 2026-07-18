@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/time/deadline_service.dart';
 import '../../../../data/database/app_database.dart';
 import '../../../../data/repositories/board_providers.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -43,6 +44,14 @@ class CategorySection extends ConsumerWidget {
         settings.collapsedCategoryIds.contains(category!.id);
     final now = ref.watch(currentTimeProvider).value ?? DateTime.now();
     final completedCount = tasks.where((task) => task.isCompleted).length;
+    final activeDurations = tasks
+        .where((task) => !task.isCompleted)
+        .map((task) => DeadlineService.remaining(task.deadlineUtc, now: now))
+        .where((duration) => duration > Duration.zero);
+    final longestRemaining = activeDurations.fold<Duration>(
+      Duration.zero,
+      (longest, duration) => duration > longest ? duration : longest,
+    );
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: DragTarget<int>(
@@ -95,6 +104,7 @@ class CategorySection extends ConsumerWidget {
                                     task: task,
                                     snapshot: snapshot,
                                     categoryColor: color,
+                                    longestRemaining: longestRemaining,
                                     now: now,
                                   ),
                                 ),
