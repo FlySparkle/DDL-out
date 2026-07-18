@@ -96,9 +96,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get confirm => '确认';
 
   @override
-  String get moreActions => '更多操作';
-
-  @override
   String get customColor => '自定义颜色';
 
   @override
@@ -123,19 +120,28 @@ class AppLocalizationsZh extends AppLocalizations {
   String get emptyTitle => '还没有截止事项';
 
   @override
-  String get emptyBody => '先创建一个分类，再把要完成的事放进去。';
+  String get emptyBody => '先记下要完成的事，之后也可以再整理分类。';
 
   @override
   String get noTasks => '这个分类还没有事项';
 
   @override
-  String get clearCompleted => '清除已完成';
+  String get clearCompleted => '移除已完成事项';
 
   @override
-  String get clearCategoryTasks => '清空本分类事项';
+  String get clearCategoryTasks => '移除本分类已完成事项';
 
   @override
-  String get clearCategories => '清空分类';
+  String get categoryActions => '分类操作';
+
+  @override
+  String get reorderCategory => '拖动调整分类顺序';
+
+  @override
+  String get moveTask => '拖动移动事项';
+
+  @override
+  String get taskActions => '事项操作';
 
   @override
   String get clearAllData => '清空全部数据';
@@ -272,12 +278,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deleteCategoryTitle => '删除分类？';
 
   @override
+  String get deleteCategory => '删除分类';
+
+  @override
   String deleteCategoryBody(int count) {
     return '分类内的 $count 个事项将移动到“未分类”。';
   }
 
   @override
-  String get clearCompletedTitle => '清除已完成事项？';
+  String get clearCompletedTitle => '移除所有已完成事项？';
 
   @override
   String clearCompletedBody(int count) {
@@ -285,18 +294,12 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get clearCategoryTasksTitle => '清空本分类的事项？';
+  String get clearCategoryTasksTitle => '移除本分类已完成事项？';
 
   @override
   String clearCategoryTasksBody(int count) {
-    return '将永久删除本分类内的 $count 个事项。';
+    return '将永久删除本分类内的 $count 个已完成事项。';
   }
-
-  @override
-  String get clearCategoriesTitle => '清空所有分类？';
-
-  @override
-  String get clearCategoriesBody => '所有普通分类将被删除，事项会保留到“未分类”。';
 
   @override
   String get clearAllTitle => '清空全部数据？';
@@ -324,13 +327,67 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String remainingShort(int hours, int minutes) {
-    return '${hours}h ${minutes}m';
+    return '$hours小时$minutes分';
   }
 
   @override
   String remainingLong(int days, int hours) {
-    return '${days}d ${hours}h';
+    return '$days天$hours小时';
   }
+
+  @override
+  String overdueByShort(int hours, int minutes) {
+    return '逾期$hours小时$minutes分';
+  }
+
+  @override
+  String overdueByLong(int days, int hours) {
+    return '逾期$days天$hours小时';
+  }
+
+  @override
+  String get inOneHour => '1 小时后';
+
+  @override
+  String get today => '今天';
+
+  @override
+  String get tomorrow => '明天';
+
+  @override
+  String get thisWeekend => '本周末';
+
+  @override
+  String get undo => '撤销';
+
+  @override
+  String get taskMarkedComplete => '已标记为完成';
+
+  @override
+  String get taskMarkedIncomplete => '已恢复为未完成';
+
+  @override
+  String taskMovedTo(String category) {
+    return '已移至“$category”';
+  }
+
+  @override
+  String get clearCompletedConfirm => '永久清除';
+
+  @override
+  String get clearCategoryTasksConfirm => '移除已完成事项';
+
+  @override
+  String get deleteCategoryConfirm => '删除分类';
+
+  @override
+  String get deleteTaskConfirm => '删除事项';
+
+  @override
+  String get clearAllConfirm => '清空全部数据';
+
+  @override
+  String get restoreConfirm => '恢复并替换';
 
   @override
   String taskCount(int count) {

@@ -158,20 +158,14 @@ void _navigateToDestination(
 
 enum AppNavigationDestinationId {
   board('/'),
-  appearance('/settings/appearance'),
-  systemData('/settings/system-data'),
-  about('/settings/about'),
-  community('/settings/community');
+  settings('/settings');
 
   const AppNavigationDestinationId(this.route);
 
   final String route;
 
   static AppNavigationDestinationId fromLocation(String location) {
-    if (location.startsWith('/settings/system-data')) return systemData;
-    if (location.startsWith('/settings/about')) return about;
-    if (location.startsWith('/settings/community')) return community;
-    if (location.startsWith('/settings')) return appearance;
+    if (location.startsWith('/settings')) return settings;
     return board;
   }
 }
@@ -391,7 +385,6 @@ class _AppNavigationDestinations extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final boardDestination = destinations.first;
     final boardButton = _destinationButton(boardDestination);
     final settingsGroup = Column(
@@ -404,21 +397,7 @@ class _AppNavigationDestinations extends StatelessWidget {
           ),
           child: const Divider(height: 1),
         ),
-        SizedBox(
-          height: 36,
-          child: Opacity(
-            opacity: expansionProgress,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16, top: 12),
-              child: Text(
-                l10n.settingsTitle,
-                maxLines: 1,
-                overflow: TextOverflow.clip,
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-            ),
-          ),
-        ),
+        const SizedBox(height: 8),
         for (final destination in destinations.skip(1)) ...[
           _destinationButton(destination),
           if (destination != destinations.last) const SizedBox(height: 8),
@@ -577,27 +556,9 @@ List<_AppNavigationDestination> _destinations(AppLocalizations l10n) => [
     selectedIcon: Icons.home,
   ),
   _AppNavigationDestination(
-    id: AppNavigationDestinationId.appearance,
-    label: l10n.appearanceSettingsTitle,
-    icon: Icons.palette_outlined,
-    selectedIcon: Icons.palette,
-  ),
-  _AppNavigationDestination(
-    id: AppNavigationDestinationId.systemData,
-    label: l10n.systemDataSettingsTitle,
-    icon: Icons.tune_outlined,
-    selectedIcon: Icons.tune,
-  ),
-  _AppNavigationDestination(
-    id: AppNavigationDestinationId.about,
-    label: l10n.aboutSettingsTitle,
-    icon: Icons.info_outline,
-    selectedIcon: Icons.info,
-  ),
-  _AppNavigationDestination(
-    id: AppNavigationDestinationId.community,
-    label: l10n.communitySettingsTitle,
-    icon: Icons.groups_outlined,
-    selectedIcon: Icons.groups,
+    id: AppNavigationDestinationId.settings,
+    label: l10n.settingsTitle,
+    icon: Icons.settings_outlined,
+    selectedIcon: Icons.settings,
   ),
 ];

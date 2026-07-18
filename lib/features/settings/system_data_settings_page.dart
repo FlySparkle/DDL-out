@@ -17,7 +17,8 @@ class SystemDataSettingsPage extends ConsumerWidget {
     final settings = ref.watch(settingsControllerProvider);
     final controller = ref.read(settingsControllerProvider.notifier);
     return SettingsPageScaffold(
-      destination: AppNavigationDestinationId.systemData,
+      destination: AppNavigationDestinationId.settings,
+      showBackButton: true,
       title: l10n.systemDataSettingsTitle,
       body: ListView(
         padding: SettingsPageScaffold.contentPadding,

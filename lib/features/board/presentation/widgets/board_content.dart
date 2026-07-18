@@ -5,6 +5,7 @@ import '../../../../data/database/app_database.dart';
 import '../../../../data/repositories/board_providers.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../dialogs/category_editor.dart';
+import '../dialogs/task_editor.dart';
 import 'board_states.dart';
 import 'category_section.dart';
 
@@ -18,6 +19,11 @@ class BoardContent extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     if (snapshot.categories.isEmpty && snapshot.tasks.isEmpty) {
       return BoardEmptyState(
+        onCreateTask: () => showTaskEditor(
+          context,
+          snapshot: snapshot,
+          initialCategoryId: null,
+        ),
         onCreateCategory: () => showCategoryEditor(context),
       );
     }

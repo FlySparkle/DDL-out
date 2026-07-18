@@ -7,6 +7,7 @@ import '../../data/repositories/board_providers.dart';
 import '../../l10n/app_localizations.dart';
 import 'presentation/dialogs/category_editor.dart';
 import 'presentation/dialogs/confirmation_dialog.dart';
+import 'presentation/dialogs/task_editor.dart';
 import 'presentation/widgets/board_content.dart';
 import 'presentation/widgets/board_states.dart';
 
@@ -42,37 +43,29 @@ class BoardPage extends ConsumerWidget {
         title: Text(l10n.appTitle),
         actions: [
           IconButton(
+            tooltip: l10n.newCategory,
+            onPressed: () => showCategoryEditor(context),
+            icon: const Icon(Icons.create_new_folder_outlined),
+          ),
+          IconButton(
             tooltip: l10n.clearCompleted,
-            onPressed: board.value?.completedCount == 0
+            onPressed: (board.value?.completedCount ?? 0) == 0
                 ? null
                 : () => _clearCompleted(context, ref, board.value!),
-            icon: const Icon(Icons.cleaning_services_outlined),
-          ),
-          PopupMenuButton<String>(
-            tooltip: l10n.moreActions,
-            onSelected: (value) {
-              if (value == 'clear_categories' && board.value != null) {
-                _clearCategories(context, ref);
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'clear_categories',
-                enabled: board.value?.categories.isNotEmpty ?? false,
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.layers_clear_outlined),
-                  title: Text(l10n.clearCategories),
-                ),
-              ),
-            ],
+            icon: const Icon(Icons.playlist_remove),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        tooltip: l10n.newCategory,
-        onPressed: () => showCategoryEditor(context),
-        child: const Icon(Icons.create_new_folder_outlined),
+        tooltip: l10n.newTask,
+        onPressed: board.value == null
+            ? null
+            : () => showTaskEditor(
+                context,
+                snapshot: board.value!,
+                initialCategoryId: null,
+              ),
+        child: const Icon(Icons.add_task),
       ),
       body: board.when(
         data: (snapshot) => BoardContent(snapshot: snapshot),
@@ -96,18 +89,8 @@ class BoardPage extends ConsumerWidget {
       title: l10n.clearCompletedTitle,
       body: l10n.clearCompletedBody(snapshot.completedCount),
       destructive: true,
+      confirmLabel: l10n.clearCompletedConfirm,
     );
     if (confirmed) await ref.read(taskRepositoryProvider).clearCompleted();
-  }
-
-  Future<void> _clearCategories(BuildContext context, WidgetRef ref) async {
-    final l10n = AppLocalizations.of(context);
-    final confirmed = await showConfirmation(
-      context,
-      title: l10n.clearCategoriesTitle,
-      body: l10n.clearCategoriesBody,
-      destructive: true,
-    );
-    if (confirmed) await ref.read(categoryRepositoryProvider).clear();
   }
 }

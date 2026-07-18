@@ -36,7 +36,16 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('还没有截止事项'), findsOneWidget);
+    expect(find.text('新建事项'), findsOneWidget);
     expect(find.text('新建分类'), findsOneWidget);
+    expect(find.byTooltip('新建分类'), findsOneWidget);
+    expect(find.byTooltip('移除已完成事项'), findsOneWidget);
+    expect(find.byType(PopupMenuButton<String>), findsNothing);
+    await tester.tap(find.text('新建事项'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(TextFormField, '事项名称'), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
     expect(find.text('截止事项'), findsOneWidget);
@@ -206,7 +215,7 @@ void main() {
           .shape,
     );
     final secondDestination = tester.getRect(
-      find.byKey(const ValueKey('navigation-destination-appearance')),
+      find.byKey(const ValueKey('navigation-destination-settings')),
     );
     expect(secondDestination.top, greaterThan(destinationRect.bottom));
     expect(find.text('Work'), findsOneWidget);
@@ -376,6 +385,45 @@ void main() {
     expect(find.text('孤立事项'), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('task controls fit the minimum supported width', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final now = DateTime(2026, 7, 19, 12);
+    final snapshot = _snapshotWithTask(now);
+    await tester.binding.setSurfaceSize(const Size(360, 700));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          boardProvider.overrideWith((ref) => Stream.value(snapshot)),
+          currentTimeProvider.overrideWith((ref) => Stream.value(now)),
+        ],
+        child: MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.windows),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: const AppNavigationShell(location: '/', child: BoardPage()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ship release'), findsOneWidget);
+    expect(find.byIcon(Icons.drag_indicator), findsNWidgets(2));
+    final categoryClear = find.byTooltip(
+      'Remove completed tasks in this category',
+    );
+    expect(categoryClear, findsOneWidget);
+    final categoryClearButton = find.ancestor(
+      of: categoryClear,
+      matching: find.byType(IconButton),
+    );
+    expect(categoryClearButton, findsOneWidget);
+    expect(tester.widget<IconButton>(categoryClearButton).onPressed, isNull);
+    expect(tester.takeException(), isNull);
   });
 }
 

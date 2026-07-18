@@ -33,7 +33,8 @@ class CommunitySettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     return SettingsPageScaffold(
-      destination: AppNavigationDestinationId.community,
+      destination: AppNavigationDestinationId.settings,
+      showBackButton: true,
       title: l10n.communitySettingsTitle,
       body: ListView(
         padding: SettingsPageScaffold.contentPadding,

@@ -26,9 +26,7 @@ class LegalDocumentPage extends ConsumerWidget {
       LegalDocumentKind.terms => l10n.termsOfService,
       LegalDocumentKind.codeOfConduct => l10n.codeOfConduct,
     };
-    final destination = kind == LegalDocumentKind.codeOfConduct
-        ? AppNavigationDestinationId.community
-        : AppNavigationDestinationId.about;
+    const destination = AppNavigationDestinationId.settings;
 
     return SettingsPageScaffold(
       destination: destination,

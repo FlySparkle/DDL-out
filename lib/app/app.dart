@@ -12,6 +12,7 @@ import '../features/settings/community_settings_page.dart';
 import '../features/settings/domain/legal_document.dart';
 import '../features/settings/presentation/legal_document_page.dart';
 import '../features/settings/system_data_settings_page.dart';
+import '../features/settings/settings_overview_page.dart';
 import '../l10n/app_localizations.dart';
 import 'navigation/app_navigation_shell.dart';
 import 'app_shell.dart';
@@ -23,7 +24,10 @@ final _router = GoRouter(
           AppNavigationShell(location: state.uri.path, child: child),
       routes: [
         GoRoute(path: '/', builder: (context, state) => const BoardPage()),
-        GoRoute(path: '/settings', redirect: (_, _) => '/settings/appearance'),
+        GoRoute(
+          path: '/settings',
+          builder: (context, state) => const SettingsOverviewPage(),
+        ),
         GoRoute(
           path: '/settings/appearance',
           builder: (context, state) => const AppearanceSettingsPage(),

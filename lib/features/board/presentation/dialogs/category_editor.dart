@@ -170,6 +170,7 @@ class _CategoryEditorState extends ConsumerState<CategoryEditor> {
       title: l10n.deleteCategoryTitle,
       body: l10n.deleteCategoryBody(widget.taskCount),
       destructive: true,
+      confirmLabel: l10n.deleteCategoryConfirm,
     );
     if (!confirmed) return;
     await ref.read(categoryRepositoryProvider).delete(widget.category!.id);

@@ -274,12 +274,6 @@ abstract class AppLocalizations {
   /// **'确认'**
   String get confirm;
 
-  /// No description provided for @moreActions.
-  ///
-  /// In zh, this message translates to:
-  /// **'更多操作'**
-  String get moreActions;
-
   /// No description provided for @customColor.
   ///
   /// In zh, this message translates to:
@@ -331,7 +325,7 @@ abstract class AppLocalizations {
   /// No description provided for @emptyBody.
   ///
   /// In zh, this message translates to:
-  /// **'先创建一个分类，再把要完成的事放进去。'**
+  /// **'先记下要完成的事，之后也可以再整理分类。'**
   String get emptyBody;
 
   /// No description provided for @noTasks.
@@ -343,20 +337,38 @@ abstract class AppLocalizations {
   /// No description provided for @clearCompleted.
   ///
   /// In zh, this message translates to:
-  /// **'清除已完成'**
+  /// **'移除已完成事项'**
   String get clearCompleted;
 
   /// No description provided for @clearCategoryTasks.
   ///
   /// In zh, this message translates to:
-  /// **'清空本分类事项'**
+  /// **'移除本分类已完成事项'**
   String get clearCategoryTasks;
 
-  /// No description provided for @clearCategories.
+  /// No description provided for @categoryActions.
   ///
   /// In zh, this message translates to:
-  /// **'清空分类'**
-  String get clearCategories;
+  /// **'分类操作'**
+  String get categoryActions;
+
+  /// No description provided for @reorderCategory.
+  ///
+  /// In zh, this message translates to:
+  /// **'拖动调整分类顺序'**
+  String get reorderCategory;
+
+  /// No description provided for @moveTask.
+  ///
+  /// In zh, this message translates to:
+  /// **'拖动移动事项'**
+  String get moveTask;
+
+  /// No description provided for @taskActions.
+  ///
+  /// In zh, this message translates to:
+  /// **'事项操作'**
+  String get taskActions;
 
   /// No description provided for @clearAllData.
   ///
@@ -622,6 +634,12 @@ abstract class AppLocalizations {
   /// **'删除分类？'**
   String get deleteCategoryTitle;
 
+  /// No description provided for @deleteCategory.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除分类'**
+  String get deleteCategory;
+
   /// No description provided for @deleteCategoryBody.
   ///
   /// In zh, this message translates to:
@@ -631,7 +649,7 @@ abstract class AppLocalizations {
   /// No description provided for @clearCompletedTitle.
   ///
   /// In zh, this message translates to:
-  /// **'清除已完成事项？'**
+  /// **'移除所有已完成事项？'**
   String get clearCompletedTitle;
 
   /// No description provided for @clearCompletedBody.
@@ -643,26 +661,14 @@ abstract class AppLocalizations {
   /// No description provided for @clearCategoryTasksTitle.
   ///
   /// In zh, this message translates to:
-  /// **'清空本分类的事项？'**
+  /// **'移除本分类已完成事项？'**
   String get clearCategoryTasksTitle;
 
   /// No description provided for @clearCategoryTasksBody.
   ///
   /// In zh, this message translates to:
-  /// **'将永久删除本分类内的 {count} 个事项。'**
+  /// **'将永久删除本分类内的 {count} 个已完成事项。'**
   String clearCategoryTasksBody(int count);
-
-  /// No description provided for @clearCategoriesTitle.
-  ///
-  /// In zh, this message translates to:
-  /// **'清空所有分类？'**
-  String get clearCategoriesTitle;
-
-  /// No description provided for @clearCategoriesBody.
-  ///
-  /// In zh, this message translates to:
-  /// **'所有普通分类将被删除，事项会保留到“未分类”。'**
-  String get clearCategoriesBody;
 
   /// No description provided for @clearAllTitle.
   ///
@@ -702,14 +708,110 @@ abstract class AppLocalizations {
   /// No description provided for @remainingShort.
   ///
   /// In zh, this message translates to:
-  /// **'{hours}h {minutes}m'**
+  /// **'{hours}小时{minutes}分'**
   String remainingShort(int hours, int minutes);
 
   /// No description provided for @remainingLong.
   ///
   /// In zh, this message translates to:
-  /// **'{days}d {hours}h'**
+  /// **'{days}天{hours}小时'**
   String remainingLong(int days, int hours);
+
+  /// No description provided for @overdueByShort.
+  ///
+  /// In zh, this message translates to:
+  /// **'逾期{hours}小时{minutes}分'**
+  String overdueByShort(int hours, int minutes);
+
+  /// No description provided for @overdueByLong.
+  ///
+  /// In zh, this message translates to:
+  /// **'逾期{days}天{hours}小时'**
+  String overdueByLong(int days, int hours);
+
+  /// No description provided for @inOneHour.
+  ///
+  /// In zh, this message translates to:
+  /// **'1 小时后'**
+  String get inOneHour;
+
+  /// No description provided for @today.
+  ///
+  /// In zh, this message translates to:
+  /// **'今天'**
+  String get today;
+
+  /// No description provided for @tomorrow.
+  ///
+  /// In zh, this message translates to:
+  /// **'明天'**
+  String get tomorrow;
+
+  /// No description provided for @thisWeekend.
+  ///
+  /// In zh, this message translates to:
+  /// **'本周末'**
+  String get thisWeekend;
+
+  /// No description provided for @undo.
+  ///
+  /// In zh, this message translates to:
+  /// **'撤销'**
+  String get undo;
+
+  /// No description provided for @taskMarkedComplete.
+  ///
+  /// In zh, this message translates to:
+  /// **'已标记为完成'**
+  String get taskMarkedComplete;
+
+  /// No description provided for @taskMarkedIncomplete.
+  ///
+  /// In zh, this message translates to:
+  /// **'已恢复为未完成'**
+  String get taskMarkedIncomplete;
+
+  /// No description provided for @taskMovedTo.
+  ///
+  /// In zh, this message translates to:
+  /// **'已移至“{category}”'**
+  String taskMovedTo(String category);
+
+  /// No description provided for @clearCompletedConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'永久清除'**
+  String get clearCompletedConfirm;
+
+  /// No description provided for @clearCategoryTasksConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'移除已完成事项'**
+  String get clearCategoryTasksConfirm;
+
+  /// No description provided for @deleteCategoryConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除分类'**
+  String get deleteCategoryConfirm;
+
+  /// No description provided for @deleteTaskConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除事项'**
+  String get deleteTaskConfirm;
+
+  /// No description provided for @clearAllConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'清空全部数据'**
+  String get clearAllConfirm;
+
+  /// No description provided for @restoreConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'恢复并替换'**
+  String get restoreConfirm;
 
   /// No description provided for @taskCount.
   ///

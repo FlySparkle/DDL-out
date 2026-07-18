@@ -96,9 +96,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get confirm => '確認';
 
   @override
-  String get moreActions => 'その他の操作';
-
-  @override
   String get customColor => 'カスタムカラー';
 
   @override
@@ -123,19 +120,28 @@ class AppLocalizationsJa extends AppLocalizations {
   String get emptyTitle => '締切タスクはまだありません';
 
   @override
-  String get emptyBody => 'カテゴリーを作成して、完了したいことを追加しましょう。';
+  String get emptyBody => 'まずやることを記録しましょう。カテゴリー分けは後からでもできます。';
 
   @override
   String get noTasks => 'このカテゴリーにはタスクがありません';
 
   @override
-  String get clearCompleted => '完了済みを削除';
+  String get clearCompleted => '完了済みタスクを削除';
 
   @override
-  String get clearCategoryTasks => 'このカテゴリーのタスクを削除';
+  String get clearCategoryTasks => 'このカテゴリーの完了済みを削除';
 
   @override
-  String get clearCategories => 'カテゴリーを削除';
+  String get categoryActions => 'カテゴリー操作';
+
+  @override
+  String get reorderCategory => 'ドラッグしてカテゴリーを並べ替え';
+
+  @override
+  String get moveTask => 'ドラッグしてタスクを移動';
+
+  @override
+  String get taskActions => 'タスク操作';
 
   @override
   String get clearAllData => 'すべてのデータを削除';
@@ -273,12 +279,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get deleteCategoryTitle => 'カテゴリーを削除しますか？';
 
   @override
+  String get deleteCategory => 'カテゴリーを削除';
+
+  @override
   String deleteCategoryBody(int count) {
     return 'このカテゴリー内の $count 件のタスクは「未分類」に移動します。';
   }
 
   @override
-  String get clearCompletedTitle => '完了済みタスクを削除しますか？';
+  String get clearCompletedTitle => 'すべての完了済みタスクを削除しますか？';
 
   @override
   String clearCompletedBody(int count) {
@@ -286,18 +295,12 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get clearCategoryTasksTitle => 'このカテゴリーのタスクを削除しますか？';
+  String get clearCategoryTasksTitle => 'このカテゴリーの完了済みタスクを削除しますか？';
 
   @override
   String clearCategoryTasksBody(int count) {
-    return 'このカテゴリー内の $count 件のタスクを完全に削除します。';
+    return 'このカテゴリー内の完了済みタスク $count 件を完全に削除します。';
   }
-
-  @override
-  String get clearCategoriesTitle => 'すべてのカテゴリーを削除しますか？';
-
-  @override
-  String get clearCategoriesBody => 'すべてのカテゴリーが削除され、タスクは「未分類」に残ります。';
 
   @override
   String get clearAllTitle => 'すべてのデータを削除しますか？';
@@ -332,6 +335,60 @@ class AppLocalizationsJa extends AppLocalizations {
   String remainingLong(int days, int hours) {
     return '残り $days日$hours時間';
   }
+
+  @override
+  String overdueByShort(int hours, int minutes) {
+    return '$hours時間$minutes分超過';
+  }
+
+  @override
+  String overdueByLong(int days, int hours) {
+    return '$days日$hours時間超過';
+  }
+
+  @override
+  String get inOneHour => '1時間後';
+
+  @override
+  String get today => '今日';
+
+  @override
+  String get tomorrow => '明日';
+
+  @override
+  String get thisWeekend => '今週末';
+
+  @override
+  String get undo => '元に戻す';
+
+  @override
+  String get taskMarkedComplete => '完了にしました';
+
+  @override
+  String get taskMarkedIncomplete => '未完了に戻しました';
+
+  @override
+  String taskMovedTo(String category) {
+    return '「$category」へ移動しました';
+  }
+
+  @override
+  String get clearCompletedConfirm => '完全に削除';
+
+  @override
+  String get clearCategoryTasksConfirm => '完了済みを削除';
+
+  @override
+  String get deleteCategoryConfirm => 'カテゴリーを削除';
+
+  @override
+  String get deleteTaskConfirm => 'タスクを削除';
+
+  @override
+  String get clearAllConfirm => 'すべてのデータを消去';
+
+  @override
+  String get restoreConfirm => '復元して置き換え';
 
   @override
   String taskCount(int count) {

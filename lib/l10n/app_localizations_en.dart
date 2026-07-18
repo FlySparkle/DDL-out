@@ -96,9 +96,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirm => 'Confirm';
 
   @override
-  String get moreActions => 'More actions';
-
-  @override
   String get customColor => 'Custom color';
 
   @override
@@ -124,19 +121,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emptyBody =>
-      'Create a category, then add the things you need to finish.';
+      'Capture what you need to finish now. You can organize it later.';
 
   @override
   String get noTasks => 'No tasks in this category';
 
   @override
-  String get clearCompleted => 'Clear completed';
+  String get clearCompleted => 'Remove completed tasks';
 
   @override
-  String get clearCategoryTasks => 'Clear tasks in this category';
+  String get clearCategoryTasks => 'Remove completed tasks in this category';
 
   @override
-  String get clearCategories => 'Clear categories';
+  String get categoryActions => 'Category actions';
+
+  @override
+  String get reorderCategory => 'Drag to reorder category';
+
+  @override
+  String get moveTask => 'Drag to move task';
+
+  @override
+  String get taskActions => 'Task actions';
 
   @override
   String get clearAllData => 'Clear all data';
@@ -277,12 +283,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteCategoryTitle => 'Delete category?';
 
   @override
+  String get deleteCategory => 'Delete category';
+
+  @override
   String deleteCategoryBody(int count) {
     return 'The $count tasks in this category will move to Uncategorized.';
   }
 
   @override
-  String get clearCompletedTitle => 'Clear completed tasks?';
+  String get clearCompletedTitle => 'Remove all completed tasks?';
 
   @override
   String clearCompletedBody(int count) {
@@ -290,19 +299,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get clearCategoryTasksTitle => 'Clear tasks in this category?';
+  String get clearCategoryTasksTitle =>
+      'Remove completed tasks in this category?';
 
   @override
   String clearCategoryTasksBody(int count) {
-    return 'This will permanently delete the $count tasks in this category.';
+    return 'This will permanently delete the $count completed tasks in this category.';
   }
-
-  @override
-  String get clearCategoriesTitle => 'Clear all categories?';
-
-  @override
-  String get clearCategoriesBody =>
-      'All categories will be deleted. Tasks will remain in Uncategorized.';
 
   @override
   String get clearAllTitle => 'Clear all data?';
@@ -338,6 +341,60 @@ class AppLocalizationsEn extends AppLocalizations {
   String remainingLong(int days, int hours) {
     return '${days}d ${hours}h';
   }
+
+  @override
+  String overdueByShort(int hours, int minutes) {
+    return 'Overdue ${hours}h ${minutes}m';
+  }
+
+  @override
+  String overdueByLong(int days, int hours) {
+    return 'Overdue ${days}d ${hours}h';
+  }
+
+  @override
+  String get inOneHour => 'In 1 hour';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get tomorrow => 'Tomorrow';
+
+  @override
+  String get thisWeekend => 'This weekend';
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get taskMarkedComplete => 'Marked complete';
+
+  @override
+  String get taskMarkedIncomplete => 'Marked incomplete';
+
+  @override
+  String taskMovedTo(String category) {
+    return 'Moved to “$category”';
+  }
+
+  @override
+  String get clearCompletedConfirm => 'Clear permanently';
+
+  @override
+  String get clearCategoryTasksConfirm => 'Remove completed';
+
+  @override
+  String get deleteCategoryConfirm => 'Delete category';
+
+  @override
+  String get deleteTaskConfirm => 'Delete task';
+
+  @override
+  String get clearAllConfirm => 'Clear all data';
+
+  @override
+  String get restoreConfirm => 'Restore and replace';
 
   @override
   String taskCount(int count) {

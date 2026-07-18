@@ -3,8 +3,13 @@ import 'package:flutter/material.dart';
 import '../../../../l10n/app_localizations.dart';
 
 class BoardEmptyState extends StatelessWidget {
-  const BoardEmptyState({required this.onCreateCategory, super.key});
+  const BoardEmptyState({
+    required this.onCreateTask,
+    required this.onCreateCategory,
+    super.key,
+  });
 
+  final VoidCallback onCreateTask;
   final VoidCallback onCreateCategory;
 
   @override
@@ -32,6 +37,12 @@ class BoardEmptyState extends StatelessWidget {
               Text(l10n.emptyBody, textAlign: TextAlign.center),
               const SizedBox(height: 20),
               FilledButton.icon(
+                onPressed: onCreateTask,
+                icon: const Icon(Icons.add_task),
+                label: Text(l10n.newTask),
+              ),
+              const SizedBox(height: 8),
+              TextButton.icon(
                 onPressed: onCreateCategory,
                 icon: const Icon(Icons.create_new_folder_outlined),
                 label: Text(l10n.newCategory),

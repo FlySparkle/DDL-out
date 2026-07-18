@@ -11,6 +11,7 @@ import 'package:ddl_out/features/settings/domain/legal_document.dart';
 import 'package:ddl_out/features/settings/presentation/legal_document_page.dart';
 import 'package:ddl_out/features/settings/presentation/settings_tile_group.dart';
 import 'package:ddl_out/features/settings/settings_page.dart';
+import 'package:ddl_out/features/settings/settings_overview_page.dart';
 import 'package:ddl_out/features/settings/system_data_settings_page.dart';
 import 'package:ddl_out/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +36,21 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text(entry.$2), findsOneWidget);
     }
+  });
+
+  testWidgets('settings hub groups all low-frequency destinations', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(
+      _app(const SettingsOverviewPage(), _FakeLauncher(true)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Appearance & personalization'), findsOneWidget);
+    expect(find.text('System & data'), findsOneWidget);
+    expect(find.text('About'), findsOneWidget);
+    expect(find.text('Community & support'), findsOneWidget);
   });
 
   testWidgets('content tiles use the navigation shape and edge inset', (
