@@ -10,7 +10,7 @@ void main() {
 
   test('all localized legal documents are present and non-empty', () {
     for (final locale in ['zh', 'en', 'ja']) {
-      for (final fileName in ['privacy.md', 'terms.md', 'code_of_conduct.md']) {
+      for (final fileName in ['privacy.md', 'terms.md']) {
         final file = File('assets/legal/$locale/$fileName');
         expect(file.existsSync(), isTrue, reason: file.path);
         final contents = file.readAsStringSync();

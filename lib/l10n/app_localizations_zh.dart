@@ -441,7 +441,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get documentLoadFailed => '文档加载失败';
 
   @override
-  String get viewRepositorySource => '查看仓库原文';
+  String get viewRepositorySource => '查看原文';
 
   @override
   String get authorsSection => '作者';
@@ -490,9 +490,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get codeOfConduct => '社区行为准则';
-
-  @override
-  String get codeOfConductSubtitle => '离线阅读社区参与规范';
 
   @override
   String get reportSecurityIssue => '私密报告安全漏洞';

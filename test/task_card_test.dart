@@ -68,7 +68,7 @@ void main() {
     expect(progress.widthFactor, 0.5);
   });
 
-  testWidgets('mobile task handle starts dragging without a long press', (
+  testWidgets('mobile task handle starts after a brief 120ms press', (
     tester,
   ) async {
     final now = DateTime(2026, 7, 19, 12);
@@ -105,10 +105,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(LongPressDraggable<int>), findsNothing);
-    final draggable = find.byType(Draggable<int>);
+    final draggable = find.byType(LongPressDraggable<int>);
     expect(draggable, findsOneWidget);
     final gesture = await tester.startGesture(tester.getCenter(draggable));
+    await tester.pump(const Duration(milliseconds: 130));
     await gesture.moveBy(const Offset(30, 30));
     await tester.pump();
 

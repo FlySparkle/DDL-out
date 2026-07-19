@@ -147,7 +147,7 @@
   "checkUpdatesOnStartupSubtitle": "起動時に GitHub へ接続して正式版を確認します",
   "openLinkFailed": "リンクを開けませんでした。後でもう一度お試しください",
   "documentLoadFailed": "文書を読み込めませんでした",
-  "viewRepositorySource": "リポジトリの原文を見る",
+  "viewRepositorySource": "原文を見る",
   "authorsSection": "作者",
   "legalSection": "法的情報とライセンス",
   "openSourceLicense": "オープンソースライセンス",
@@ -164,7 +164,6 @@
   "communityGuidelinesSection": "参加とガイドライン",
   "contributingGuide": "貢献ガイド",
   "codeOfConduct": "コミュニティ行動規範",
-  "codeOfConductSubtitle": "コミュニティ規範をオフラインで読む",
   "reportSecurityIssue": "脆弱性を非公開で報告",
   "reportSecurityIssueSubtitle": "GitHub の非公開報告を使用し、脆弱性の詳細を公開しないでください"
 }

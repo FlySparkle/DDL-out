@@ -442,7 +442,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get documentLoadFailed => '文書を読み込めませんでした';
 
   @override
-  String get viewRepositorySource => 'リポジトリの原文を見る';
+  String get viewRepositorySource => '原文を見る';
 
   @override
   String get authorsSection => '作者';
@@ -491,9 +491,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get codeOfConduct => 'コミュニティ行動規範';
-
-  @override
-  String get codeOfConductSubtitle => 'コミュニティ規範をオフラインで読む';
 
   @override
   String get reportSecurityIssue => '脆弱性を非公開で報告';

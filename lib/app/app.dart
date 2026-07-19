@@ -17,7 +17,10 @@ import '../l10n/app_localizations.dart';
 import 'navigation/app_navigation_shell.dart';
 import 'app_shell.dart';
 
+final _rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final _router = GoRouter(
+  navigatorKey: _rootNavigatorKey,
   routes: [
     ShellRoute(
       builder: (context, state, child) =>
@@ -60,14 +63,6 @@ final _router = GoRouter(
         GoRoute(
           path: '/settings/community',
           builder: (context, state) => const CommunitySettingsPage(),
-          routes: [
-            GoRoute(
-              path: 'code-of-conduct',
-              builder: (context, state) => const LegalDocumentPage(
-                kind: LegalDocumentKind.codeOfConduct,
-              ),
-            ),
-          ],
         ),
       ],
     ),
@@ -100,7 +95,8 @@ class DdlOutApp extends ConsumerWidget {
           ),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          builder: (_, child) => AppShell(child: child!),
+          builder: (_, child) =>
+              AppShell(navigatorKey: _rootNavigatorKey, child: child!),
         );
       },
     );

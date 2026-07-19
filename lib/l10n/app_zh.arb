@@ -147,7 +147,7 @@
   "checkUpdatesOnStartupSubtitle": "开启后每次启动会连接 GitHub 检查正式版本",
   "openLinkFailed": "无法打开链接，请稍后重试",
   "documentLoadFailed": "文档加载失败",
-  "viewRepositorySource": "查看仓库原文",
+  "viewRepositorySource": "查看原文",
   "authorsSection": "作者",
   "legalSection": "法律与许可",
   "openSourceLicense": "开源许可证",
@@ -164,7 +164,6 @@
   "communityGuidelinesSection": "参与与规范",
   "contributingGuide": "贡献指南",
   "codeOfConduct": "社区行为准则",
-  "codeOfConductSubtitle": "离线阅读社区参与规范",
   "reportSecurityIssue": "私密报告安全漏洞",
   "reportSecurityIssueSubtitle": "通过 GitHub 私密安全报告提交，请勿公开漏洞细节"
 }

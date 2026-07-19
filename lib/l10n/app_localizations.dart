@@ -906,7 +906,7 @@ abstract class AppLocalizations {
   /// No description provided for @viewRepositorySource.
   ///
   /// In zh, this message translates to:
-  /// **'查看仓库原文'**
+  /// **'查看原文'**
   String get viewRepositorySource;
 
   /// No description provided for @authorsSection.
@@ -1004,12 +1004,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'社区行为准则'**
   String get codeOfConduct;
-
-  /// No description provided for @codeOfConductSubtitle.
-  ///
-  /// In zh, this message translates to:
-  /// **'离线阅读社区参与规范'**
-  String get codeOfConductSubtitle;
 
   /// No description provided for @reportSecurityIssue.
   ///

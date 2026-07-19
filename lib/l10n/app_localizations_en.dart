@@ -449,7 +449,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get documentLoadFailed => 'Could not load this document';
 
   @override
-  String get viewRepositorySource => 'View repository source';
+  String get viewRepositorySource => 'View source';
 
   @override
   String get authorsSection => 'Authors';
@@ -499,9 +499,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get codeOfConduct => 'Community code of conduct';
-
-  @override
-  String get codeOfConductSubtitle => 'Read the community guidelines offline';
 
   @override
   String get reportSecurityIssue => 'Report a security vulnerability privately';

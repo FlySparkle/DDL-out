@@ -147,7 +147,7 @@
   "checkUpdatesOnStartupSubtitle": "Connect to GitHub on launch to check for stable releases",
   "openLinkFailed": "Could not open the link. Try again later.",
   "documentLoadFailed": "Could not load this document",
-  "viewRepositorySource": "View repository source",
+  "viewRepositorySource": "View source",
   "authorsSection": "Authors",
   "legalSection": "Legal & licences",
   "openSourceLicense": "Open-source licence",
@@ -164,7 +164,6 @@
   "communityGuidelinesSection": "Participation & guidelines",
   "contributingGuide": "Contributing guide",
   "codeOfConduct": "Community code of conduct",
-  "codeOfConductSubtitle": "Read the community guidelines offline",
   "reportSecurityIssue": "Report a security vulnerability privately",
   "reportSecurityIssueSubtitle": "Use GitHub private reporting; do not disclose vulnerability details publicly"
 }

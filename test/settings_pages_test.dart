@@ -155,6 +155,24 @@ void main() {
     );
   });
 
+  testWidgets('code of conduct opens the online source', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final launcher = _FakeLauncher(true);
+    await tester.pumpWidget(_app(const CommunitySettingsPage(), launcher));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('Community code of conduct'));
+    await tester.tap(find.text('Community code of conduct'));
+    await tester.pump();
+
+    expect(
+      launcher.lastUri,
+      Uri.parse(
+        'https://github.com/FlySparkle/DDL-out/blob/main/docs/CODE_OF_CONDUCT.md',
+      ),
+    );
+  });
+
   testWidgets('legal document load failures are non-fatal', (tester) async {
     SharedPreferences.setMockInitialValues({});
     final launcher = _FakeLauncher(true);
@@ -174,7 +192,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(AppBar),
-        matching: find.widgetWithText(OutlinedButton, 'View repository source'),
+        matching: find.widgetWithText(OutlinedButton, 'View source'),
       ),
       findsOneWidget,
     );
