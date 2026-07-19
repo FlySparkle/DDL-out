@@ -143,7 +143,7 @@ class AboutSettingsSection extends ConsumerWidget {
         return;
       }
       final result = await showUpdatePrompt(context, update);
-      if (result == UpdatePromptResult.downloadFailed && context.mounted) {
+      if (result == UpdatePromptResult.installFailed && context.mounted) {
         showSettingsMessage(context, l10n.operationFailed);
       }
     } on Object {

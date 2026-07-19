@@ -412,11 +412,41 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String updateAvailableBody(String version) {
-    return 'DDL out! $version が公開されました。GitHub を開いてダウンロードしますか？';
+    return 'DDL out! $version が公開されました。アプリ内でダウンロードしてインストールできます。';
   }
 
   @override
-  String get downloadUpdate => 'ダウンロード';
+  String get downloadUpdate => '今すぐ更新';
+
+  @override
+  String get updateDownloading => 'アップデートをダウンロードしています…';
+
+  @override
+  String updateDownloadingProgress(int percent) {
+    return 'アップデートをダウンロードしています… $percent%';
+  }
+
+  @override
+  String get updateVerifying => 'アップデートを検証しています…';
+
+  @override
+  String get updatePreparing => 'インストールと再起動を準備しています…';
+
+  @override
+  String get updatePermissionRequired =>
+      'DDL out! に不明なアプリのインストールを許可し、もう一度「今すぐ更新」をタップしてください。';
+
+  @override
+  String get updateUnsupported => 'このプラットフォームではアプリ内更新をまだ利用できません。';
+
+  @override
+  String get updatePackageUnavailable => 'このデバイス向けのアップデートパッケージがありません。';
+
+  @override
+  String get updateVerificationFailed => 'アップデートを検証できませんでした。後でもう一度お試しください。';
+
+  @override
+  String get updateInstallFailed => 'アップデートをインストールできませんでした。後でもう一度お試しください。';
 
   @override
   String get alreadyUpToDate => '最新バージョンです';
@@ -442,7 +472,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get documentLoadFailed => '文書を読み込めませんでした';
 
   @override
-  String get viewRepositorySource => 'リポジトリの原文を見る';
+  String get viewRepositorySource => '原文を見る';
 
   @override
   String get authorsSection => '作者';
@@ -491,9 +521,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get codeOfConduct => 'コミュニティ行動規範';
-
-  @override
-  String get codeOfConductSubtitle => 'コミュニティ規範をオフラインで読む';
 
   @override
   String get reportSecurityIssue => '脆弱性を非公開で報告';

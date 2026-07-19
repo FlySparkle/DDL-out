@@ -427,7 +427,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('category drag reorders without framework assertions', (
+  testWidgets('mobile category handle reorders after a brief press', (
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({});
@@ -463,7 +463,7 @@ void main() {
           categoryRepositoryProvider.overrideWithValue(repository),
         ],
         child: MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.windows),
+          theme: ThemeData(platform: TargetPlatform.android),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('en'),
@@ -475,14 +475,11 @@ void main() {
 
     final handles = find.byTooltip('Drag to reorder category');
     expect(handles, findsNWidgets(2));
-    final dragListeners = find.byType(Draggable<CategoryDragData>);
+    final dragListeners = find.byType(LongPressDraggable<CategoryDragData>);
     expect(dragListeners, findsNWidgets(2));
     final firstHandle = dragListeners.first;
-    final gesture = await tester.startGesture(
-      tester.getCenter(firstHandle),
-      kind: PointerDeviceKind.mouse,
-    );
-    await tester.pump();
+    final gesture = await tester.startGesture(tester.getCenter(firstHandle));
+    await tester.pump(const Duration(milliseconds: 130));
     await gesture.moveTo(tester.getCenter(find.text('Second')));
     await tester.pump(const Duration(milliseconds: 300));
     await gesture.up();

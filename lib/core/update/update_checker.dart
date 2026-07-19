@@ -9,12 +9,8 @@ final githubLatestReleaseUri = Uri.parse(
   'https://api.github.com/repos/FlySparkle/DDL-out/releases/latest',
 );
 
-final githubReleasesPageUri = Uri.parse(
-  'https://github.com/FlySparkle/DDL-out/releases/latest',
-);
-
 abstract interface class LatestReleaseReader {
-  Future<String> readLatestVersion();
+  Future<LatestRelease> readLatestRelease();
 }
 
 final latestReleaseReaderProvider = Provider<LatestReleaseReader>(
@@ -32,7 +28,7 @@ class GitHubLatestReleaseReader implements LatestReleaseReader {
   const GitHubLatestReleaseReader();
 
   @override
-  Future<String> readLatestVersion() async {
+  Future<LatestRelease> readLatestRelease() async {
     final client = HttpClient();
     try {
       final request = await client
@@ -49,17 +45,38 @@ class GitHubLatestReleaseReader implements LatestReleaseReader {
         throw const UpdateCheckException('Unable to read the latest release.');
       }
 
-      final payload = jsonDecode(body);
-      if (payload is! Map<String, dynamic> || payload['tag_name'] is! String) {
-        throw const UpdateCheckException(
-          'The latest release has no version tag.',
-        );
-      }
-      return payload['tag_name'] as String;
+      return parseGitHubReleasePayload(jsonDecode(body));
     } finally {
       client.close(force: true);
     }
   }
+}
+
+LatestRelease parseGitHubReleasePayload(Object? payload) {
+  if (payload is! Map<String, dynamic> || payload['tag_name'] is! String) {
+    throw const UpdateCheckException('The latest release has no version tag.');
+  }
+  final assets = <ReleaseAsset>[];
+  final rawAssets = payload['assets'];
+  if (rawAssets is List) {
+    for (final rawAsset in rawAssets) {
+      if (rawAsset is! Map<String, dynamic> ||
+          rawAsset['name'] is! String ||
+          rawAsset['browser_download_url'] is! String) {
+        continue;
+      }
+      final uri = Uri.tryParse(rawAsset['browser_download_url'] as String);
+      if (uri == null || uri.scheme != 'https') continue;
+      assets.add(
+        ReleaseAsset(
+          name: rawAsset['name'] as String,
+          downloadUri: uri,
+          size: rawAsset['size'] is int ? rawAsset['size'] as int : null,
+        ),
+      );
+    }
+  }
+  return LatestRelease(version: payload['tag_name'] as String, assets: assets);
 }
 
 class AppUpdateChecker {
@@ -75,22 +92,41 @@ class AppUpdateChecker {
     final currentVersion = ReleaseVersion.tryParseOrNull(
       await currentVersionReader.read(),
     );
-    final latestVersion = ReleaseVersion.tryParseOrNull(
-      await latestReleaseReader.readLatestVersion(),
-    );
+    final latestRelease = await latestReleaseReader.readLatestRelease();
+    final latestVersion = ReleaseVersion.tryParseOrNull(latestRelease.version);
     if (currentVersion == null || latestVersion == null) {
       throw const UpdateCheckException('Unable to compare release versions.');
     }
     return latestVersion.compareTo(currentVersion) > 0
-        ? AppUpdate(latestVersion.toString())
+        ? AppUpdate(latestVersion.toString(), latestRelease.assets)
         : null;
   }
 }
 
 class AppUpdate {
-  const AppUpdate(this.version);
+  const AppUpdate(this.version, [this.assets = const []]);
 
   final String version;
+  final List<ReleaseAsset> assets;
+}
+
+class LatestRelease {
+  const LatestRelease({required this.version, this.assets = const []});
+
+  final String version;
+  final List<ReleaseAsset> assets;
+}
+
+class ReleaseAsset {
+  const ReleaseAsset({
+    required this.name,
+    required this.downloadUri,
+    this.size,
+  });
+
+  final String name;
+  final Uri downloadUri;
+  final int? size;
 }
 
 class UpdateCheckException implements Exception {

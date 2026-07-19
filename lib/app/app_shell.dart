@@ -8,9 +8,10 @@ import '../l10n/app_localizations.dart';
 
 /// App 级外壳：注入文字缩放、触发启动时更新检查。
 class AppShell extends ConsumerStatefulWidget {
-  const AppShell({required this.child, super.key});
+  const AppShell({required this.child, this.navigatorKey, super.key});
 
   final Widget child;
+  final GlobalKey<NavigatorState>? navigatorKey;
 
   @override
   ConsumerState<AppShell> createState() => _AppShellState();
@@ -38,13 +39,20 @@ class _AppShellState extends ConsumerState<AppShell> {
       try {
         final update = await ref.read(updateCheckerProvider).checkForUpdate();
         if (update == null || !mounted) return;
-        final result = await showUpdatePrompt(context, update);
-        if (result == UpdatePromptResult.downloadFailed && mounted) {
-          ScaffoldMessenger.of(context)
+        final promptContext =
+            widget.navigatorKey?.currentState?.overlay?.context ?? context;
+        if (!promptContext.mounted) return;
+        final result = await showUpdatePrompt(promptContext, update);
+        if (result == UpdatePromptResult.installFailed &&
+            mounted &&
+            promptContext.mounted) {
+          ScaffoldMessenger.of(promptContext)
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
-                content: Text(AppLocalizations.of(context).operationFailed),
+                content: Text(
+                  AppLocalizations.of(promptContext).operationFailed,
+                ),
               ),
             );
         }

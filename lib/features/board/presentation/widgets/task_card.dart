@@ -229,11 +229,14 @@ class TaskCard extends ConsumerWidget {
         ),
       ),
     );
-    if (Theme.of(context).platform == TargetPlatform.android) {
+    final platform = Theme.of(context).platform;
+    if (platform == TargetPlatform.android || platform == TargetPlatform.iOS) {
       return LongPressDraggable<int>(
         data: task.id,
         feedback: feedback,
         dragAnchorStrategy: pointerDragAnchorStrategy,
+        delay: const Duration(milliseconds: 120),
+        maxSimultaneousDrags: 1,
         child: handle,
       );
     }
@@ -241,6 +244,7 @@ class TaskCard extends ConsumerWidget {
       data: task.id,
       feedback: feedback,
       dragAnchorStrategy: pointerDragAnchorStrategy,
+      maxSimultaneousDrags: 1,
       child: handle,
     );
   }

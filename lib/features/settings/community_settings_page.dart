@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../app/navigation/app_navigation_shell.dart';
 import '../../core/links/external_link_launcher.dart';
@@ -24,6 +23,9 @@ class CommunitySettingsPage extends ConsumerWidget {
   );
   static final _contributing = Uri.parse(
     'https://github.com/FlySparkle/DDL-out/blob/main/docs/CONTRIBUTING.md',
+  );
+  static final _codeOfConduct = Uri.parse(
+    'https://github.com/FlySparkle/DDL-out/blob/main/docs/CODE_OF_CONDUCT.md',
   );
   static final _security = Uri.parse(
     'https://github.com/FlySparkle/DDL-out/security/advisories/new',
@@ -85,14 +87,12 @@ class CommunitySettingsPage extends ConsumerWidget {
                 title: l10n.contributingGuide,
                 uri: _contributing,
               ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.groups_outlined),
-                title: Text(l10n.codeOfConduct),
-                subtitle: Text(l10n.codeOfConductSubtitle),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () =>
-                    context.push('/settings/community/code-of-conduct'),
+              _externalTile(
+                context,
+                ref,
+                icon: Icons.groups_outlined,
+                title: l10n.codeOfConduct,
+                uri: _codeOfConduct,
               ),
               _externalTile(
                 context,

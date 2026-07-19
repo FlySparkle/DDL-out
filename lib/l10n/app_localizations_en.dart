@@ -418,11 +418,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String updateAvailableBody(String version) {
-    return 'DDL out! $version is available. Open GitHub to download it?';
+    return 'DDL out! $version is available and can be downloaded and installed in the app.';
   }
 
   @override
-  String get downloadUpdate => 'Download';
+  String get downloadUpdate => 'Update now';
+
+  @override
+  String get updateDownloading => 'Downloading update…';
+
+  @override
+  String updateDownloadingProgress(int percent) {
+    return 'Downloading update… $percent%';
+  }
+
+  @override
+  String get updateVerifying => 'Verifying update package…';
+
+  @override
+  String get updatePreparing => 'Preparing to install and restart…';
+
+  @override
+  String get updatePermissionRequired =>
+      'Allow DDL out! to install unknown apps, then tap “Update now” again.';
+
+  @override
+  String get updateUnsupported =>
+      'In-app updates are not supported on this platform yet.';
+
+  @override
+  String get updatePackageUnavailable =>
+      'This release has no update package for this device.';
+
+  @override
+  String get updateVerificationFailed =>
+      'The update package could not be verified. Try again later.';
+
+  @override
+  String get updateInstallFailed =>
+      'Could not install the update. Try again later.';
 
   @override
   String get alreadyUpToDate => 'You\'re up to date';
@@ -449,7 +483,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get documentLoadFailed => 'Could not load this document';
 
   @override
-  String get viewRepositorySource => 'View repository source';
+  String get viewRepositorySource => 'View source';
 
   @override
   String get authorsSection => 'Authors';
@@ -499,9 +533,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get codeOfConduct => 'Community code of conduct';
-
-  @override
-  String get codeOfConductSubtitle => 'Read the community guidelines offline';
 
   @override
   String get reportSecurityIssue => 'Report a security vulnerability privately';

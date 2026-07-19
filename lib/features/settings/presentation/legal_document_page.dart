@@ -24,7 +24,6 @@ class LegalDocumentPage extends ConsumerWidget {
       LegalDocumentKind.gpl => l10n.openSourceLicense,
       LegalDocumentKind.privacy => l10n.privacyPolicy,
       LegalDocumentKind.terms => l10n.termsOfService,
-      LegalDocumentKind.codeOfConduct => l10n.codeOfConduct,
     };
     const destination = AppNavigationDestinationId.settings;
 

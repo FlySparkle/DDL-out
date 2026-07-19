@@ -42,6 +42,27 @@ void main() {
       expect(await checker.checkForUpdate(), isNull);
     });
   });
+
+  test('parses release assets and rejects non-HTTPS download URLs', () {
+    final release = parseGitHubReleasePayload({
+      'tag_name': 'v1.2.0',
+      'assets': [
+        {
+          'name': 'DDL_out_v1.2.0-windows-x64-portable.zip',
+          'browser_download_url': 'https://example.com/app.zip',
+          'size': 42,
+        },
+        {
+          'name': 'unsafe.zip',
+          'browser_download_url': 'http://example.com/unsafe.zip',
+        },
+      ],
+    });
+
+    expect(release.version, 'v1.2.0');
+    expect(release.assets, hasLength(1));
+    expect(release.assets.single.size, 42);
+  });
 }
 
 class _FakeAppVersionReader implements AppVersionReader {
@@ -59,5 +80,6 @@ class _FakeLatestReleaseReader implements LatestReleaseReader {
   final String version;
 
   @override
-  Future<String> readLatestVersion() async => version;
+  Future<LatestRelease> readLatestRelease() async =>
+      LatestRelease(version: version);
 }

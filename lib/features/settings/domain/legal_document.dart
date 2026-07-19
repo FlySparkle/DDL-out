@@ -1,4 +1,4 @@
-enum LegalDocumentKind { gpl, privacy, terms, codeOfConduct }
+enum LegalDocumentKind { gpl, privacy, terms }
 
 class LegalDocumentDescriptor {
   const LegalDocumentDescriptor({
@@ -35,7 +35,6 @@ class LegalDocumentDescriptor {
     final fileName = switch (kind) {
       LegalDocumentKind.privacy => 'privacy.md',
       LegalDocumentKind.terms => 'terms.md',
-      LegalDocumentKind.codeOfConduct => 'code_of_conduct.md',
       LegalDocumentKind.gpl => throw StateError('Handled above.'),
     };
     final assetPath = 'assets/legal/$locale/$fileName';

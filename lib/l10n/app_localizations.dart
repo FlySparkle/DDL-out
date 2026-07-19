@@ -852,14 +852,68 @@ abstract class AppLocalizations {
   /// No description provided for @updateAvailableBody.
   ///
   /// In zh, this message translates to:
-  /// **'DDL out! {version} 已发布。是否前往 GitHub 下载？'**
+  /// **'DDL out! {version} 已发布，可以直接在应用内下载并安装。'**
   String updateAvailableBody(String version);
 
   /// No description provided for @downloadUpdate.
   ///
   /// In zh, this message translates to:
-  /// **'前往下载'**
+  /// **'立即更新'**
   String get downloadUpdate;
+
+  /// No description provided for @updateDownloading.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在下载更新…'**
+  String get updateDownloading;
+
+  /// No description provided for @updateDownloadingProgress.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在下载更新… {percent}%'**
+  String updateDownloadingProgress(int percent);
+
+  /// No description provided for @updateVerifying.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在校验更新包…'**
+  String get updateVerifying;
+
+  /// No description provided for @updatePreparing.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在准备安装并重启…'**
+  String get updatePreparing;
+
+  /// No description provided for @updatePermissionRequired.
+  ///
+  /// In zh, this message translates to:
+  /// **'请允许 DDL out! 安装未知应用，然后再次点击“立即更新”。'**
+  String get updatePermissionRequired;
+
+  /// No description provided for @updateUnsupported.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前平台暂不支持应用内更新。'**
+  String get updateUnsupported;
+
+  /// No description provided for @updatePackageUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'此版本没有适用于当前设备的更新包。'**
+  String get updatePackageUnavailable;
+
+  /// No description provided for @updateVerificationFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'更新包校验失败，请稍后重试。'**
+  String get updateVerificationFailed;
+
+  /// No description provided for @updateInstallFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'无法安装更新，请稍后重试。'**
+  String get updateInstallFailed;
 
   /// No description provided for @alreadyUpToDate.
   ///
@@ -906,7 +960,7 @@ abstract class AppLocalizations {
   /// No description provided for @viewRepositorySource.
   ///
   /// In zh, this message translates to:
-  /// **'查看仓库原文'**
+  /// **'查看原文'**
   String get viewRepositorySource;
 
   /// No description provided for @authorsSection.
@@ -1004,12 +1058,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'社区行为准则'**
   String get codeOfConduct;
-
-  /// No description provided for @codeOfConductSubtitle.
-  ///
-  /// In zh, this message translates to:
-  /// **'离线阅读社区参与规范'**
-  String get codeOfConductSubtitle;
 
   /// No description provided for @reportSecurityIssue.
   ///
