@@ -79,6 +79,18 @@ invalid line
     expect(checksums, hasLength(2));
   });
 
+  test('release asset name validation is host-platform independent', () {
+    expect(isSafeReleaseAssetName('DDL_out_v1.0.0-windows-x64.zip'), isTrue);
+    expect(
+      isSafeReleaseAssetName('../DDL_out_v1.0.0-windows-x64.zip'),
+      isFalse,
+    );
+    expect(
+      isSafeReleaseAssetName('..\\DDL_out_v1.0.0-windows-x64.zip'),
+      isFalse,
+    );
+  });
+
   test(
     'windows updater replaces the app directory and removes its backup',
     () async {

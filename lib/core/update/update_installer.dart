@@ -310,10 +310,17 @@ ReleaseAsset? selectPackageAsset(
   return assets
       .where(
         (asset) =>
-            path.basename(asset.name) == asset.name &&
-            asset.name.endsWith(suffix),
+            isSafeReleaseAssetName(asset.name) && asset.name.endsWith(suffix),
       )
       .firstOrNull;
+}
+
+bool isSafeReleaseAssetName(String name) {
+  return name.isNotEmpty &&
+      name != '.' &&
+      name != '..' &&
+      !name.contains('/') &&
+      !name.contains('\\');
 }
 
 Map<String, String> parseChecksums(String contents) {
