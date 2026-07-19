@@ -332,18 +332,11 @@ class CategorySection extends ConsumerWidget {
       ),
     );
     final data = CategoryDragData(category!.id);
-    if (Theme.of(context).platform == TargetPlatform.android) {
-      return LongPressDraggable<CategoryDragData>(
-        data: data,
-        feedback: feedback,
-        dragAnchorStrategy: pointerDragAnchorStrategy,
-        child: handle,
-      );
-    }
     return Draggable<CategoryDragData>(
       data: data,
       feedback: feedback,
       dragAnchorStrategy: pointerDragAnchorStrategy,
+      maxSimultaneousDrags: 1,
       child: handle,
     );
   }

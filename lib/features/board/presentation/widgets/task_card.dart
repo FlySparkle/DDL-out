@@ -229,18 +229,11 @@ class TaskCard extends ConsumerWidget {
         ),
       ),
     );
-    if (Theme.of(context).platform == TargetPlatform.android) {
-      return LongPressDraggable<int>(
-        data: task.id,
-        feedback: feedback,
-        dragAnchorStrategy: pointerDragAnchorStrategy,
-        child: handle,
-      );
-    }
     return Draggable<int>(
       data: task.id,
       feedback: feedback,
       dragAnchorStrategy: pointerDragAnchorStrategy,
+      maxSimultaneousDrags: 1,
       child: handle,
     );
   }
