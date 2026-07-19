@@ -43,7 +43,7 @@ class _AppShellState extends ConsumerState<AppShell> {
             widget.navigatorKey?.currentState?.overlay?.context ?? context;
         if (!promptContext.mounted) return;
         final result = await showUpdatePrompt(promptContext, update);
-        if (result == UpdatePromptResult.downloadFailed &&
+        if (result == UpdatePromptResult.installFailed &&
             mounted &&
             promptContext.mounted) {
           ScaffoldMessenger.of(promptContext)

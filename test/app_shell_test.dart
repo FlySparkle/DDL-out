@@ -99,8 +99,8 @@ class _CountingLatestReleaseReader implements LatestReleaseReader {
   int calls = 0;
 
   @override
-  Future<String> readLatestVersion() async {
+  Future<LatestRelease> readLatestRelease() async {
     calls += 1;
-    return version;
+    return LatestRelease(version: version);
   }
 }

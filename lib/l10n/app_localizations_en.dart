@@ -418,11 +418,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String updateAvailableBody(String version) {
-    return 'DDL out! $version is available. Open GitHub to download it?';
+    return 'DDL out! $version is available and can be downloaded and installed in the app.';
   }
 
   @override
-  String get downloadUpdate => 'Download';
+  String get downloadUpdate => 'Update now';
+
+  @override
+  String get updateDownloading => 'Downloading update…';
+
+  @override
+  String updateDownloadingProgress(int percent) {
+    return 'Downloading update… $percent%';
+  }
+
+  @override
+  String get updateVerifying => 'Verifying update package…';
+
+  @override
+  String get updatePreparing => 'Preparing to install and restart…';
+
+  @override
+  String get updatePermissionRequired =>
+      'Allow DDL out! to install unknown apps, then tap “Update now” again.';
+
+  @override
+  String get updateUnsupported =>
+      'In-app updates are not supported on this platform yet.';
+
+  @override
+  String get updatePackageUnavailable =>
+      'This release has no update package for this device.';
+
+  @override
+  String get updateVerificationFailed =>
+      'The update package could not be verified. Try again later.';
+
+  @override
+  String get updateInstallFailed =>
+      'Could not install the update. Try again later.';
 
   @override
   String get alreadyUpToDate => 'You\'re up to date';

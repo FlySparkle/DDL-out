@@ -411,11 +411,40 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String updateAvailableBody(String version) {
-    return 'DDL out! $version 已发布。是否前往 GitHub 下载？';
+    return 'DDL out! $version 已发布，可以直接在应用内下载并安装。';
   }
 
   @override
-  String get downloadUpdate => '前往下载';
+  String get downloadUpdate => '立即更新';
+
+  @override
+  String get updateDownloading => '正在下载更新…';
+
+  @override
+  String updateDownloadingProgress(int percent) {
+    return '正在下载更新… $percent%';
+  }
+
+  @override
+  String get updateVerifying => '正在校验更新包…';
+
+  @override
+  String get updatePreparing => '正在准备安装并重启…';
+
+  @override
+  String get updatePermissionRequired => '请允许 DDL out! 安装未知应用，然后再次点击“立即更新”。';
+
+  @override
+  String get updateUnsupported => '当前平台暂不支持应用内更新。';
+
+  @override
+  String get updatePackageUnavailable => '此版本没有适用于当前设备的更新包。';
+
+  @override
+  String get updateVerificationFailed => '更新包校验失败，请稍后重试。';
+
+  @override
+  String get updateInstallFailed => '无法安装更新，请稍后重试。';
 
   @override
   String get alreadyUpToDate => '当前已是最新版本';
