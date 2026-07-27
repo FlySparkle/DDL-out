@@ -1,6 +1,7 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
-const syncProtocolVersion = 3;
+const syncProtocolVersion = 4;
 
 abstract final class SyncEntityType {
   static const category = 'category';
@@ -163,6 +164,31 @@ final class SyncOperationEnvelope {
       context.containsDot(other.originDeviceId, other.originSequence);
 
   String get canonicalJson => jsonEncode(toJson());
+}
+
+abstract final class SyncTransferCodec {
+  static const int chunkSizeBytes = 512 * 1024;
+
+  static Uint8List encodeOperation(SyncOperationEnvelope operation) {
+    return Uint8List.fromList(utf8.encode(jsonEncode(operation.toJson())));
+  }
+
+  static SyncOperationEnvelope decodeOperation(List<int> bytes) {
+    final decoded = jsonDecode(utf8.decode(bytes));
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException(
+        'Synchronization operation must be an object',
+      );
+    }
+    return SyncOperationEnvelope.fromJson(decoded);
+  }
+
+  static Iterable<Uint8List> chunks(Uint8List payload) sync* {
+    for (var offset = 0; offset < payload.length; offset += chunkSizeBytes) {
+      final end = (offset + chunkSizeBytes).clamp(0, payload.length);
+      yield Uint8List.sublistView(payload, offset, end);
+    }
+  }
 }
 
 final class SyncConflictView {

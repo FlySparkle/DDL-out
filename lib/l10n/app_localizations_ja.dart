@@ -673,6 +673,11 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String syncTransferProgress(String transferred, String total) {
+    return '転送済み $transferred/$total';
+  }
+
+  @override
   String get otherDevice => 'もう一方の端末';
 
   @override

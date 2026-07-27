@@ -224,6 +224,8 @@
   "connectingDevice": "正在连接电脑…",
   "syncingWith": "正在与 {device} 合并改动…",
   "@syncingWith": {"placeholders": {"device": {"type": "String"}}},
+  "syncTransferProgress": "已传输 {transferred}/{total}",
+  "@syncTransferProgress": {"placeholders": {"transferred": {"type": "String"}, "total": {"type": "String"}}},
   "otherDevice": "另一台设备",
   "syncCompleted": "同步完成：收到 {received} 项，发出 {sent} 项，发现 {conflicts} 个冲突。",
   "@syncCompleted": {"placeholders": {"received": {"type": "int"}, "sent": {"type": "int"}, "conflicts": {"type": "int"}}},

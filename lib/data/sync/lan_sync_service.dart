@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/foundation.dart';
@@ -11,6 +12,22 @@ import 'package:uuid/uuid.dart';
 import '../database/app_database.dart';
 import '../repositories/repositories.dart';
 import 'sync_models.dart';
+
+final class _PreparedSyncTransfer {
+  const _PreparedSyncTransfer(this.payloads, this.totalBytes);
+
+  final List<Uint8List> payloads;
+  final int totalBytes;
+
+  int get operationCount => payloads.length;
+}
+
+final class _SyncTransferPlan {
+  const _SyncTransferPlan(this.operationCount, this.totalBytes);
+
+  final int operationCount;
+  final int totalBytes;
+}
 
 enum LanSyncPhase {
   idle,
@@ -32,6 +49,8 @@ class LanSyncState {
     this.sentOperations = 0,
     this.receivedOperations = 0,
     this.conflictCount = 0,
+    this.transferredBytes = 0,
+    this.totalBytes = 0,
     this.isCoordinator = false,
   });
 
@@ -42,6 +61,8 @@ class LanSyncState {
   final int sentOperations;
   final int receivedOperations;
   final int conflictCount;
+  final int transferredBytes;
+  final int totalBytes;
   final bool isCoordinator;
 
   LanSyncState copyWith({
@@ -54,6 +75,8 @@ class LanSyncState {
     int? sentOperations,
     int? receivedOperations,
     int? conflictCount,
+    int? transferredBytes,
+    int? totalBytes,
     bool? isCoordinator,
   }) {
     return LanSyncState(
@@ -64,9 +87,24 @@ class LanSyncState {
       sentOperations: sentOperations ?? this.sentOperations,
       receivedOperations: receivedOperations ?? this.receivedOperations,
       conflictCount: conflictCount ?? this.conflictCount,
+      transferredBytes: transferredBytes ?? this.transferredBytes,
+      totalBytes: totalBytes ?? this.totalBytes,
       isCoordinator: isCoordinator ?? this.isCoordinator,
     );
   }
+}
+
+String formatSyncByteCount(int byteCount) {
+  if (byteCount < 1024) return '$byteCount B';
+  final kibibytes = byteCount / 1024;
+  if (kibibytes < 1024) return '${_formatSyncUnit(kibibytes)} KB';
+  return '${_formatSyncUnit(kibibytes / 1024)} MB';
+}
+
+String _formatSyncUnit(double value) {
+  return value >= 100 || value == value.roundToDouble()
+      ? value.toStringAsFixed(0)
+      : value.toStringAsFixed(1);
 }
 
 final lanSyncControllerProvider =
@@ -86,8 +124,15 @@ final syncDevicesProvider = StreamProvider<List<SyncDevice>>((ref) {
 
 class LanSyncController extends Notifier<LanSyncState> {
   static const _sessionLifetime = Duration(minutes: 2);
-  static const _messageTimeout = Duration(seconds: 30);
-  static const _maximumEncryptedFrameBytes = 8 * 1024 * 1024;
+  static const _messageTimeout = Duration(minutes: 2);
+  static const _progressRefreshInterval = Duration(milliseconds: 200);
+  static const _maximumEncryptedFrameBytes =
+      SyncTransferCodec.chunkSizeBytes + 1024;
+  static const _maximumOperationBytes = 256 * 1024 * 1024;
+  static const _encryptedNonceBytes = 12;
+  static const _encryptedMacBytes = 16;
+  static const _pushChunkKind = 1;
+  static const _pullChunkKind = 2;
 
   final _uuid = const Uuid();
   final _cipher = AesGcm.with256bits();
@@ -95,7 +140,10 @@ class LanSyncController extends Notifier<LanSyncState> {
   HttpServer? _server;
   WebSocket? _socket;
   Timer? _expiryTimer;
+  Timer? _progressTimer;
   bool _claimed = false;
+  int _transferredBytes = 0;
+  int _totalBytes = 0;
 
   AppDatabase get _database => ref.read(appDatabaseProvider);
 
@@ -107,7 +155,9 @@ class LanSyncController extends Notifier<LanSyncState> {
     return const LanSyncState();
   }
 
-  Future<void> startHosting() async {
+  Future<void> startHosting({
+    @visibleForTesting List<String>? hostAddressesOverride,
+  }) async {
     await _closeTransport();
     state = const LanSyncState(
       phase: LanSyncPhase.preparing,
@@ -115,7 +165,7 @@ class LanSyncController extends Notifier<LanSyncState> {
     );
     try {
       final identity = await _database.readSyncIdentity();
-      final addresses = await _privateIpv4Addresses();
+      final addresses = hostAddressesOverride ?? await _privateIpv4Addresses();
       if (addresses.isEmpty) {
         throw const SocketException('没有可用的局域网 IPv4 地址');
       }
@@ -243,18 +293,36 @@ class LanSyncController extends Notifier<LanSyncState> {
         'identity': local.toJson(),
       });
 
-      final push = await _nextMessage(iterator, key);
-      if (push['type'] != 'push') {
-        throw const FormatException('同步消息顺序不正确');
-      }
-      final incoming = _operationsFromJson(push['operations']);
-      final applyReport = await _database.applyRemoteOperations(incoming);
+      final incomingPlan = _transferPlanFromMessage(
+        await _nextMessage(iterator, key),
+        'pushPlan',
+      );
       final outgoing = await _database.readOperationsMissingFrom(peer.vector);
+      final outgoingTransfer = _prepareTransfer(outgoing);
       await _sendMessage(socket, key, {
-        'type': 'pull',
-        'operations': outgoing.map((operation) => operation.toJson()).toList(),
-        'hostApplied': applyReport.applied,
+        'type': 'pullPlan',
+        'operationCount': outgoingTransfer.operationCount,
+        'totalBytes': outgoingTransfer.totalBytes,
       });
+      _beginTransferProgress(
+        incomingPlan.totalBytes + outgoingTransfer.totalBytes,
+      );
+      final applyReport = await _receiveOperationTransfer(
+        socket: socket,
+        iterator: iterator,
+        key: key,
+        direction: 'push',
+        chunkKind: _pushChunkKind,
+        plan: incomingPlan,
+      );
+      await _sendOperationTransfer(
+        socket: socket,
+        iterator: iterator,
+        key: key,
+        direction: 'pull',
+        chunkKind: _pullChunkKind,
+        transfer: outgoingTransfer,
+      );
 
       final complete = await _nextMessage(iterator, key);
       if (complete['type'] != 'complete') {
@@ -278,9 +346,10 @@ class LanSyncController extends Notifier<LanSyncState> {
       if (!digestMatches) {
         throw const FormatException('两端校验结果不一致，请重新同步');
       }
+      _publishTransferProgress();
       state = state.copyWith(
         phase: LanSyncPhase.success,
-        sentOperations: outgoing.length,
+        sentOperations: outgoingTransfer.operationCount,
         receivedOperations: applyReport.applied,
         conflictCount: conflictCount,
         clearQrData: true,
@@ -319,16 +388,35 @@ class LanSyncController extends Notifier<LanSyncState> {
         peerName: host.deviceName,
       );
       final outgoing = await _database.readOperationsMissingFrom(host.vector);
+      final outgoingTransfer = _prepareTransfer(outgoing);
       await _sendMessage(socket, key, {
-        'type': 'push',
-        'operations': outgoing.map((operation) => operation.toJson()).toList(),
+        'type': 'pushPlan',
+        'operationCount': outgoingTransfer.operationCount,
+        'totalBytes': outgoingTransfer.totalBytes,
       });
-      final pull = await _nextMessage(iterator, key);
-      if (pull['type'] != 'pull') {
-        throw const FormatException('电脑返回了无效的同步内容');
-      }
-      final incoming = _operationsFromJson(pull['operations']);
-      final report = await _database.applyRemoteOperations(incoming);
+      final incomingPlan = _transferPlanFromMessage(
+        await _nextMessage(iterator, key),
+        'pullPlan',
+      );
+      _beginTransferProgress(
+        outgoingTransfer.totalBytes + incomingPlan.totalBytes,
+      );
+      await _sendOperationTransfer(
+        socket: socket,
+        iterator: iterator,
+        key: key,
+        direction: 'push',
+        chunkKind: _pushChunkKind,
+        transfer: outgoingTransfer,
+      );
+      final report = await _receiveOperationTransfer(
+        socket: socket,
+        iterator: iterator,
+        key: key,
+        direction: 'pull',
+        chunkKind: _pullChunkKind,
+        plan: incomingPlan,
+      );
       await _sendMessage(socket, key, {
         'type': 'complete',
         'digest': await _database.computeSyncStateDigest(),
@@ -344,10 +432,11 @@ class LanSyncController extends Notifier<LanSyncState> {
         finalHost.deviceName,
         finalHost.vector,
       );
+      _publishTransferProgress();
       state = state.copyWith(
         phase: LanSyncPhase.success,
         peerName: host.deviceName,
-        sentOperations: outgoing.length,
+        sentOperations: outgoingTransfer.operationCount,
         receivedOperations: report.applied,
         conflictCount: done['conflicts']! as int,
         clearError: true,
@@ -370,6 +459,8 @@ class LanSyncController extends Notifier<LanSyncState> {
   Future<void> _closeTransport({bool keepState = false}) async {
     _expiryTimer?.cancel();
     _expiryTimer = null;
+    _progressTimer?.cancel();
+    _progressTimer = null;
     final socket = _socket;
     _socket = null;
     final server = _server;
@@ -378,6 +469,173 @@ class LanSyncController extends Notifier<LanSyncState> {
     await socket?.close();
     await server?.close(force: true);
     if (!keepState && ref.mounted) state = const LanSyncState();
+  }
+
+  _PreparedSyncTransfer _prepareTransfer(
+    List<SyncOperationEnvelope> operations,
+  ) {
+    final payloads = <Uint8List>[];
+    var totalBytes = 0;
+    for (final operation in operations) {
+      final payload = SyncTransferCodec.encodeOperation(operation);
+      if (payload.length > _maximumOperationBytes) {
+        throw const FormatException('单项同步数据过大，无法安全传输');
+      }
+      payloads.add(payload);
+      totalBytes += payload.length;
+    }
+    return _PreparedSyncTransfer(payloads, totalBytes);
+  }
+
+  _SyncTransferPlan _transferPlanFromMessage(
+    Map<String, dynamic> message,
+    String expectedType,
+  ) {
+    final operationCount = message['operationCount'];
+    final totalBytes = message['totalBytes'];
+    if (message['type'] != expectedType ||
+        operationCount is! int ||
+        operationCount < 0 ||
+        operationCount > 1000000 ||
+        totalBytes is! int ||
+        totalBytes < 0 ||
+        (operationCount == 0 && totalBytes != 0) ||
+        (operationCount > 0 && totalBytes == 0)) {
+      throw const FormatException('同步传输计划无效');
+    }
+    return _SyncTransferPlan(operationCount, totalBytes);
+  }
+
+  Future<void> _sendOperationTransfer({
+    required WebSocket socket,
+    required StreamIterator<dynamic> iterator,
+    required SecretKey key,
+    required String direction,
+    required int chunkKind,
+    required _PreparedSyncTransfer transfer,
+  }) async {
+    for (final (index, payload) in transfer.payloads.indexed) {
+      await _sendMessage(socket, key, {
+        'type': '${direction}Operation',
+        'index': index,
+        'byteLength': payload.length,
+      });
+      final operationAck = await _nextMessage(iterator, key);
+      if (operationAck['type'] != '${direction}OperationAck' ||
+          operationAck['index'] != index) {
+        throw const FormatException('同步操作确认无效');
+      }
+      var offset = 0;
+      for (final chunk in SyncTransferCodec.chunks(payload)) {
+        await _sendPayloadChunk(
+          socket: socket,
+          key: key,
+          chunkKind: chunkKind,
+          offset: offset,
+          bytes: chunk,
+        );
+        final chunkAck = await _nextMessage(iterator, key);
+        final nextOffset = offset + chunk.length;
+        if (chunkAck['type'] != '${direction}ChunkAck' ||
+            chunkAck['index'] != index ||
+            chunkAck['nextOffset'] != nextOffset) {
+          throw const FormatException('同步分块确认无效');
+        }
+        offset = nextOffset;
+        _recordTransferredBytes(chunk.length);
+      }
+    }
+  }
+
+  Future<SyncApplyReport> _receiveOperationTransfer({
+    required WebSocket socket,
+    required StreamIterator<dynamic> iterator,
+    required SecretKey key,
+    required String direction,
+    required int chunkKind,
+    required _SyncTransferPlan plan,
+  }) async {
+    var applied = 0;
+    var duplicates = 0;
+    var receivedBytes = 0;
+    for (var index = 0; index < plan.operationCount; index += 1) {
+      final operationMessage = await _nextMessage(iterator, key);
+      final byteLength = operationMessage['byteLength'];
+      if (operationMessage['type'] != '${direction}Operation' ||
+          operationMessage['index'] != index ||
+          byteLength is! int ||
+          byteLength <= 0 ||
+          byteLength > _maximumOperationBytes ||
+          receivedBytes + byteLength > plan.totalBytes) {
+        throw const FormatException('同步操作分块信息无效');
+      }
+      await _sendMessage(socket, key, {
+        'type': '${direction}OperationAck',
+        'index': index,
+      });
+      final builder = BytesBuilder(copy: false);
+      var operationBytes = 0;
+      while (operationBytes < byteLength) {
+        final chunk = await _nextPayloadChunk(
+          iterator: iterator,
+          key: key,
+          expectedChunkKind: chunkKind,
+          expectedOffset: operationBytes,
+        );
+        if (operationBytes + chunk.length > byteLength) {
+          throw const FormatException('同步分块超出声明大小');
+        }
+        builder.add(chunk);
+        operationBytes += chunk.length;
+        receivedBytes += chunk.length;
+        _recordTransferredBytes(chunk.length);
+        await _sendMessage(socket, key, {
+          'type': '${direction}ChunkAck',
+          'index': index,
+          'nextOffset': operationBytes,
+        });
+      }
+      final operation = SyncTransferCodec.decodeOperation(builder.takeBytes());
+      final report = await _database.applyRemoteOperations([operation]);
+      applied += report.applied;
+      duplicates += report.duplicates;
+    }
+    if (receivedBytes != plan.totalBytes) {
+      throw const FormatException('同步传输大小与计划不一致');
+    }
+    return SyncApplyReport(
+      applied: applied,
+      duplicates: duplicates,
+      conflicts: await _database.openConflictCount(),
+    );
+  }
+
+  void _beginTransferProgress(int totalBytes) {
+    _progressTimer?.cancel();
+    _progressTimer = null;
+    _transferredBytes = 0;
+    _totalBytes = totalBytes;
+    if (!ref.mounted) return;
+    state = state.copyWith(transferredBytes: 0, totalBytes: totalBytes);
+  }
+
+  void _recordTransferredBytes(int byteCount) {
+    _transferredBytes += byteCount;
+    if (_progressTimer != null) return;
+    _progressTimer = Timer(_progressRefreshInterval, () {
+      _progressTimer = null;
+      _publishTransferProgress();
+    });
+  }
+
+  void _publishTransferProgress() {
+    _progressTimer?.cancel();
+    _progressTimer = null;
+    if (!ref.mounted) return;
+    state = state.copyWith(
+      transferredBytes: _transferredBytes.clamp(0, _totalBytes),
+      totalBytes: _totalBytes,
+    );
   }
 
   Future<Map<String, dynamic>> _nextMessage(
@@ -394,40 +652,101 @@ class LanSyncController extends Notifier<LanSyncState> {
     SecretKey key,
     Map<String, Object?> message,
   ) async {
-    final plainText = utf8.encode(jsonEncode(message));
+    final plainText = Uint8List.fromList(utf8.encode(jsonEncode(message)));
+    await _sendEncryptedFrame(socket, key, plainText);
+  }
+
+  Future<void> _sendPayloadChunk({
+    required WebSocket socket,
+    required SecretKey key,
+    required int chunkKind,
+    required int offset,
+    required Uint8List bytes,
+  }) async {
+    final plainText = Uint8List(9 + bytes.length);
+    plainText[0] = chunkKind;
+    ByteData.sublistView(plainText, 1, 9).setUint64(0, offset, Endian.big);
+    plainText.setRange(9, plainText.length, bytes);
+    await _sendEncryptedFrame(socket, key, plainText);
+  }
+
+  Future<void> _sendEncryptedFrame(
+    WebSocket socket,
+    SecretKey key,
+    Uint8List plainText,
+  ) async {
     final nonce = _cipher.newNonce();
     final box = await _cipher.encrypt(plainText, secretKey: key, nonce: nonce);
-    socket.add(
-      jsonEncode({
-        'nonce': base64UrlEncode(box.nonce),
-        'cipherText': base64UrlEncode(box.cipherText),
-        'mac': base64UrlEncode(box.mac.bytes),
-      }),
+    final frame = Uint8List(
+      _encryptedNonceBytes + _encryptedMacBytes + box.cipherText.length,
     );
+    frame.setRange(0, _encryptedNonceBytes, box.nonce);
+    frame.setRange(
+      _encryptedNonceBytes,
+      _encryptedNonceBytes + _encryptedMacBytes,
+      box.mac.bytes,
+    );
+    frame.setRange(
+      _encryptedNonceBytes + _encryptedMacBytes,
+      frame.length,
+      box.cipherText,
+    );
+    socket.add(frame);
   }
 
   Future<Map<String, dynamic>> _decryptMessage(
     Object? raw,
     SecretKey key,
   ) async {
-    if (raw is! String || raw.length > _maximumEncryptedFrameBytes) {
-      throw const FormatException('同步消息格式无效');
-    }
-    final frame = jsonDecode(raw);
-    if (frame is! Map<String, dynamic>) {
-      throw const FormatException('同步消息格式无效');
-    }
-    final box = SecretBox(
-      base64Url.decode(frame['cipherText']! as String),
-      nonce: base64Url.decode(frame['nonce']! as String),
-      mac: Mac(base64Url.decode(frame['mac']! as String)),
-    );
-    final clearText = await _cipher.decrypt(box, secretKey: key);
+    final clearText = await _decryptFrame(raw, key);
     final message = jsonDecode(utf8.decode(clearText));
     if (message is! Map<String, dynamic>) {
       throw const FormatException('同步消息内容无效');
     }
     return message;
+  }
+
+  Future<Uint8List> _nextPayloadChunk({
+    required StreamIterator<dynamic> iterator,
+    required SecretKey key,
+    required int expectedChunkKind,
+    required int expectedOffset,
+  }) async {
+    final hasMessage = await iterator.moveNext().timeout(_messageTimeout);
+    if (!hasMessage) throw const SocketException('连接已关闭');
+    final clearText = await _decryptFrame(iterator.current, key);
+    if (clearText.length <= 9 ||
+        clearText[0] != expectedChunkKind ||
+        clearText.length - 9 > SyncTransferCodec.chunkSizeBytes) {
+      throw const FormatException('同步数据分块无效');
+    }
+    final offset = ByteData.sublistView(
+      clearText,
+      1,
+      9,
+    ).getUint64(0, Endian.big);
+    if (offset != expectedOffset) {
+      throw const FormatException('同步数据分块顺序无效');
+    }
+    return Uint8List.sublistView(clearText, 9);
+  }
+
+  Future<Uint8List> _decryptFrame(Object? raw, SecretKey key) async {
+    if (raw is! List<int> ||
+        raw.length < _encryptedNonceBytes + _encryptedMacBytes + 1 ||
+        raw.length > _maximumEncryptedFrameBytes) {
+      throw const FormatException('同步消息格式无效');
+    }
+    final frame = Uint8List.fromList(raw);
+    final cipherTextStart = _encryptedNonceBytes + _encryptedMacBytes;
+    final box = SecretBox(
+      Uint8List.sublistView(frame, cipherTextStart),
+      nonce: Uint8List.sublistView(frame, 0, _encryptedNonceBytes),
+      mac: Mac(
+        Uint8List.sublistView(frame, _encryptedNonceBytes, cipherTextStart),
+      ),
+    );
+    return Uint8List.fromList(await _cipher.decrypt(box, secretKey: key));
   }
 
   Map<String, dynamic> _parseQrPayload(String source) {
@@ -464,17 +783,6 @@ class LanSyncController extends Notifier<LanSyncState> {
           entry.key: entry.value as int,
       }),
     );
-  }
-
-  List<SyncOperationEnvelope> _operationsFromJson(Object? raw) {
-    if (raw is! List) throw const FormatException('同步操作列表无效');
-    return raw
-        .map(
-          (item) => SyncOperationEnvelope.fromJson(
-            Map<String, dynamic>.from(item as Map),
-          ),
-        )
-        .toList(growable: false);
   }
 
   Future<List<String>> _privateIpv4Addresses() async {

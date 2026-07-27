@@ -279,16 +279,38 @@ class _ProgressSession extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isTransferring = sync.phase == LanSyncPhase.transferring;
     final text = switch (sync.phase) {
       LanSyncPhase.preparing => l10n.preparingSync,
       LanSyncPhase.connecting => l10n.connectingDevice,
       _ => l10n.syncingWith(sync.peerName ?? l10n.otherDevice),
     };
+    final progress = sync.totalBytes == 0
+        ? 1.0
+        : (sync.transferredBytes / sync.totalBytes).clamp(0.0, 1.0);
     return Column(
       children: [
-        const CircularProgressIndicator(),
+        if (isTransferring)
+          LinearProgressIndicator(
+            key: const ValueKey('sync-byte-progress'),
+            value: progress,
+          )
+        else
+          const CircularProgressIndicator(),
         const SizedBox(height: 16),
         Text(text, textAlign: TextAlign.center),
+        if (isTransferring) ...[
+          const SizedBox(height: 8),
+          Text(
+            l10n.syncTransferProgress(
+              formatSyncByteCount(sync.transferredBytes),
+              formatSyncByteCount(sync.totalBytes),
+            ),
+            key: const ValueKey('sync-byte-progress-label'),
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
       ],
     );
   }

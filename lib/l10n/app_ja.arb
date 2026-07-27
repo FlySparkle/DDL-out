@@ -224,6 +224,8 @@
   "connectingDevice": "パソコンに接続しています…",
   "syncingWith": "{device} と変更を統合しています…",
   "@syncingWith": {"placeholders": {"device": {"type": "String"}}},
+  "syncTransferProgress": "転送済み {transferred}/{total}",
+  "@syncTransferProgress": {"placeholders": {"transferred": {"type": "String"}, "total": {"type": "String"}}},
   "otherDevice": "もう一方の端末",
   "syncCompleted": "同期完了：受信 {received} 件、送信 {sent} 件、競合 {conflicts} 件。",
   "@syncCompleted": {"placeholders": {"received": {"type": "int"}, "sent": {"type": "int"}, "conflicts": {"type": "int"}}},
