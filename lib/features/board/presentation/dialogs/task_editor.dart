@@ -148,7 +148,7 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
                 return null;
               },
             ),
-            const Divider(height: 32),
+            const SizedBox(height: 12),
             Text(
               l10n.taskDetailsSection,
               style: Theme.of(context).textTheme.titleMedium,
@@ -159,7 +159,7 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
               initialDocument: _detailDocument,
               onChanged: (document) => _detailDocument = document,
             ),
-            const Divider(height: 32),
+            const SizedBox(height: 12),
             DropdownButtonFormField<int>(
               initialValue: _categoryValue,
               decoration: InputDecoration(labelText: l10n.taskCategory),
