@@ -8,10 +8,11 @@ import 'package:intl/intl.dart';
 import '../../../../core/time/deadline_service.dart';
 import '../../../../data/database/app_database.dart';
 import '../../../../data/repositories/board_providers.dart';
+import '../../../../data/task_details/task_detail_document.dart';
 import '../../../../data/task_details/task_detail_image.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../application/task_image_clipboard.dart';
 import '../../../settings/application/settings.dart';
+import '../widgets/task_detail_content_editor.dart';
 import 'adaptive_editor.dart';
 import 'confirmation_dialog.dart';
 import 'editor_frame.dart';
@@ -52,8 +53,8 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
   static const _uncategorizedValue = -1;
 
   final _formKey = GlobalKey<FormState>();
+  final _detailEditorKey = GlobalKey<TaskDetailContentEditorState>();
   late final TextEditingController _nameController;
-  late final TextEditingController _detailsController;
   late final TextEditingController _daysController;
   late final TextEditingController _hoursController;
   late final TextEditingController _minutesController;
@@ -61,7 +62,7 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
   late DateTime _absoluteLocal;
   late int _categoryValue;
   late bool _relativeDirty;
-  late List<TaskDetailImage> _detailImages;
+  late TaskDetailDocument _detailDocument;
   bool _saving = false;
   bool _pastingImage = false;
 
@@ -70,10 +71,10 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
     super.initState();
     final settings = ref.read(settingsControllerProvider);
     _nameController = TextEditingController(text: widget.task?.name ?? '');
-    _detailsController = TextEditingController(
-      text: widget.task?.details ?? '',
+    _detailDocument = TaskDetailDocumentCodec.decode(
+      details: widget.task?.details ?? '',
+      images: _decodeImages(widget.task?.detailImagesJson ?? '[]'),
     );
-    _detailImages = _decodeImages(widget.task?.detailImagesJson ?? '[]');
     _categoryValue =
         widget.task?.categoryId ??
         widget.initialCategoryId ??
@@ -115,7 +116,6 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
   @override
   void dispose() {
     _nameController.dispose();
-    _detailsController.dispose();
     _daysController.dispose();
     _hoursController.dispose();
     _minutesController.dispose();
@@ -161,7 +161,7 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
                 TextButton.icon(
                   onPressed: _pastingImage
                       ? null
-                      : () => _pasteFromClipboard(allowTextFallback: false),
+                      : () => _detailEditorKey.currentState?.pasteImagesOnly(),
                   icon: _pastingImage
                       ? const SizedBox.square(
                           dimension: 18,
@@ -173,54 +173,25 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
               ],
             ),
             const SizedBox(height: 8),
-            CallbackShortcuts(
-              bindings: {
-                const SingleActivator(
-                  LogicalKeyboardKey.keyV,
-                  control: true,
-                ): () =>
-                    _pasteFromClipboard(allowTextFallback: true),
-                const SingleActivator(
-                  LogicalKeyboardKey.keyV,
-                  meta: true,
-                ): () =>
-                    _pasteFromClipboard(allowTextFallback: true),
+            TaskDetailContentEditor(
+              key: _detailEditorKey,
+              initialDocument: _detailDocument,
+              onChanged: (document) => _detailDocument = document,
+              onPastingChanged: (value) {
+                if (mounted) setState(() => _pastingImage = value);
               },
-              child: TextFormField(
-                key: const ValueKey('task-details-field'),
-                controller: _detailsController,
-                minLines: 4,
-                maxLines: 8,
-                maxLength: 10000,
-                decoration: InputDecoration(
-                  hintText: l10n.taskDetailsHint,
-                  alignLabelWithHint: true,
-                ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                TaskDetailImageLayout.usesDesktopWindow(
+                      Theme.of(context).platform,
+                    )
+                    ? l10n.imageDetailHelpDesktop
+                    : l10n.imageDetailHelpMobile,
+                style: const TextStyle(fontSize: 12),
               ),
             ),
-            if (_detailImages.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Semantics(
-                label: l10n.taskDetailImages,
-                child: Wrap(
-                  key: const ValueKey('task-detail-images'),
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final image in _detailImages)
-                      _DetailImageTile(
-                        image: image,
-                        removeTooltip: l10n.removeImage,
-                        onRemove: () => setState(
-                          () => _detailImages.removeWhere(
-                            (candidate) => candidate.id == image.id,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
             const Divider(height: 32),
             DropdownButtonFormField<int>(
               initialValue: _categoryValue,
@@ -458,11 +429,16 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
         ? null
         : _categoryValue;
     final repository = ref.read(taskRepositoryProvider);
+    final detailDocument =
+        _detailEditorKey.currentState?.document ?? _detailDocument;
+    TaskDetailDocumentCodec.validate(detailDocument);
+    final encodedDetails = TaskDetailDocumentCodec.encode(detailDocument);
+    final encodedImages = TaskDetailImageCodec.encode(detailDocument.images);
     if (widget.task == null) {
       await repository.create(
         name: _nameController.text.trim(),
-        details: _detailsController.text,
-        detailImagesJson: TaskDetailImageCodec.encode(_detailImages),
+        details: encodedDetails,
+        detailImagesJson: encodedImages,
         deadlineUtc: deadline,
         categoryId: categoryId,
       );
@@ -470,8 +446,8 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
       await repository.update(
         task: widget.task!,
         name: _nameController.text.trim(),
-        details: _detailsController.text,
-        detailImagesJson: TaskDetailImageCodec.encode(_detailImages),
+        details: encodedDetails,
+        detailImagesJson: encodedImages,
         deadlineUtc: deadline,
         categoryId: categoryId,
       );
@@ -493,59 +469,6 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
     } on FormatException {
       return [];
     }
-  }
-
-  Future<void> _pasteFromClipboard({required bool allowTextFallback}) async {
-    if (_pastingImage) return;
-    setState(() => _pastingImage = true);
-    final l10n = AppLocalizations.of(context);
-    try {
-      final pasted = await ref.read(taskImageClipboardProvider).readImages();
-      if (!mounted) return;
-      if (pasted.isNotEmpty) {
-        final combined = [..._detailImages, ...pasted];
-        TaskDetailImageCodec.validate(combined);
-        setState(() => _detailImages = combined);
-        return;
-      }
-      if (allowTextFallback) {
-        final data = await Clipboard.getData(Clipboard.kTextPlain);
-        if (!mounted) return;
-        final text = data?.text;
-        if (text != null && text.isNotEmpty) {
-          _insertDetailText(text);
-          return;
-        }
-      }
-      _showMessage(l10n.noImageInClipboard);
-    } on Object {
-      if (mounted) _showMessage(l10n.imagePasteFailed);
-    } finally {
-      if (mounted) setState(() => _pastingImage = false);
-    }
-  }
-
-  void _insertDetailText(String text) {
-    final value = _detailsController.value;
-    final selection = value.selection.isValid
-        ? value.selection
-        : TextSelection.collapsed(offset: value.text.length);
-    final nextText = value.text.replaceRange(
-      selection.start,
-      selection.end,
-      text,
-    );
-    final offset = selection.start + text.length;
-    _detailsController.value = TextEditingValue(
-      text: nextText,
-      selection: TextSelection.collapsed(offset: offset),
-    );
-  }
-
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _applyQuickDeadline(DateTime value) {
@@ -586,51 +509,5 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
     if (!confirmed) return;
     await ref.read(taskRepositoryProvider).delete(widget.task!.id);
     if (mounted) Navigator.pop(context);
-  }
-}
-
-class _DetailImageTile extends StatelessWidget {
-  const _DetailImageTile({
-    required this.image,
-    required this.removeTooltip,
-    required this.onRemove,
-  });
-
-  final TaskDetailImage image;
-  final String removeTooltip;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 132,
-      height: 100,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.memory(
-              image.bytes,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => ColoredBox(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                child: const Icon(Icons.broken_image_outlined),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 4,
-            right: 4,
-            child: IconButton.filledTonal(
-              tooltip: removeTooltip,
-              visualDensity: VisualDensity.compact,
-              onPressed: onRemove,
-              icon: const Icon(Icons.close, size: 18),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

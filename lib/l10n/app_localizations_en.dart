@@ -76,6 +76,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get removeImage => 'Remove image';
 
   @override
+  String get openImageDesktop => 'Double-click to open image';
+
+  @override
+  String get openImageMobile => 'Tap to view image full screen';
+
+  @override
+  String get imageDetailHelpDesktop =>
+      'Images occupy their own line and use at most 8 lines of text height. Double-click to open a separate zoomable window.';
+
+  @override
+  String get imageDetailHelpMobile =>
+      'Images occupy their own line and use at most 8 lines of text height. Tap to view and zoom full screen.';
+
+  @override
+  String get imageViewerTitle => 'Image viewer';
+
+  @override
+  String get zoomOut => 'Zoom out';
+
+  @override
+  String get zoomIn => 'Zoom in';
+
+  @override
+  String get resetZoom => 'Reset zoom';
+
+  @override
+  String get close => 'Close';
+
+  @override
   String get noImageInClipboard => 'There is no usable image in the clipboard';
 
   @override

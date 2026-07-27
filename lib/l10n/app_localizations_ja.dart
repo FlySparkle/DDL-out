@@ -75,6 +75,35 @@ class AppLocalizationsJa extends AppLocalizations {
   String get removeImage => '画像を削除';
 
   @override
+  String get openImageDesktop => 'ダブルクリックして画像を開く';
+
+  @override
+  String get openImageMobile => 'タップして画像を全画面表示';
+
+  @override
+  String get imageDetailHelpDesktop =>
+      '画像は独立した行に表示され、高さは本文 8 行分までです。ダブルクリックすると別ウィンドウで拡大・縮小できます。';
+
+  @override
+  String get imageDetailHelpMobile =>
+      '画像は独立した行に表示され、高さは本文 8 行分までです。タップすると全画面で拡大・縮小できます。';
+
+  @override
+  String get imageViewerTitle => '画像ビューアー';
+
+  @override
+  String get zoomOut => '縮小';
+
+  @override
+  String get zoomIn => '拡大';
+
+  @override
+  String get resetZoom => '表示倍率をリセット';
+
+  @override
+  String get close => '閉じる';
+
+  @override
   String get noImageInClipboard => 'クリップボードに使用できる画像がありません';
 
   @override

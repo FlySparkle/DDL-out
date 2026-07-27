@@ -5,10 +5,13 @@ import 'package:intl/intl.dart';
 import '../../../../core/time/deadline_service.dart';
 import '../../../../data/database/app_database.dart';
 import '../../../../data/repositories/board_providers.dart';
+import '../../../../data/task_details/task_detail_document.dart';
 import '../../../../data/task_details/task_detail_image.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../application/task_image_viewer.dart';
 import '../../../settings/application/settings.dart';
 import '../dialogs/task_editor.dart';
+import 'task_detail_content_editor.dart';
 
 class TaskCard extends ConsumerWidget {
   const TaskCard({
@@ -30,7 +33,10 @@ class TaskCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
-    final detailImages = _decodeImages(task.detailImagesJson);
+    final detailDocument = TaskDetailDocumentCodec.decode(
+      details: task.details,
+      images: _decodeImages(task.detailImagesJson),
+    );
     final showDragHandle = ref.watch(
       settingsControllerProvider.select(
         (settings) => settings.showTaskDragHandle,
@@ -122,7 +128,13 @@ class TaskCard extends ConsumerWidget {
                       ),
                     ),
                     Expanded(
-                      child: _TaskSummary(task: task, images: detailImages),
+                      child: _TaskSummary(
+                        task: task,
+                        document: detailDocument,
+                        onOpenImage: (image) => ref
+                            .read(taskImageViewerProvider)
+                            .open(context, image),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -255,18 +267,34 @@ class TaskCard extends ConsumerWidget {
 }
 
 class _TaskSummary extends StatelessWidget {
-  const _TaskSummary({required this.task, required this.images});
+  const _TaskSummary({
+    required this.task,
+    required this.document,
+    required this.onOpenImage,
+  });
 
   final Task task;
-  final List<TaskDetailImage> images;
+  final TaskDetailDocument document;
+  final ValueChanged<TaskDetailImage> onOpenImage;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final usesDesktopWindow = TaskDetailImageLayout.usesDesktopWindow(
+      Theme.of(context).platform,
+    );
     final completedColor = task.isCompleted
         ? scheme.onSurfaceVariant
         : scheme.onSurface;
-    final hasDetails = task.details.trim().isNotEmpty || images.isNotEmpty;
+    final visibleBlocks = document.blocks
+        .where(
+          (block) =>
+              block is TaskDetailImageBlock ||
+              block is TaskDetailTextBlock && block.text.trim().isNotEmpty,
+        )
+        .take(3)
+        .toList(growable: false);
+    final hasDetails = visibleBlocks.isNotEmpty;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Column(
@@ -299,45 +327,74 @@ class _TaskSummary extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (task.details.trim().isNotEmpty)
-                    Text(
-                      task.details.trim(),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
+                  for (
+                    var index = 0;
+                    index < visibleBlocks.length;
+                    index++
+                  ) ...[
+                    if (index > 0) const SizedBox(height: 6),
+                    switch (visibleBlocks[index]) {
+                      final TaskDetailTextBlock block => Text(
+                        block.text.trim(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                  if (images.isNotEmpty) ...[
-                    if (task.details.trim().isNotEmpty)
-                      const SizedBox(height: 6),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: [
-                        for (final image in images.take(3))
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: Image.memory(
-                              image.bytes,
-                              width: 42,
-                              height: 34,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, _, _) => SizedBox(
-                                width: 42,
-                                height: 34,
-                                child: ColoredBox(
-                                  color: scheme.surfaceContainerHighest,
-                                  child: const Icon(
-                                    Icons.broken_image_outlined,
-                                    size: 18,
+                      final TaskDetailImageBlock block => GestureDetector(
+                        key: ValueKey(
+                          'task-card-detail-image-${block.image.id}',
+                        ),
+                        onTap: usesDesktopWindow
+                            ? null
+                            : () => onOpenImage(block.image),
+                        onDoubleTap: usesDesktopWindow
+                            ? () => onOpenImage(block.image)
+                            : null,
+                        child: Tooltip(
+                          message: usesDesktopWindow
+                              ? AppLocalizations.of(context).openImageDesktop
+                              : AppLocalizations.of(context).openImageMobile,
+                          child: MouseRegion(
+                            cursor: usesDesktopWindow
+                                ? SystemMouseCursors.zoomIn
+                                : MouseCursor.defer,
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  minWidth: 96,
+                                  minHeight: 54,
+                                  maxWidth: 180,
+                                  maxHeight:
+                                      TaskDetailImageLayout.maximumCardHeight,
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Image.memory(
+                                    block.image.bytes,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (_, _, _) => SizedBox(
+                                      width: 96,
+                                      height: TaskDetailImageLayout
+                                          .maximumCardHeight,
+                                      child: ColoredBox(
+                                        color: scheme.surfaceContainerHighest,
+                                        child: const Icon(
+                                          Icons.broken_image_outlined,
+                                          size: 18,
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                      ],
-                    ),
+                        ),
+                      ),
+                    },
                   ],
                 ],
               ),

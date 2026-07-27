@@ -232,6 +232,60 @@ abstract class AppLocalizations {
   /// **'移除图片'**
   String get removeImage;
 
+  /// No description provided for @openImageDesktop.
+  ///
+  /// In zh, this message translates to:
+  /// **'双击打开图片'**
+  String get openImageDesktop;
+
+  /// No description provided for @openImageMobile.
+  ///
+  /// In zh, this message translates to:
+  /// **'点击全屏查看图片'**
+  String get openImageMobile;
+
+  /// No description provided for @imageDetailHelpDesktop.
+  ///
+  /// In zh, this message translates to:
+  /// **'图片独占一行，最多显示 8 行文字的高度；双击可独立打开并缩放。'**
+  String get imageDetailHelpDesktop;
+
+  /// No description provided for @imageDetailHelpMobile.
+  ///
+  /// In zh, this message translates to:
+  /// **'图片独占一行，最多显示 8 行文字的高度；点击可全屏查看并缩放。'**
+  String get imageDetailHelpMobile;
+
+  /// No description provided for @imageViewerTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'图片查看'**
+  String get imageViewerTitle;
+
+  /// No description provided for @zoomOut.
+  ///
+  /// In zh, this message translates to:
+  /// **'缩小'**
+  String get zoomOut;
+
+  /// No description provided for @zoomIn.
+  ///
+  /// In zh, this message translates to:
+  /// **'放大'**
+  String get zoomIn;
+
+  /// No description provided for @resetZoom.
+  ///
+  /// In zh, this message translates to:
+  /// **'恢复原始比例'**
+  String get resetZoom;
+
+  /// No description provided for @close.
+  ///
+  /// In zh, this message translates to:
+  /// **'关闭'**
+  String get close;
+
   /// No description provided for @noImageInClipboard.
   ///
   /// In zh, this message translates to:

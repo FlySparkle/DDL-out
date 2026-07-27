@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:ddl_out/data/database/app_database.dart';
 import 'package:ddl_out/data/repositories/board_providers.dart';
 import 'package:ddl_out/data/repositories/task_repository.dart';
+import 'package:ddl_out/data/task_details/task_detail_document.dart';
 import 'package:ddl_out/data/task_details/task_detail_image.dart';
 import 'package:ddl_out/features/board/application/task_image_clipboard.dart';
 import 'package:ddl_out/features/board/presentation/dialogs/task_editor.dart';
@@ -142,7 +143,11 @@ void main() {
     );
     final detailsField = find.byKey(const ValueKey('task-details-field'));
     await tester.tap(detailsField);
-    await tester.enterText(detailsField, 'Reference screenshot');
+    await tester.enterText(detailsField, 'BeforeAfter');
+    final detailsTextField = tester.widget<TextField>(detailsField);
+    detailsTextField.controller!.selection = const TextSelection.collapsed(
+      offset: 6,
+    );
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyV);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
@@ -154,12 +159,19 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Save'));
     await tester.pumpAndSettle();
 
-    expect(repository.createdDetails, 'Reference screenshot');
     final stored = TaskDetailImageCodec.decode(
       repository.createdDetailImagesJson!,
     );
     expect(stored, hasLength(1));
     expect(stored.single.bytes, image.bytes);
+    final document = TaskDetailDocumentCodec.decode(
+      details: repository.createdDetails!,
+      images: stored,
+    );
+    expect(document.blocks, hasLength(3));
+    expect((document.blocks[0] as TaskDetailTextBlock).text, 'Before');
+    expect((document.blocks[1] as TaskDetailImageBlock).image.id, image.id);
+    expect((document.blocks[2] as TaskDetailTextBlock).text, 'After');
   });
 }
 

@@ -75,6 +75,33 @@ class AppLocalizationsZh extends AppLocalizations {
   String get removeImage => '移除图片';
 
   @override
+  String get openImageDesktop => '双击打开图片';
+
+  @override
+  String get openImageMobile => '点击全屏查看图片';
+
+  @override
+  String get imageDetailHelpDesktop => '图片独占一行，最多显示 8 行文字的高度；双击可独立打开并缩放。';
+
+  @override
+  String get imageDetailHelpMobile => '图片独占一行，最多显示 8 行文字的高度；点击可全屏查看并缩放。';
+
+  @override
+  String get imageViewerTitle => '图片查看';
+
+  @override
+  String get zoomOut => '缩小';
+
+  @override
+  String get zoomIn => '放大';
+
+  @override
+  String get resetZoom => '恢复原始比例';
+
+  @override
+  String get close => '关闭';
+
+  @override
   String get noImageInClipboard => '剪贴板中没有可用图片';
 
   @override
