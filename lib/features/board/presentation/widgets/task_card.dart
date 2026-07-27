@@ -6,7 +6,6 @@ import '../../../../core/time/deadline_service.dart';
 import '../../../../data/database/app_database.dart';
 import '../../../../data/repositories/board_providers.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../dialogs/confirmation_dialog.dart';
 import '../dialogs/task_editor.dart';
 
 class TaskCard extends ConsumerWidget {
@@ -173,36 +172,7 @@ class TaskCard extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    PopupMenuButton<String>(
-                      tooltip: l10n.taskActions,
-                      onSelected: (value) {
-                        if (value == 'edit') {
-                          _openEditor(context);
-                        } else if (value == 'delete') {
-                          _deleteTask(context, ref);
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                          value: 'edit',
-                          child: ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: const Icon(Icons.edit_outlined),
-                            title: Text(l10n.editTask),
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            textColor: scheme.error,
-                            iconColor: scheme.error,
-                            leading: const Icon(Icons.delete_outline),
-                            title: Text(l10n.delete),
-                          ),
-                        ),
-                      ],
-                    ),
+                    const SizedBox(width: 12),
                   ],
                 ),
               ),
@@ -305,17 +275,5 @@ class TaskCard extends ConsumerWidget {
       initialCategoryId: task.categoryId,
       task: task,
     );
-  }
-
-  Future<void> _deleteTask(BuildContext context, WidgetRef ref) async {
-    final l10n = AppLocalizations.of(context);
-    final confirmed = await showConfirmation(
-      context,
-      title: l10n.deleteTaskTitle,
-      body: l10n.deleteTaskBody,
-      destructive: true,
-      confirmLabel: l10n.deleteTaskConfirm,
-    );
-    if (confirmed) await ref.read(taskRepositoryProvider).delete(task.id);
   }
 }

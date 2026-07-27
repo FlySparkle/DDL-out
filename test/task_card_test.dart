@@ -66,6 +66,8 @@ void main() {
       find.byKey(const ValueKey('deadline-progress')),
     );
     expect(progress.widthFactor, 0.5);
+    expect(find.byType(PopupMenuButton<String>), findsNothing);
+    expect(find.byTooltip('Task actions'), findsNothing);
   });
 
   testWidgets('mobile task handle starts after a brief 120ms press', (
