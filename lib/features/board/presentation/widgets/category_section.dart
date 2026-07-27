@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/time/deadline_service.dart';
+import '../../../../core/widgets/destructive_undo_snack_bar.dart';
 import '../../../../data/database/app_database.dart';
 import '../../../../data/repositories/board_providers.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -244,11 +245,20 @@ class CategorySection extends ConsumerWidget {
       destructive: true,
       confirmLabel: l10n.clearCategoryTasksConfirm,
     );
-    if (confirmed) {
-      await ref
-          .read(taskRepositoryProvider)
-          .clearCompletedInCategory(category?.id);
-    }
+    if (!confirmed) return;
+    final deletedIds = tasks
+        .where((task) => task.isCompleted)
+        .map((task) => task.id)
+        .toList(growable: false);
+    final repository = ref.read(taskRepositoryProvider);
+    await repository.clearCompletedInCategory(category?.id);
+    if (!context.mounted) return;
+    showDestructiveUndoSnackBar(
+      messenger: ScaffoldMessenger.of(context),
+      message: l10n.completedTasksDeleted(deletedIds.length),
+      undoLabel: l10n.undoCountdown,
+      onUndo: () => repository.restoreMany(deletedIds),
+    );
   }
 
   Future<void> _deleteCategory(BuildContext context, WidgetRef ref) async {
@@ -263,10 +273,27 @@ class CategorySection extends ConsumerWidget {
       confirmLabel: l10n.deleteCategoryConfirm,
     );
     if (!confirmed) return;
-    await ref.read(categoryRepositoryProvider).delete(currentCategory.id);
-    await ref
-        .read(settingsControllerProvider.notifier)
-        .removeCategoryPreference(currentCategory.id);
+    final categoryRepository = ref.read(categoryRepositoryProvider);
+    final taskRepository = ref.read(taskRepositoryProvider);
+    final settingsController = ref.read(settingsControllerProvider.notifier);
+    final affectedTaskIds = tasks
+        .map((task) => task.id)
+        .toList(growable: false);
+    await categoryRepository.delete(currentCategory.id);
+    if (!context.mounted) return;
+    showDestructiveUndoSnackBar(
+      messenger: ScaffoldMessenger.of(context),
+      message: l10n.categoryDeleted,
+      undoLabel: l10n.undoCountdown,
+      onUndo: () async {
+        await categoryRepository.restore(currentCategory.id);
+        for (final taskId in affectedTaskIds) {
+          await taskRepository.move(taskId, currentCategory.id);
+        }
+      },
+      onExpired: () =>
+          settingsController.removeCategoryPreference(currentCategory.id),
+    );
   }
 
   Future<void> _moveTask(
@@ -276,23 +303,12 @@ class CategorySection extends ConsumerWidget {
   ) async {
     final task = snapshot.tasks.where((task) => task.id == taskId).firstOrNull;
     if (task == null || task.categoryId == category?.id) return;
-    final previousCategoryId = task.categoryId;
     await ref.read(taskRepositoryProvider).move(taskId, category?.id);
     if (!context.mounted) return;
     final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(l10n.taskMovedTo(title)),
-          action: SnackBarAction(
-            label: l10n.undo,
-            onPressed: () => ref
-                .read(taskRepositoryProvider)
-                .move(taskId, previousCategoryId),
-          ),
-        ),
-      );
+      ..showSnackBar(SnackBar(content: Text(l10n.taskMovedTo(title))));
   }
 
   Widget _categoryDragHandle(BuildContext context) {

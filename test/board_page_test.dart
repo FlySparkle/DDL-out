@@ -546,5 +546,8 @@ class _RecordingCategoryRepository implements CategoryRepository {
   }
 
   @override
+  Future<void> restore(int id) async {}
+
+  @override
   Future<void> update(Category category, String name, int colorArgb) async {}
 }

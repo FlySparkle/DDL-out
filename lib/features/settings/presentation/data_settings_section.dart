@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/backup/backup_service.dart';
 import '../../../data/repositories/board_providers.dart';
+import '../../../core/widgets/destructive_undo_snack_bar.dart';
 import '../../../l10n/app_localizations.dart';
 import 'settings_section_title.dart';
 import 'settings_tile_group.dart';
@@ -139,7 +140,21 @@ class DataSettingsSection extends ConsumerWidget {
       ),
     );
     if (confirmed == true) {
-      await ref.read(appDatabaseProvider).clearAllData();
+      final database = ref.read(appDatabaseProvider);
+      final snapshot =
+          ref.read(boardProvider).value ??
+          BoardSnapshot(
+            categories: await database.readCategories(),
+            tasks: await database.readTasks(),
+          );
+      await database.clearAllData();
+      if (!context.mounted) return;
+      showDestructiveUndoSnackBar(
+        messenger: ScaffoldMessenger.of(context),
+        message: l10n.allDataDeleted,
+        undoLabel: l10n.undoCountdown,
+        onUndo: () => database.restoreSnapshot(snapshot),
+      );
     }
   }
 

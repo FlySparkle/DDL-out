@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/navigation/app_navigation_shell.dart';
+import '../../core/widgets/destructive_undo_snack_bar.dart';
 import '../../data/database/app_database.dart';
 import '../../data/repositories/board_providers.dart';
 import '../../l10n/app_localizations.dart';
@@ -91,6 +92,19 @@ class BoardPage extends ConsumerWidget {
       destructive: true,
       confirmLabel: l10n.clearCompletedConfirm,
     );
-    if (confirmed) await ref.read(taskRepositoryProvider).clearCompleted();
+    if (!confirmed) return;
+    final deletedIds = snapshot.tasks
+        .where((task) => task.isCompleted)
+        .map((task) => task.id)
+        .toList(growable: false);
+    final repository = ref.read(taskRepositoryProvider);
+    await repository.clearCompleted();
+    if (!context.mounted) return;
+    showDestructiveUndoSnackBar(
+      messenger: ScaffoldMessenger.of(context),
+      message: l10n.completedTasksDeleted(deletedIds.length),
+      undoLabel: l10n.undoCountdown,
+      onUndo: () => repository.restoreMany(deletedIds),
+    );
   }
 }

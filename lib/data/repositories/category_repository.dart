@@ -5,5 +5,6 @@ abstract interface class CategoryRepository {
   Future<void> update(Category category, String name, int colorArgb);
   Future<void> reorder(List<int> categoryIds);
   Future<void> delete(int id);
+  Future<void> restore(int id);
   Future<void> clear();
 }

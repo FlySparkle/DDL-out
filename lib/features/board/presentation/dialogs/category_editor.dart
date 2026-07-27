@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/time/deadline_service.dart';
 import '../../../../data/database/app_database.dart';
 import '../../../../data/repositories/board_providers.dart';
+import '../../../../core/widgets/destructive_undo_snack_bar.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../settings/application/settings_controller.dart';
 import 'adaptive_editor.dart';
@@ -173,11 +174,35 @@ class _CategoryEditorState extends ConsumerState<CategoryEditor> {
       confirmLabel: l10n.deleteCategoryConfirm,
     );
     if (!confirmed) return;
-    await ref.read(categoryRepositoryProvider).delete(widget.category!.id);
-    await ref
-        .read(settingsControllerProvider.notifier)
-        .removeCategoryPreference(widget.category!.id);
-    if (mounted) Navigator.pop(context);
+    final categoryId = widget.category!.id;
+    final affectedTaskIds =
+        ref
+            .read(boardProvider)
+            .value
+            ?.tasks
+            .where((task) => task.categoryId == categoryId)
+            .map((task) => task.id)
+            .toList(growable: false) ??
+        const <int>[];
+    final categoryRepository = ref.read(categoryRepositoryProvider);
+    final taskRepository = ref.read(taskRepositoryProvider);
+    final settingsController = ref.read(settingsControllerProvider.notifier);
+    final messenger = ScaffoldMessenger.of(context);
+    await categoryRepository.delete(categoryId);
+    if (!mounted) return;
+    Navigator.pop(context);
+    showDestructiveUndoSnackBar(
+      messenger: messenger,
+      message: l10n.categoryDeleted,
+      undoLabel: l10n.undoCountdown,
+      onUndo: () async {
+        await categoryRepository.restore(categoryId);
+        for (final taskId in affectedTaskIds) {
+          await taskRepository.move(taskId, categoryId);
+        }
+      },
+      onExpired: () => settingsController.removeCategoryPreference(categoryId),
+    );
   }
 }
 

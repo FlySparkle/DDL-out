@@ -330,7 +330,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteTaskTitle => 'Delete task?';
 
   @override
-  String get deleteTaskBody => 'This action cannot be undone.';
+  String get deleteTaskBody =>
+      'You can undo this deletion before the countdown ends.';
 
   @override
   String get deleteCategoryTitle => 'Delete category?';
@@ -340,7 +341,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String deleteCategoryBody(int count) {
-    return 'The $count tasks in this category will move to Uncategorized.';
+    return 'The $count tasks in this category will move to Uncategorized. You can undo before the countdown ends.';
   }
 
   @override
@@ -348,7 +349,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String clearCompletedBody(int count) {
-    return 'This will permanently delete $count completed tasks.';
+    return 'This will delete $count completed tasks. You can undo before the countdown ends.';
   }
 
   @override
@@ -357,7 +358,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String clearCategoryTasksBody(int count) {
-    return 'This will permanently delete the $count completed tasks in this category.';
+    return 'This will delete the $count completed tasks in this category. You can undo before the countdown ends.';
   }
 
   @override
@@ -365,7 +366,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clearAllBody =>
-      'All categories and tasks will be permanently deleted.';
+      'All categories and tasks will be deleted. You can undo before the countdown ends.';
 
   @override
   String get restoreTitle => 'Restore this backup?';
@@ -419,6 +420,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get undo => 'Undo';
+
+  @override
+  String undoCountdown(int seconds) {
+    return 'Undo (${seconds}s)';
+  }
+
+  @override
+  String get taskDeleted => 'Task deleted';
+
+  @override
+  String get categoryDeleted => 'Category deleted';
+
+  @override
+  String completedTasksDeleted(int count) {
+    return 'Deleted $count completed tasks';
+  }
+
+  @override
+  String get allDataDeleted => 'All data cleared';
 
   @override
   String get taskMarkedComplete => 'Marked complete';

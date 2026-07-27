@@ -245,6 +245,8 @@ class AppDatabase extends _$AppDatabase {
     await deleteSyncedCategory(id);
   }
 
+  Future<void> restoreCategory(int id) => restoreSyncedCategory(id);
+
   Future<void> clearCategories() async {
     await clearSyncedCategories();
   }
@@ -293,6 +295,10 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> deleteTask(int id) => deleteSyncedTask(id);
 
+  Future<void> restoreTask(int id) => restoreSyncedTasks([id]);
+
+  Future<void> restoreTasks(Iterable<int> ids) => restoreSyncedTasks(ids);
+
   Future<void> clearCompleted() => clearSyncedCompleted();
 
   Future<void> clearCompletedInCategory(int? categoryId) {
@@ -301,6 +307,10 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> clearAllData() async {
     await clearAllSyncedData();
+  }
+
+  Future<void> restoreSnapshot(BoardSnapshot snapshot) {
+    return restoreSyncedSnapshot(snapshot);
   }
 
   Future<void> replaceAll({

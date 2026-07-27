@@ -727,7 +727,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteTaskBody.
   ///
   /// In zh, this message translates to:
-  /// **'此操作无法撤销。'**
+  /// **'删除后可在倒计时结束前撤销。'**
   String get deleteTaskBody;
 
   /// No description provided for @deleteCategoryTitle.
@@ -745,7 +745,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteCategoryBody.
   ///
   /// In zh, this message translates to:
-  /// **'分类内的 {count} 个事项将移动到“未分类”。'**
+  /// **'分类内的 {count} 个事项将移动到“未分类”，倒计时结束前可撤销。'**
   String deleteCategoryBody(int count);
 
   /// No description provided for @clearCompletedTitle.
@@ -757,7 +757,7 @@ abstract class AppLocalizations {
   /// No description provided for @clearCompletedBody.
   ///
   /// In zh, this message translates to:
-  /// **'将永久删除 {count} 个已完成事项。'**
+  /// **'将删除 {count} 个已完成事项，倒计时结束前可撤销。'**
   String clearCompletedBody(int count);
 
   /// No description provided for @clearCategoryTasksTitle.
@@ -769,7 +769,7 @@ abstract class AppLocalizations {
   /// No description provided for @clearCategoryTasksBody.
   ///
   /// In zh, this message translates to:
-  /// **'将永久删除本分类内的 {count} 个已完成事项。'**
+  /// **'将删除本分类内的 {count} 个已完成事项，倒计时结束前可撤销。'**
   String clearCategoryTasksBody(int count);
 
   /// No description provided for @clearAllTitle.
@@ -781,7 +781,7 @@ abstract class AppLocalizations {
   /// No description provided for @clearAllBody.
   ///
   /// In zh, this message translates to:
-  /// **'所有分类和事项都将被永久删除。'**
+  /// **'所有分类和事项都将被删除，倒计时结束前可撤销。'**
   String get clearAllBody;
 
   /// No description provided for @restoreTitle.
@@ -860,6 +860,36 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'撤销'**
   String get undo;
+
+  /// No description provided for @undoCountdown.
+  ///
+  /// In zh, this message translates to:
+  /// **'撤销（{seconds}秒）'**
+  String undoCountdown(int seconds);
+
+  /// No description provided for @taskDeleted.
+  ///
+  /// In zh, this message translates to:
+  /// **'事项已删除'**
+  String get taskDeleted;
+
+  /// No description provided for @categoryDeleted.
+  ///
+  /// In zh, this message translates to:
+  /// **'分类已删除'**
+  String get categoryDeleted;
+
+  /// No description provided for @completedTasksDeleted.
+  ///
+  /// In zh, this message translates to:
+  /// **'已删除 {count} 个已完成事项'**
+  String completedTasksDeleted(int count);
+
+  /// No description provided for @allDataDeleted.
+  ///
+  /// In zh, this message translates to:
+  /// **'全部数据已清空'**
+  String get allDataDeleted;
 
   /// No description provided for @taskMarkedComplete.
   ///

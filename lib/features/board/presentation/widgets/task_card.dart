@@ -222,12 +222,6 @@ class TaskCard extends ConsumerWidget {
           content: Text(
             next ? l10n.taskMarkedComplete : l10n.taskMarkedIncomplete,
           ),
-          action: SnackBarAction(
-            label: l10n.undo,
-            onPressed: () => ref
-                .read(taskRepositoryProvider)
-                .setCompleted(task.id, task.isCompleted),
-          ),
         ),
       );
   }

@@ -294,6 +294,12 @@ class _RecordingTaskRepository implements TaskRepository {
   Future<void> move(int taskId, int? categoryId) async {}
 
   @override
+  Future<void> restore(int id) async {}
+
+  @override
+  Future<void> restoreMany(Iterable<int> ids) async {}
+
+  @override
   Future<void> setCompleted(int taskId, bool completed) async {}
 
   @override

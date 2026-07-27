@@ -189,6 +189,21 @@ extension SyncDatabase on AppDatabase {
     });
   }
 
+  Future<void> restoreSyncedCategory(int id) async {
+    await transaction(() async {
+      final category = await (select(
+        categories,
+      )..where((row) => row.id.equals(id))).getSingle();
+      if (category.deletedAtUtc == null) return;
+      await _recordLocalOperation(
+        entityType: SyncEntityType.category,
+        entitySyncId: category.syncId!,
+        kind: SyncOperationKind.restore,
+        changes: {SyncField.deleted: null},
+      );
+    });
+  }
+
   Future<void> clearSyncedCategories() async {
     final rows = await readCategories();
     for (final row in rows) {
@@ -315,6 +330,44 @@ extension SyncDatabase on AppDatabase {
         kind: SyncOperationKind.delete,
         changes: {SyncField.deleted: DateTime.now().toUtc().toIso8601String()},
       );
+    });
+  }
+
+  Future<void> restoreSyncedTasks(Iterable<int> ids) async {
+    final uniqueIds = ids.toSet();
+    if (uniqueIds.isEmpty) return;
+    await transaction(() async {
+      final rows = await (select(
+        tasks,
+      )..where((row) => row.id.isIn(uniqueIds))).get();
+      final deletedRows = rows
+          .where((row) => row.deletedAtUtc != null)
+          .toList(growable: false);
+      if (deletedRows.isEmpty) return;
+      final transactionId = const Uuid().v4();
+      for (final (index, task) in deletedRows.indexed) {
+        await _recordLocalOperation(
+          entityType: SyncEntityType.task,
+          entitySyncId: task.syncId!,
+          kind: SyncOperationKind.restore,
+          changes: {SyncField.deleted: null},
+          transactionId: transactionId,
+          transactionIndex: index,
+          transactionCount: deletedRows.length,
+        );
+      }
+    });
+  }
+
+  Future<void> restoreSyncedSnapshot(BoardSnapshot snapshot) async {
+    await transaction(() async {
+      for (final category in snapshot.categories) {
+        await restoreSyncedCategory(category.id);
+      }
+      await restoreSyncedTasks(snapshot.tasks.map((task) => task.id));
+      for (final task in snapshot.tasks) {
+        await moveSyncedTask(task.id, task.categoryId);
+      }
     });
   }
 

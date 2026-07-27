@@ -21,6 +21,8 @@ abstract interface class TaskRepository {
   Future<void> move(int taskId, int? categoryId);
   Future<void> setCompleted(int taskId, bool completed);
   Future<void> delete(int id);
+  Future<void> restore(int id);
+  Future<void> restoreMany(Iterable<int> ids);
   Future<void> clearCompleted();
   Future<void> clearCompletedInCategory(int? categoryId);
 }

@@ -325,7 +325,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get deleteTaskTitle => 'タスクを削除しますか？';
 
   @override
-  String get deleteTaskBody => 'この操作は元に戻せません。';
+  String get deleteTaskBody => 'カウントダウンが終わるまで削除を元に戻せます。';
 
   @override
   String get deleteCategoryTitle => 'カテゴリーを削除しますか？';
@@ -335,7 +335,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String deleteCategoryBody(int count) {
-    return 'このカテゴリー内の $count 件のタスクは「未分類」に移動します。';
+    return 'このカテゴリー内の $count 件のタスクは「未分類」に移動します。カウントダウンが終わるまで元に戻せます。';
   }
 
   @override
@@ -343,7 +343,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String clearCompletedBody(int count) {
-    return '完了済みの $count 件のタスクを完全に削除します。';
+    return '完了済みの $count 件のタスクを削除します。カウントダウンが終わるまで元に戻せます。';
   }
 
   @override
@@ -351,14 +351,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String clearCategoryTasksBody(int count) {
-    return 'このカテゴリー内の完了済みタスク $count 件を完全に削除します。';
+    return 'このカテゴリー内の完了済みタスク $count 件を削除します。カウントダウンが終わるまで元に戻せます。';
   }
 
   @override
   String get clearAllTitle => 'すべてのデータを削除しますか？';
 
   @override
-  String get clearAllBody => 'すべてのカテゴリーとタスクが完全に削除されます。';
+  String get clearAllBody => 'すべてのカテゴリーとタスクを削除します。カウントダウンが終わるまで元に戻せます。';
 
   @override
   String get restoreTitle => 'このバックアップを復元しますか？';
@@ -412,6 +412,25 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get undo => '元に戻す';
+
+  @override
+  String undoCountdown(int seconds) {
+    return '元に戻す（$seconds秒）';
+  }
+
+  @override
+  String get taskDeleted => 'タスクを削除しました';
+
+  @override
+  String get categoryDeleted => 'カテゴリーを削除しました';
+
+  @override
+  String completedTasksDeleted(int count) {
+    return '完了済みタスクを $count 件削除しました';
+  }
+
+  @override
+  String get allDataDeleted => 'すべてのデータを削除しました';
 
   @override
   String get taskMarkedComplete => '完了にしました';

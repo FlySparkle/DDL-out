@@ -50,6 +50,12 @@ final class DriftTaskRepository implements TaskRepository {
   Future<void> delete(int id) => _database.deleteTask(id);
 
   @override
+  Future<void> restore(int id) => _database.restoreTask(id);
+
+  @override
+  Future<void> restoreMany(Iterable<int> ids) => _database.restoreTasks(ids);
+
+  @override
   Future<void> clearCompleted() => _database.clearCompleted();
 
   @override

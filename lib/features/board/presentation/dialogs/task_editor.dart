@@ -10,6 +10,7 @@ import '../../../../data/database/app_database.dart';
 import '../../../../data/repositories/board_providers.dart';
 import '../../../../data/task_details/task_detail_document.dart';
 import '../../../../data/task_details/task_detail_image.dart';
+import '../../../../core/widgets/destructive_undo_snack_bar.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../settings/application/settings.dart';
 import '../widgets/task_detail_content_editor.dart';
@@ -474,7 +475,17 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
       confirmLabel: l10n.deleteTaskConfirm,
     );
     if (!confirmed) return;
-    await ref.read(taskRepositoryProvider).delete(widget.task!.id);
-    if (mounted) Navigator.pop(context);
+    final taskId = widget.task!.id;
+    final repository = ref.read(taskRepositoryProvider);
+    final messenger = ScaffoldMessenger.of(context);
+    await repository.delete(taskId);
+    if (!mounted) return;
+    Navigator.pop(context);
+    showDestructiveUndoSnackBar(
+      messenger: messenger,
+      message: l10n.taskDeleted,
+      undoLabel: l10n.undoCountdown,
+      onUndo: () => repository.restore(taskId),
+    );
   }
 }

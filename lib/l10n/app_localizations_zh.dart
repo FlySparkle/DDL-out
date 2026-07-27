@@ -323,7 +323,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deleteTaskTitle => '删除事项？';
 
   @override
-  String get deleteTaskBody => '此操作无法撤销。';
+  String get deleteTaskBody => '删除后可在倒计时结束前撤销。';
 
   @override
   String get deleteCategoryTitle => '删除分类？';
@@ -333,7 +333,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String deleteCategoryBody(int count) {
-    return '分类内的 $count 个事项将移动到“未分类”。';
+    return '分类内的 $count 个事项将移动到“未分类”，倒计时结束前可撤销。';
   }
 
   @override
@@ -341,7 +341,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String clearCompletedBody(int count) {
-    return '将永久删除 $count 个已完成事项。';
+    return '将删除 $count 个已完成事项，倒计时结束前可撤销。';
   }
 
   @override
@@ -349,14 +349,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String clearCategoryTasksBody(int count) {
-    return '将永久删除本分类内的 $count 个已完成事项。';
+    return '将删除本分类内的 $count 个已完成事项，倒计时结束前可撤销。';
   }
 
   @override
   String get clearAllTitle => '清空全部数据？';
 
   @override
-  String get clearAllBody => '所有分类和事项都将被永久删除。';
+  String get clearAllBody => '所有分类和事项都将被删除，倒计时结束前可撤销。';
 
   @override
   String get restoreTitle => '恢复这个备份？';
@@ -410,6 +410,25 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get undo => '撤销';
+
+  @override
+  String undoCountdown(int seconds) {
+    return '撤销（$seconds秒）';
+  }
+
+  @override
+  String get taskDeleted => '事项已删除';
+
+  @override
+  String get categoryDeleted => '分类已删除';
+
+  @override
+  String completedTasksDeleted(int count) {
+    return '已删除 $count 个已完成事项';
+  }
+
+  @override
+  String get allDataDeleted => '全部数据已清空';
 
   @override
   String get taskMarkedComplete => '已标记为完成';

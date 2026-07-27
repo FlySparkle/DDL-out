@@ -22,5 +22,8 @@ final class DriftCategoryRepository implements CategoryRepository {
   Future<void> delete(int id) => _database.deleteCategory(id);
 
   @override
+  Future<void> restore(int id) => _database.restoreCategory(id);
+
+  @override
   Future<void> clear() => _database.clearCategories();
 }
