@@ -1,9 +1,4 @@
-import 'dart:convert';
-
 import 'package:ddl_out/data/database/app_database.dart';
-import 'package:ddl_out/data/task_details/task_detail_document.dart';
-import 'package:ddl_out/data/task_details/task_detail_image.dart';
-import 'package:ddl_out/features/board/application/task_image_viewer.dart';
 import 'package:ddl_out/features/board/presentation/widgets/task_card.dart';
 import 'package:ddl_out/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -187,9 +182,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('task card separates title from persisted details', (
-    tester,
-  ) async {
+  testWidgets('task card does not preview persisted details', (tester) async {
     SharedPreferences.setMockInitialValues({});
     final now = DateTime(2026, 7, 19, 12);
     final task = Task(
@@ -228,151 +221,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Card title'), findsOneWidget);
-    expect(find.text('Card details'), findsOneWidget);
-    expect(find.byKey(const ValueKey('task-details-block')), findsOneWidget);
+    expect(find.text('Card details'), findsNothing);
+    expect(find.byKey(const ValueKey('task-details-block')), findsNothing);
   });
-
-  testWidgets('embedded card image opens a fresh viewer on every double click', (
-    tester,
-  ) async {
-    SharedPreferences.setMockInitialValues({});
-    final now = DateTime(2026, 7, 19, 12);
-    final viewer = _RecordingTaskImageViewer();
-    final image = TaskDetailImage(
-      id: 'embedded',
-      mimeType: 'image/png',
-      bytes: base64Decode(
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-      ),
-    );
-    final document = TaskDetailDocument([
-      const TaskDetailTextBlock('Before image'),
-      TaskDetailImageBlock(image),
-      const TaskDetailTextBlock('After image'),
-    ]);
-    final task = Task(
-      id: 1,
-      name: 'Mixed detail',
-      details: TaskDetailDocumentCodec.encode(document),
-      detailImagesJson: TaskDetailImageCodec.encode([image]),
-      deadlineUtc: now.toUtc().add(const Duration(hours: 2)),
-      categoryId: null,
-      isCompleted: false,
-      createdAtUtc: now.toUtc(),
-      updatedAtUtc: now.toUtc(),
-      completedAtUtc: null,
-    );
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [taskImageViewerProvider.overrideWithValue(viewer)],
-        child: MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.windows),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('en'),
-          home: Scaffold(
-            body: TaskCard(
-              task: task,
-              snapshot: BoardSnapshot(categories: const [], tasks: [task]),
-              categoryColor: Colors.blue,
-              longestRemaining: const Duration(hours: 2),
-              now: now,
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('Before image'), findsOneWidget);
-    expect(find.text('After image'), findsOneWidget);
-    final embeddedImage = find.byKey(
-      const ValueKey('task-card-detail-image-embedded'),
-    );
-    await tester.ensureVisible(embeddedImage);
-    final desktopImagePoint = tester.getCenter(
-      find.descendant(of: embeddedImage, matching: find.byType(Image)),
-    );
-    await tester.tapAt(desktopImagePoint);
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(desktopImagePoint);
-    await tester.pump(const Duration(milliseconds: 400));
-    await tester.tapAt(desktopImagePoint);
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(desktopImagePoint);
-    await tester.pump(const Duration(milliseconds: 400));
-
-    expect(viewer.openedImageIds, ['embedded', 'embedded']);
-  });
-
-  testWidgets('mobile embedded image opens full-screen viewer with one tap', (
-    tester,
-  ) async {
-    SharedPreferences.setMockInitialValues({});
-    final now = DateTime(2026, 7, 19, 12);
-    final viewer = _RecordingTaskImageViewer();
-    final image = TaskDetailImage(
-      id: 'mobile-image',
-      mimeType: 'image/png',
-      bytes: base64Decode(
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-      ),
-    );
-    final document = TaskDetailDocument([TaskDetailImageBlock(image)]);
-    final task = Task(
-      id: 2,
-      name: 'Mobile image',
-      details: TaskDetailDocumentCodec.encode(document),
-      detailImagesJson: TaskDetailImageCodec.encode([image]),
-      deadlineUtc: now.toUtc().add(const Duration(hours: 2)),
-      categoryId: null,
-      isCompleted: false,
-      createdAtUtc: now.toUtc(),
-      updatedAtUtc: now.toUtc(),
-      completedAtUtc: null,
-    );
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [taskImageViewerProvider.overrideWithValue(viewer)],
-        child: MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.android),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('en'),
-          home: Scaffold(
-            body: TaskCard(
-              task: task,
-              snapshot: BoardSnapshot(categories: const [], tasks: [task]),
-              categoryColor: Colors.blue,
-              longestRemaining: const Duration(hours: 2),
-              now: now,
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    final embeddedImage = find.byKey(
-      const ValueKey('task-card-detail-image-mobile-image'),
-    );
-    await tester.ensureVisible(embeddedImage);
-    await tester.tap(
-      find.descendant(of: embeddedImage, matching: find.byType(Image)),
-    );
-    await tester.pump();
-
-    expect(viewer.openedImageIds, ['mobile-image']);
-  });
-}
-
-final class _RecordingTaskImageViewer implements TaskImageViewer {
-  final openedImageIds = <String>[];
-
-  @override
-  Future<void> open(BuildContext context, TaskDetailImage image) async {
-    openedImageIds.add(image.id);
-  }
 }

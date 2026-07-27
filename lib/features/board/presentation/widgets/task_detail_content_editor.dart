@@ -14,8 +14,6 @@ import '../../application/task_image_clipboard.dart';
 import '../../application/task_image_viewer.dart';
 
 abstract final class TaskDetailImageLayout {
-  static const maximumCardHeight = 72.0;
-
   static double maximumEditorHeight(BuildContext context) =>
       math.min(720, MediaQuery.sizeOf(context).height * 0.55);
 
