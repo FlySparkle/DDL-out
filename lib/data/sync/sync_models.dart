@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-const syncProtocolVersion = 2;
+const syncProtocolVersion = 3;
 
 abstract final class SyncEntityType {
   static const category = 'category';

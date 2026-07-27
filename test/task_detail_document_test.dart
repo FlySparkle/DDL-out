@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:ddl_out/data/task_details/task_detail_document.dart';
@@ -44,10 +45,12 @@ void main() {
     expect((restored.blocks[0] as TaskDetailTextBlock).text, 'Before');
     expect((restored.blocks[1] as TaskDetailImageBlock).image.id, 'embedded');
     expect((restored.blocks[2] as TaskDetailTextBlock).text, 'After');
-    expect(details.split('\n'), hasLength(3));
+    final encoded = jsonDecode(details) as Map<String, dynamic>;
+    expect(encoded['format'], TaskDetailDocumentCodec.format);
+    expect(encoded['ops'], isA<List<Object?>>());
   });
 
-  test('unreferenced images append after explicitly embedded content', () {
+  test('delta documents discard images no longer referenced by an embed', () {
     final embedded = image('embedded');
     final legacy = image('legacy');
     final encoded = TaskDetailDocumentCodec.encode(
@@ -66,7 +69,46 @@ void main() {
       restored.blocks.whereType<TaskDetailImageBlock>().map(
         (block) => block.image.id,
       ),
-      ['embedded', 'legacy'],
+      ['embedded'],
+    );
+  });
+
+  test('quill delta keeps text and block images in one ordered document', () {
+    final embedded = image('embedded');
+    final document = TaskDetailDocumentCodec.fromDelta(
+      operations: [
+        {'insert': 'Before\n'},
+        {
+          'insert': {
+            'image': TaskDetailDocumentCodec.imageSourceFor(embedded.id),
+          },
+        },
+        {'insert': '\nAfter\n'},
+      ],
+      images: [embedded],
+    );
+
+    expect(document.blocks, hasLength(3));
+    expect((document.blocks[0] as TaskDetailTextBlock).text, 'Before');
+    expect((document.blocks[1] as TaskDetailImageBlock).image.id, embedded.id);
+    expect((document.blocks[2] as TaskDetailTextBlock).text, 'After');
+
+    final restored = TaskDetailDocumentCodec.decode(
+      details: TaskDetailDocumentCodec.encode(document),
+      images: [embedded],
+    );
+    expect(restored.deltaOperations, isNotNull);
+    expect(
+      restored.deltaOperations,
+      contains(
+        predicate<Object?>(
+          (operation) =>
+              operation is Map &&
+              operation['insert'] is Map &&
+              (operation['insert'] as Map)['image'] ==
+                  TaskDetailDocumentCodec.imageSourceFor(embedded.id),
+        ),
+      ),
     );
   });
 }

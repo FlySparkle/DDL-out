@@ -8,9 +8,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/version/app_version.dart';
 import '../database/app_database.dart';
 import '../repositories/board_providers.dart';
+import '../task_details/task_detail_document.dart';
 import '../task_details/task_detail_image.dart';
 
-const backupSchemaVersion = 3;
+const backupSchemaVersion = 4;
 
 class BackupException implements Exception {
   const BackupException(this.message);
@@ -205,7 +206,8 @@ class BackupService {
       if (!taskIds.add(id)) throw const BackupException('事项 ID 重复');
       _name(row, 200);
       final details = row['details'];
-      if (details is! String || details.length > 10000) {
+      if (details is! String ||
+          details.length > TaskDetailDocumentCodec.maximumEncodedLength) {
         throw const BackupException('事项详情无效');
       }
       final detailImages = row['detailImages'];
@@ -213,7 +215,8 @@ class BackupService {
         throw const BackupException('事项详情图片无效');
       }
       try {
-        TaskDetailImageCodec.decode(jsonEncode(detailImages));
+        final images = TaskDetailImageCodec.decode(jsonEncode(detailImages));
+        TaskDetailDocumentCodec.decode(details: details, images: images);
       } on FormatException {
         throw const BackupException('事项详情图片无效');
       }
