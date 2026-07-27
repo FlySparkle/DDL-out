@@ -165,7 +165,9 @@ enum AppNavigationDestinationId {
   final String route;
 
   static AppNavigationDestinationId fromLocation(String location) {
-    if (location.startsWith('/settings')) return settings;
+    if (location.startsWith('/settings') || location.startsWith('/sync')) {
+      return settings;
+    }
     return board;
   }
 }

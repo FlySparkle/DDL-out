@@ -11,16 +11,20 @@ import '../features/settings/appearance_settings_page.dart';
 import '../features/settings/community_settings_page.dart';
 import '../features/settings/domain/legal_document.dart';
 import '../features/settings/presentation/legal_document_page.dart';
-import '../features/settings/system_data_settings_page.dart';
 import '../features/settings/settings_overview_page.dart';
+import '../features/settings/system_data_settings_page.dart';
+import '../features/sync/sync_page.dart';
 import '../l10n/app_localizations.dart';
 import 'navigation/app_navigation_shell.dart';
 import 'app_shell.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
+const _previewBuild = bool.fromEnvironment('DDL_OUT_PREVIEW');
+
 final _router = GoRouter(
   navigatorKey: _rootNavigatorKey,
+  initialLocation: _previewBuild ? '/sync' : '/',
   routes: [
     ShellRoute(
       builder: (context, state, child) =>
@@ -63,6 +67,11 @@ final _router = GoRouter(
         GoRoute(
           path: '/settings/community',
           builder: (context, state) => const CommunitySettingsPage(),
+        ),
+        GoRoute(path: '/sync', builder: (context, state) => const SyncPage()),
+        GoRoute(
+          path: '/sync/conflicts',
+          builder: (context, state) => const SyncConflictsPage(),
         ),
       ],
     ),

@@ -528,4 +528,127 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get reportSecurityIssueSubtitle =>
       'GitHub の非公開報告を使用し、脆弱性の詳細を公開しないでください';
+
+  @override
+  String get nearbySync => '近くの端末と同期';
+
+  @override
+  String get nearbySyncSubtitle => '同じ LAN で QR コードを読み取り、端末間で同期します';
+
+  @override
+  String get showSyncQr => 'パソコンに QR コードを表示';
+
+  @override
+  String get scanSyncQr => '同期 QR コードをスキャン';
+
+  @override
+  String get lanSyncPrivacy =>
+      'データはこの LAN 内だけで暗号化して送信され、クラウドは経由しません。セッションを閉じると QR コードは無効になります。';
+
+  @override
+  String get syncConflicts => '同期の競合';
+
+  @override
+  String get noSyncConflicts => '確認が必要な競合はありません';
+
+  @override
+  String syncConflictCount(int count) {
+    return '$count 件で残すバージョンを選択してください';
+  }
+
+  @override
+  String get pairedDevices => 'ペアリング済み端末';
+
+  @override
+  String get noPairedDevices => 'ペアリングした端末はまだありません';
+
+  @override
+  String lastSyncedAt(String date) {
+    return '最終同期：$date';
+  }
+
+  @override
+  String get scanWithinTwoMinutes =>
+      '2 分以内にスマートフォンでスキャンしてください。初回はファイアウォールの許可が必要な場合があります。';
+
+  @override
+  String get computerCreatesQr =>
+      'パソコンが一度限りのセッションを作成し、スマートフォンのスキャン後に双方の変更を自動で統合します。';
+
+  @override
+  String get phoneScansQr => 'パソコンのコードをスキャンします。バージョンを比較し、不足している変更だけを転送します。';
+
+  @override
+  String get createSyncQr => '同期 QR コードを作成';
+
+  @override
+  String get scanAndSync => 'スキャンして同期';
+
+  @override
+  String get preparingSync => '安全な接続を準備しています…';
+
+  @override
+  String get connectingDevice => 'パソコンに接続しています…';
+
+  @override
+  String syncingWith(String device) {
+    return '$device と変更を統合しています…';
+  }
+
+  @override
+  String get otherDevice => 'もう一方の端末';
+
+  @override
+  String syncCompleted(int received, int sent, int conflicts) {
+    return '同期完了：受信 $received 件、送信 $sent 件、競合 $conflicts 件。';
+  }
+
+  @override
+  String get done => '完了';
+
+  @override
+  String get conflictApprovalHere => 'この端末で競合を確認します。選択内容は次回の同期で他方へ伝わります。';
+
+  @override
+  String get conflictApprovalOnComputer =>
+      '既定では QR コードを作成したパソコンで競合を確認します。重複操作を防ぐため、この端末は読み取り専用です。';
+
+  @override
+  String get resolveOnThisDevice => 'この端末で確認';
+
+  @override
+  String conflictingField(String field) {
+    return '競合フィールド：$field';
+  }
+
+  @override
+  String candidateFrom(String device) {
+    return '$device から';
+  }
+
+  @override
+  String get categoryOrder => 'カテゴリーの順序';
+
+  @override
+  String get completionState => '完了状態';
+
+  @override
+  String get deletionState => '削除状態';
+
+  @override
+  String get keepItem => 'この項目を残す';
+
+  @override
+  String get deleteItem => 'この項目を削除';
+
+  @override
+  String get emptyValue => '空の値';
+
+  @override
+  String get forgetDevice => 'ペアリング端末を削除';
+
+  @override
+  String forgetDeviceBody(String device) {
+    return '「$device」を削除しても、この端末のデータと同期履歴は残ります。新しいコードで再度ペアリングできます。';
+  }
 }

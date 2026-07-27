@@ -540,4 +540,129 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reportSecurityIssueSubtitle =>
       'Use GitHub private reporting; do not disclose vulnerability details publicly';
+
+  @override
+  String get nearbySync => 'Nearby sync';
+
+  @override
+  String get nearbySyncSubtitle => 'Scan on the same LAN for peer-to-peer sync';
+
+  @override
+  String get showSyncQr => 'Show a QR code on this computer';
+
+  @override
+  String get scanSyncQr => 'Scan sync QR code';
+
+  @override
+  String get lanSyncPrivacy =>
+      'Data is encrypted and sent only over this LAN, never through a cloud. The QR code expires when this session closes.';
+
+  @override
+  String get syncConflicts => 'Sync conflicts';
+
+  @override
+  String get noSyncConflicts => 'No conflicts need review';
+
+  @override
+  String syncConflictCount(int count) {
+    return 'Choose which version to keep for $count items';
+  }
+
+  @override
+  String get pairedDevices => 'Paired devices';
+
+  @override
+  String get noPairedDevices => 'No other devices have been paired';
+
+  @override
+  String lastSyncedAt(String date) {
+    return 'Last synced: $date';
+  }
+
+  @override
+  String get scanWithinTwoMinutes =>
+      'Scan from your phone within 2 minutes. You may need to allow firewall access the first time.';
+
+  @override
+  String get computerCreatesQr =>
+      'This computer creates a one-time session. After the phone scans, both sides merge changes automatically.';
+
+  @override
+  String get phoneScansQr =>
+      'Scan the code on your computer. The devices compare versions and transfer only missing changes.';
+
+  @override
+  String get createSyncQr => 'Create sync QR code';
+
+  @override
+  String get scanAndSync => 'Scan and sync';
+
+  @override
+  String get preparingSync => 'Preparing a secure connection…';
+
+  @override
+  String get connectingDevice => 'Connecting to the computer…';
+
+  @override
+  String syncingWith(String device) {
+    return 'Merging changes with $device…';
+  }
+
+  @override
+  String get otherDevice => 'the other device';
+
+  @override
+  String syncCompleted(int received, int sent, int conflicts) {
+    return 'Sync complete: received $received, sent $sent, found $conflicts conflicts.';
+  }
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get conflictApprovalHere =>
+      'This device reviews conflicts. Your choice will reach the other device on the next sync.';
+
+  @override
+  String get conflictApprovalOnComputer =>
+      'The computer that created the QR code reviews conflicts by default. This phone is read-only to prevent duplicate decisions.';
+
+  @override
+  String get resolveOnThisDevice => 'Review on this device';
+
+  @override
+  String conflictingField(String field) {
+    return 'Conflicting field: $field';
+  }
+
+  @override
+  String candidateFrom(String device) {
+    return 'From $device';
+  }
+
+  @override
+  String get categoryOrder => 'Category order';
+
+  @override
+  String get completionState => 'Completion state';
+
+  @override
+  String get deletionState => 'Deletion state';
+
+  @override
+  String get keepItem => 'Keep this item';
+
+  @override
+  String get deleteItem => 'Delete this item';
+
+  @override
+  String get emptyValue => 'Empty value';
+
+  @override
+  String get forgetDevice => 'Forget paired device';
+
+  @override
+  String forgetDeviceBody(String device) {
+    return 'Forgetting “$device” keeps this device\'s data and sync history. You can pair again by scanning a new code.';
+  }
 }

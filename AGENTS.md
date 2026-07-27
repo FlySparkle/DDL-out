@@ -5,6 +5,31 @@
 Build DDL out! as a local-first Flutter application using Material 3 and
 Material 3 Expressive-inspired motion and component styling.
 
+## Canonical workspace
+
+- The default and canonical repository root is
+  `C:\Users\27950\Desktop\Work\DDL-out`.
+- Run all project inspection, editing, generation, testing, build, and Git
+  commands from this directory unless the user explicitly names another path.
+- The legacy repository copy at
+  `C:\Users\27950\Desktop\Work\Python面向对象\DDL out！` is read-only history.
+  Do not inspect it as the default workspace or continue development there.
+- Before making changes, verify that `git rev-parse --show-toplevel` resolves
+  to the canonical repository root above.
+
+## Project handoff
+
+- Before planning or implementing project changes, read
+  [the project handoff](docs/PROJECT_HANDOFF.md) for the current product and
+  development context.
+- Consult [the legacy task index](docs/legacy/OLD_CODEX_TASKS.md) only when the
+  provenance or detailed rationale of an older decision is needed.
+- Resolve conflicting information in this order: current code and tests,
+  accepted ADRs, this file and the project handoff, then legacy task records.
+  Old conversations are historical evidence, not current requirements.
+- The handoff documents must remain useful even if the legacy folder or local
+  Codex task history is unavailable.
+
 ## Repository layout
 
 - `lib/`: Flutter application source code.

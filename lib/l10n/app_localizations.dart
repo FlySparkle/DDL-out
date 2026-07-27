@@ -1070,6 +1070,216 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'通过 GitHub 私密安全报告提交，请勿公开漏洞细节'**
   String get reportSecurityIssueSubtitle;
+
+  /// No description provided for @nearbySync.
+  ///
+  /// In zh, this message translates to:
+  /// **'附近同步'**
+  String get nearbySync;
+
+  /// No description provided for @nearbySyncSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'同一局域网内扫码，点对点同步'**
+  String get nearbySyncSubtitle;
+
+  /// No description provided for @showSyncQr.
+  ///
+  /// In zh, this message translates to:
+  /// **'在电脑上显示二维码'**
+  String get showSyncQr;
+
+  /// No description provided for @scanSyncQr.
+  ///
+  /// In zh, this message translates to:
+  /// **'扫描同步二维码'**
+  String get scanSyncQr;
+
+  /// No description provided for @lanSyncPrivacy.
+  ///
+  /// In zh, this message translates to:
+  /// **'数据只在当前局域网内加密传输，不经过云端；关闭页面后二维码随即失效。'**
+  String get lanSyncPrivacy;
+
+  /// No description provided for @syncConflicts.
+  ///
+  /// In zh, this message translates to:
+  /// **'同步冲突'**
+  String get syncConflicts;
+
+  /// No description provided for @noSyncConflicts.
+  ///
+  /// In zh, this message translates to:
+  /// **'没有待处理冲突'**
+  String get noSyncConflicts;
+
+  /// No description provided for @syncConflictCount.
+  ///
+  /// In zh, this message translates to:
+  /// **'有 {count} 项需要选择保留版本'**
+  String syncConflictCount(int count);
+
+  /// No description provided for @pairedDevices.
+  ///
+  /// In zh, this message translates to:
+  /// **'已配对设备'**
+  String get pairedDevices;
+
+  /// No description provided for @noPairedDevices.
+  ///
+  /// In zh, this message translates to:
+  /// **'还没有配对过其他设备'**
+  String get noPairedDevices;
+
+  /// No description provided for @lastSyncedAt.
+  ///
+  /// In zh, this message translates to:
+  /// **'最近同步：{date}'**
+  String lastSyncedAt(String date);
+
+  /// No description provided for @scanWithinTwoMinutes.
+  ///
+  /// In zh, this message translates to:
+  /// **'请用手机在 2 分钟内扫描；首次连接可能需要允许防火墙访问。'**
+  String get scanWithinTwoMinutes;
+
+  /// No description provided for @computerCreatesQr.
+  ///
+  /// In zh, this message translates to:
+  /// **'电脑将建立一次性同步会话，手机扫码后双方自动合并改动。'**
+  String get computerCreatesQr;
+
+  /// No description provided for @phoneScansQr.
+  ///
+  /// In zh, this message translates to:
+  /// **'扫描电脑上的二维码，双方会先比较版本，只传输缺少的改动。'**
+  String get phoneScansQr;
+
+  /// No description provided for @createSyncQr.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成同步二维码'**
+  String get createSyncQr;
+
+  /// No description provided for @scanAndSync.
+  ///
+  /// In zh, this message translates to:
+  /// **'扫码并同步'**
+  String get scanAndSync;
+
+  /// No description provided for @preparingSync.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在准备安全连接…'**
+  String get preparingSync;
+
+  /// No description provided for @connectingDevice.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在连接电脑…'**
+  String get connectingDevice;
+
+  /// No description provided for @syncingWith.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在与 {device} 合并改动…'**
+  String syncingWith(String device);
+
+  /// No description provided for @otherDevice.
+  ///
+  /// In zh, this message translates to:
+  /// **'另一台设备'**
+  String get otherDevice;
+
+  /// No description provided for @syncCompleted.
+  ///
+  /// In zh, this message translates to:
+  /// **'同步完成：收到 {received} 项，发出 {sent} 项，发现 {conflicts} 个冲突。'**
+  String syncCompleted(int received, int sent, int conflicts);
+
+  /// No description provided for @done.
+  ///
+  /// In zh, this message translates to:
+  /// **'完成'**
+  String get done;
+
+  /// No description provided for @conflictApprovalHere.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前设备负责冲突审批。选择一个版本后，该决定会在下次同步时传给另一端。'**
+  String get conflictApprovalHere;
+
+  /// No description provided for @conflictApprovalOnComputer.
+  ///
+  /// In zh, this message translates to:
+  /// **'默认由生成二维码的电脑审批；当前手机先保持只读，避免两端重复操作。'**
+  String get conflictApprovalOnComputer;
+
+  /// No description provided for @resolveOnThisDevice.
+  ///
+  /// In zh, this message translates to:
+  /// **'改在此设备审批'**
+  String get resolveOnThisDevice;
+
+  /// No description provided for @conflictingField.
+  ///
+  /// In zh, this message translates to:
+  /// **'冲突字段：{field}'**
+  String conflictingField(String field);
+
+  /// No description provided for @candidateFrom.
+  ///
+  /// In zh, this message translates to:
+  /// **'来自 {device}'**
+  String candidateFrom(String device);
+
+  /// No description provided for @categoryOrder.
+  ///
+  /// In zh, this message translates to:
+  /// **'分类顺序'**
+  String get categoryOrder;
+
+  /// No description provided for @completionState.
+  ///
+  /// In zh, this message translates to:
+  /// **'完成状态'**
+  String get completionState;
+
+  /// No description provided for @deletionState.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除状态'**
+  String get deletionState;
+
+  /// No description provided for @keepItem.
+  ///
+  /// In zh, this message translates to:
+  /// **'保留这条内容'**
+  String get keepItem;
+
+  /// No description provided for @deleteItem.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除这条内容'**
+  String get deleteItem;
+
+  /// No description provided for @emptyValue.
+  ///
+  /// In zh, this message translates to:
+  /// **'空值'**
+  String get emptyValue;
+
+  /// No description provided for @forgetDevice.
+  ///
+  /// In zh, this message translates to:
+  /// **'移除配对设备'**
+  String get forgetDevice;
+
+  /// No description provided for @forgetDeviceBody.
+  ///
+  /// In zh, this message translates to:
+  /// **'移除“{device}”后仍会保留本机数据和同步记录。下次扫码可以重新配对。'**
+  String forgetDeviceBody(String device);
 }
 
 class _AppLocalizationsDelegate

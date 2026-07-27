@@ -525,4 +525,123 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get reportSecurityIssueSubtitle => '通过 GitHub 私密安全报告提交，请勿公开漏洞细节';
+
+  @override
+  String get nearbySync => '附近同步';
+
+  @override
+  String get nearbySyncSubtitle => '同一局域网内扫码，点对点同步';
+
+  @override
+  String get showSyncQr => '在电脑上显示二维码';
+
+  @override
+  String get scanSyncQr => '扫描同步二维码';
+
+  @override
+  String get lanSyncPrivacy => '数据只在当前局域网内加密传输，不经过云端；关闭页面后二维码随即失效。';
+
+  @override
+  String get syncConflicts => '同步冲突';
+
+  @override
+  String get noSyncConflicts => '没有待处理冲突';
+
+  @override
+  String syncConflictCount(int count) {
+    return '有 $count 项需要选择保留版本';
+  }
+
+  @override
+  String get pairedDevices => '已配对设备';
+
+  @override
+  String get noPairedDevices => '还没有配对过其他设备';
+
+  @override
+  String lastSyncedAt(String date) {
+    return '最近同步：$date';
+  }
+
+  @override
+  String get scanWithinTwoMinutes => '请用手机在 2 分钟内扫描；首次连接可能需要允许防火墙访问。';
+
+  @override
+  String get computerCreatesQr => '电脑将建立一次性同步会话，手机扫码后双方自动合并改动。';
+
+  @override
+  String get phoneScansQr => '扫描电脑上的二维码，双方会先比较版本，只传输缺少的改动。';
+
+  @override
+  String get createSyncQr => '生成同步二维码';
+
+  @override
+  String get scanAndSync => '扫码并同步';
+
+  @override
+  String get preparingSync => '正在准备安全连接…';
+
+  @override
+  String get connectingDevice => '正在连接电脑…';
+
+  @override
+  String syncingWith(String device) {
+    return '正在与 $device 合并改动…';
+  }
+
+  @override
+  String get otherDevice => '另一台设备';
+
+  @override
+  String syncCompleted(int received, int sent, int conflicts) {
+    return '同步完成：收到 $received 项，发出 $sent 项，发现 $conflicts 个冲突。';
+  }
+
+  @override
+  String get done => '完成';
+
+  @override
+  String get conflictApprovalHere => '当前设备负责冲突审批。选择一个版本后，该决定会在下次同步时传给另一端。';
+
+  @override
+  String get conflictApprovalOnComputer => '默认由生成二维码的电脑审批；当前手机先保持只读，避免两端重复操作。';
+
+  @override
+  String get resolveOnThisDevice => '改在此设备审批';
+
+  @override
+  String conflictingField(String field) {
+    return '冲突字段：$field';
+  }
+
+  @override
+  String candidateFrom(String device) {
+    return '来自 $device';
+  }
+
+  @override
+  String get categoryOrder => '分类顺序';
+
+  @override
+  String get completionState => '完成状态';
+
+  @override
+  String get deletionState => '删除状态';
+
+  @override
+  String get keepItem => '保留这条内容';
+
+  @override
+  String get deleteItem => '删除这条内容';
+
+  @override
+  String get emptyValue => '空值';
+
+  @override
+  String get forgetDevice => '移除配对设备';
+
+  @override
+  String forgetDeviceBody(String device) {
+    return '移除“$device”后仍会保留本机数据和同步记录。下次扫码可以重新配对。';
+  }
 }
