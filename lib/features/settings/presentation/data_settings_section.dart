@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../data/backup/backup_service.dart';
-import '../../../data/repositories/board_providers.dart';
 import '../../../core/widgets/destructive_undo_snack_bar.dart';
+import '../../../data/backup/backup_service.dart';
+import '../../../data/database/app_database.dart';
+import '../../../data/repositories/board_providers.dart';
 import '../../../l10n/app_localizations.dart';
 import 'settings_section_title.dart';
 import 'settings_tile_group.dart';
