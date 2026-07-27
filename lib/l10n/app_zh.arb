@@ -59,6 +59,8 @@
   "dynamicColorSubtitle": "Android 12 及以上默认使用系统配色",
   "useSystemFont": "使用系统默认字体",
   "useSystemFontSubtitle": "关闭后使用内嵌的思源黑体",
+  "showTaskDragHandle": "显示事项拖拽标签头",
+  "showTaskDragHandleSubtitle": "开启时仅可拖动左侧标签头；关闭后长按事项条即可拖动。",
   "fontSize": "字号",
   "fontSizeValue": "{percent}%",
   "@fontSizeValue": {"placeholders": {"percent": {"type": "int"}}},

@@ -189,6 +189,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'When off, the bundled Noto Sans SC font is used';
 
   @override
+  String get showTaskDragHandle => 'Show task drag handle';
+
+  @override
+  String get showTaskDragHandleSubtitle =>
+      'When on, drag from the left handle only. When off, long-press the task row to drag.';
+
+  @override
   String get fontSize => 'Text size';
 
   @override

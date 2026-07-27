@@ -186,6 +186,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get useSystemFontSubtitle => 'オフにすると内蔵の Noto Sans SC を使用します';
 
   @override
+  String get showTaskDragHandle => 'タスクのドラッグハンドルを表示';
+
+  @override
+  String get showTaskDragHandleSubtitle =>
+      'オンでは左側のハンドルのみ、オフではタスク行を長押ししてドラッグします。';
+
+  @override
   String get fontSize => '文字サイズ';
 
   @override

@@ -454,6 +454,18 @@ abstract class AppLocalizations {
   /// **'关闭后使用内嵌的思源黑体'**
   String get useSystemFontSubtitle;
 
+  /// No description provided for @showTaskDragHandle.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示事项拖拽标签头'**
+  String get showTaskDragHandle;
+
+  /// No description provided for @showTaskDragHandleSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'开启时仅可拖动左侧标签头；关闭后长按事项条即可拖动。'**
+  String get showTaskDragHandleSubtitle;
+
   /// No description provided for @fontSize.
   ///
   /// In zh, this message translates to:

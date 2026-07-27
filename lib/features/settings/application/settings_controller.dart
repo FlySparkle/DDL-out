@@ -16,6 +16,7 @@ class SettingsController extends Notifier<AppSettingsState> {
   static const _languageKey = 'app_language';
   static const _dynamicColorKey = 'dynamic_color';
   static const _useSystemFontKey = 'use_system_font';
+  static const _showTaskDragHandleKey = 'show_task_drag_handle';
   static const _legacyFontFamilyKey = 'font_family';
   static const _textScaleKey = 'text_scale';
   static const _navigationModeKey = 'navigation_mode';
@@ -47,6 +48,7 @@ class SettingsController extends Notifier<AppSettingsState> {
       language: _readLanguage(preferences),
       dynamicColorEnabled: preferences.getBool(_dynamicColorKey) ?? true,
       useSystemFont: _readUseSystemFont(preferences),
+      showTaskDragHandle: preferences.getBool(_showTaskDragHandleKey) ?? true,
       textScale: (preferences.getDouble(_textScaleKey) ?? 1).clamp(0.8, 1.4),
       sidebarMode: _readSidebarMode(preferences),
       sidebarAlignment: _readSidebarAlignment(preferences),
@@ -130,6 +132,11 @@ class SettingsController extends Notifier<AppSettingsState> {
   Future<void> setUseSystemFont(bool value) async {
     state = state.copyWith(useSystemFont: value);
     await (await _prefs()).setBool(_useSystemFontKey, value);
+  }
+
+  Future<void> setShowTaskDragHandle(bool value) async {
+    state = state.copyWith(showTaskDragHandle: value);
+    await (await _prefs()).setBool(_showTaskDragHandleKey, value);
   }
 
   Future<void> setTextScale(double value) async {

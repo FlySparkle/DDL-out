@@ -186,6 +186,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get useSystemFontSubtitle => '关闭后使用内嵌的思源黑体';
 
   @override
+  String get showTaskDragHandle => '显示事项拖拽标签头';
+
+  @override
+  String get showTaskDragHandleSubtitle => '开启时仅可拖动左侧标签头；关闭后长按事项条即可拖动。';
+
+  @override
   String get fontSize => '字号';
 
   @override

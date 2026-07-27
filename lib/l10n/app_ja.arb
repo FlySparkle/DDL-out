@@ -59,6 +59,8 @@
   "dynamicColorSubtitle": "Android 12 以降では、システムの配色をデフォルトで使用します",
   "useSystemFont": "システムのデフォルトフォントを使用",
   "useSystemFontSubtitle": "オフにすると内蔵の Noto Sans SC を使用します",
+  "showTaskDragHandle": "タスクのドラッグハンドルを表示",
+  "showTaskDragHandleSubtitle": "オンでは左側のハンドルのみ、オフではタスク行を長押ししてドラッグします。",
   "fontSize": "文字サイズ",
   "fontSizeValue": "{percent}%",
   "@fontSizeValue": {"placeholders": {"percent": {"type": "int"}}},

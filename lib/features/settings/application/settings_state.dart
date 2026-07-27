@@ -37,6 +37,7 @@ class AppSettingsState {
     this.language = AppLanguage.system,
     this.dynamicColorEnabled = true,
     this.useSystemFont = true,
+    this.showTaskDragHandle = true,
     this.textScale = 1,
     this.sidebarMode = SidebarMode.floating,
     this.sidebarAlignment = SidebarAlignment.alignBetween,
@@ -53,6 +54,7 @@ class AppSettingsState {
   final AppLanguage language;
   final bool dynamicColorEnabled;
   final bool useSystemFont;
+  final bool showTaskDragHandle;
   final double textScale;
   final SidebarMode sidebarMode;
   final SidebarAlignment sidebarAlignment;
@@ -71,6 +73,7 @@ class AppSettingsState {
     AppLanguage? language,
     bool? dynamicColorEnabled,
     bool? useSystemFont,
+    bool? showTaskDragHandle,
     double? textScale,
     SidebarMode? sidebarMode,
     SidebarAlignment? sidebarAlignment,
@@ -87,6 +90,7 @@ class AppSettingsState {
       language: language ?? this.language,
       dynamicColorEnabled: dynamicColorEnabled ?? this.dynamicColorEnabled,
       useSystemFont: useSystemFont ?? this.useSystemFont,
+      showTaskDragHandle: showTaskDragHandle ?? this.showTaskDragHandle,
       textScale: textScale ?? this.textScale,
       sidebarMode: sidebarMode ?? this.sidebarMode,
       sidebarAlignment: sidebarAlignment ?? this.sidebarAlignment,

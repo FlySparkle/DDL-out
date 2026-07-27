@@ -6,6 +6,7 @@ import '../../../../core/time/deadline_service.dart';
 import '../../../../data/database/app_database.dart';
 import '../../../../data/repositories/board_providers.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../settings/application/settings.dart';
 import '../dialogs/task_editor.dart';
 
 class TaskCard extends ConsumerWidget {
@@ -28,6 +29,11 @@ class TaskCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
+    final showDragHandle = ref.watch(
+      settingsControllerProvider.select(
+        (settings) => settings.showTaskDragHandle,
+      ),
+    );
     final fill = DeadlineService.urgencyColor(
       categoryColor,
       task.deadlineUtc,
@@ -64,12 +70,14 @@ class TaskCard extends ConsumerWidget {
         ),
       ),
     );
-    final dragHandle = _dragHandle(
-      context,
-      feedback,
-      foreground: DeadlineService.readableForeground(fill),
-    );
-    return Semantics(
+    final dragHandle = showDragHandle
+        ? _dragHandle(
+            context,
+            feedback,
+            foreground: DeadlineService.readableForeground(fill),
+          )
+        : null;
+    final card = Semantics(
       button: true,
       label: task.name,
       child: Material(
@@ -81,19 +89,25 @@ class TaskCard extends ConsumerWidget {
           onTap: () => _openEditor(context),
           child: Stack(
             children: [
-              Positioned(
-                key: const ValueKey('task-drag-band'),
-                left: 0,
-                top: 0,
-                bottom: 0,
-                width: 48,
-                child: ColoredBox(color: fill),
+              Positioned.fill(
+                key: const ValueKey('deadline-progress-track'),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: AnimatedFractionallySizedBox(
+                    key: const ValueKey('deadline-progress'),
+                    duration: const Duration(milliseconds: 350),
+                    curve: Curves.easeOutCubic,
+                    widthFactor: progress,
+                    heightFactor: 1,
+                    child: ColoredBox(color: fill),
+                  ),
+                ),
               ),
               ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 58),
                 child: Row(
                   children: [
-                    dragHandle,
+                    if (dragHandle != null) dragHandle,
                     IconButton(
                       tooltip: task.isCompleted
                           ? l10n.markIncomplete
@@ -121,56 +135,11 @@ class TaskCard extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Container(
-                      key: const ValueKey('deadline-progress-track'),
-                      width: 116,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color: Color.alphaBlend(
-                          fill.withValues(alpha: 0.22),
-                          scheme.surfaceContainerLow,
-                        ),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: AnimatedFractionallySizedBox(
-                              key: const ValueKey('deadline-progress'),
-                              duration: const Duration(milliseconds: 350),
-                              curve: Curves.easeOutCubic,
-                              widthFactor: progress,
-                              heightFactor: 1,
-                              child: ColoredBox(
-                                color: Color.alphaBlend(
-                                  fill.withValues(alpha: 0.78),
-                                  scheme.surfaceContainerLow,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
-                              child: Text(
-                                _remainingLabel(context, task.deadlineUtc),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.labelMedium
-                                    ?.copyWith(
-                                      color: scheme.onSurface,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    Text(
+                      _remainingLabel(context, task.deadlineUtc),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelMedium,
                     ),
                     const SizedBox(width: 12),
                   ],
@@ -180,6 +149,15 @@ class TaskCard extends ConsumerWidget {
           ),
         ),
       ),
+    );
+    if (showDragHandle) return card;
+    return LongPressDraggable<int>(
+      data: task.id,
+      feedback: feedback,
+      dragAnchorStrategy: pointerDragAnchorStrategy,
+      maxSimultaneousDrags: 1,
+      childWhenDragging: Opacity(opacity: 0.35, child: card),
+      child: card,
     );
   }
 

@@ -82,6 +82,28 @@ void main() {
     expect(container.read(settingsControllerProvider).useSystemFont, isFalse);
   });
 
+  test('task drag handle defaults on and persists its toggle', () async {
+    SharedPreferences.setMockInitialValues({});
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    final controller = container.read(settingsControllerProvider.notifier);
+    await pumpEventQueue();
+
+    expect(
+      container.read(settingsControllerProvider).showTaskDragHandle,
+      isTrue,
+    );
+
+    await controller.setShowTaskDragHandle(false);
+
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getBool('show_task_drag_handle'), isFalse);
+    expect(
+      container.read(settingsControllerProvider).showTaskDragHandle,
+      isFalse,
+    );
+  });
+
   test('defaults to following the system language', () async {
     SharedPreferences.setMockInitialValues({});
     final container = ProviderContainer();
