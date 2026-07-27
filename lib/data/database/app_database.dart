@@ -243,10 +243,7 @@ class AppDatabase extends _$AppDatabase {
   Future<List<Task>> readTasks() =>
       (select(tasks)
             ..where((row) => row.deletedAtUtc.isNull())
-            ..orderBy([
-              (row) => OrderingTerm.asc(row.positionKey),
-              (row) => OrderingTerm.asc(row.id),
-            ]))
+            ..orderBy([(row) => OrderingTerm.asc(row.id)]))
           .get();
 
   Future<int> createCategory(String name, int colorArgb) async {
