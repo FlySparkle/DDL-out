@@ -19,7 +19,7 @@ abstract interface class TaskRepository {
   });
 
   Future<void> move(int taskId, int? categoryId, {int? index});
-  Future<void> sortByDeadline();
+  Future<void> sortByDeadline(int? categoryId);
   Future<void> setCompleted(int taskId, bool completed);
   Future<void> delete(int id);
   Future<void> restore(int id);

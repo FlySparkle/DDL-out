@@ -12,6 +12,7 @@ import '../dialogs/category_editor.dart';
 import '../dialogs/confirmation_dialog.dart';
 import '../dialogs/task_editor.dart';
 import 'reorderable_task_list.dart';
+import 'task_auto_sort_icon.dart';
 
 @immutable
 class CategoryDragData {
@@ -143,7 +144,13 @@ class CategorySection extends ConsumerWidget {
             const SizedBox(width: 16),
           Expanded(
             child: InkWell(
-              onTap: category == null ? null : toggle,
+              onTap: category == null
+                  ? null
+                  : () => showCategoryEditor(
+                      context,
+                      category: category,
+                      taskCount: tasks.length,
+                    ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Column(
@@ -180,46 +187,11 @@ class CategorySection extends ConsumerWidget {
                 : () => _clearTasks(context, ref, completedCount),
             icon: const Icon(Icons.playlist_remove),
           ),
-          if (category != null)
-            PopupMenuButton<String>(
-              tooltip: l10n.categoryActions,
-              onSelected: (value) {
-                switch (value) {
-                  case 'edit':
-                    showCategoryEditor(
-                      context,
-                      category: category,
-                      taskCount: tasks.length,
-                    );
-                    break;
-                  case 'delete':
-                    _deleteCategory(context, ref);
-                    break;
-                }
-              },
-              itemBuilder: (context) => [
-                if (category != null)
-                  PopupMenuItem(
-                    value: 'edit',
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.edit_outlined),
-                      title: Text(l10n.editCategory),
-                    ),
-                  ),
-                if (category != null)
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      textColor: Theme.of(context).colorScheme.error,
-                      iconColor: Theme.of(context).colorScheme.error,
-                      leading: const Icon(Icons.delete_outline),
-                      title: Text(l10n.deleteCategory),
-                    ),
-                  ),
-              ],
-            ),
+          IconButton(
+            tooltip: l10n.sortTasks,
+            onPressed: tasks.length < 2 ? null : () => _sortTasks(context, ref),
+            icon: const TaskAutoSortIcon(),
+          ),
           if (category != null) _categoryDragHandle(context),
         ],
       ),
@@ -255,41 +227,6 @@ class CategorySection extends ConsumerWidget {
     );
   }
 
-  Future<void> _deleteCategory(BuildContext context, WidgetRef ref) async {
-    final currentCategory = category;
-    if (currentCategory == null) return;
-    final l10n = AppLocalizations.of(context);
-    final confirmed = await showConfirmation(
-      context,
-      title: l10n.deleteCategoryTitle,
-      body: l10n.deleteCategoryBody(tasks.length),
-      destructive: true,
-      confirmLabel: l10n.deleteCategoryConfirm,
-    );
-    if (!confirmed) return;
-    final categoryRepository = ref.read(categoryRepositoryProvider);
-    final taskRepository = ref.read(taskRepositoryProvider);
-    final settingsController = ref.read(settingsControllerProvider.notifier);
-    final affectedTaskIds = tasks
-        .map((task) => task.id)
-        .toList(growable: false);
-    await categoryRepository.delete(currentCategory.id);
-    if (!context.mounted) return;
-    showDestructiveUndoSnackBar(
-      messenger: ScaffoldMessenger.of(context),
-      message: l10n.categoryDeleted,
-      undoLabel: l10n.undoCountdown,
-      onUndo: () async {
-        await categoryRepository.restore(currentCategory.id);
-        for (final taskId in affectedTaskIds) {
-          await taskRepository.move(taskId, currentCategory.id);
-        }
-      },
-      onExpired: () =>
-          settingsController.removeCategoryPreference(currentCategory.id),
-    );
-  }
-
   Future<void> _moveTask(
     BuildContext context,
     WidgetRef ref,
@@ -303,6 +240,16 @@ class CategorySection extends ConsumerWidget {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(l10n.taskMovedTo(title))));
+  }
+
+  Future<void> _sortTasks(BuildContext context, WidgetRef ref) async {
+    await ref.read(taskRepositoryProvider).sortByDeadline(category?.id);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).tasksSorted)),
+      );
   }
 
   Widget _categoryDragHandle(BuildContext context) {

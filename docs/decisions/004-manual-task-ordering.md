@@ -16,7 +16,8 @@ each category while keeping that order across restarts, backups, and peer sync.
 - Board reads use `positionKey` as the default task order.
 - Changing completion state does not change `positionKey`.
 - Dragging a task writes a new category and/or position.
-- The explicit sort action rewrites each category to:
+- Each category header exposes an explicit sort action that rewrites that
+  category to:
   incomplete tasks by deadline, followed by completed tasks by deadline.
 - Task position participates in database migration, JSON backups, and sync
   field operations.

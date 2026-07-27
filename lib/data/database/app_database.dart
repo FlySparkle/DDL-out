@@ -309,7 +309,8 @@ class AppDatabase extends _$AppDatabase {
     return moveSyncedTask(taskId, categoryId, index: index);
   }
 
-  Future<void> sortTasksByDeadline() => sortSyncedTasksByDeadline();
+  Future<void> sortTasksByDeadline(int? categoryId) =>
+      sortSyncedTasksByDeadline(categoryId);
 
   Future<void> setTaskCompleted(int taskId, bool completed) {
     return setSyncedTaskCompleted(taskId, completed);

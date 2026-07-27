@@ -335,33 +335,33 @@ extension SyncDatabase on AppDatabase {
     });
   }
 
-  Future<void> sortSyncedTasksByDeadline() async {
+  Future<void> sortSyncedTasksByDeadline(int? categoryId) async {
     await transaction(() async {
-      final rows = await (select(
-        tasks,
-      )..where((row) => row.deletedAtUtc.isNull())).get();
-      final byCategory = <int?, List<Task>>{};
-      for (final task in rows) {
-        byCategory.putIfAbsent(task.categoryId, () => []).add(task);
-      }
+      final rows =
+          await (select(tasks)..where(
+                (row) =>
+                    (categoryId == null
+                        ? row.categoryId.isNull()
+                        : row.categoryId.equals(categoryId)) &
+                    row.deletedAtUtc.isNull(),
+              ))
+              .get();
       final operations = <({Task task, String position})>[];
-      for (final categoryRows in byCategory.values) {
-        categoryRows.sort((left, right) {
-          final completion = left.isCompleted == right.isCompleted
-              ? 0
-              : left.isCompleted
-              ? 1
-              : -1;
-          if (completion != 0) return completion;
-          final deadline = left.deadlineUtc.compareTo(right.deadlineUtc);
-          if (deadline != 0) return deadline;
-          return left.id.compareTo(right.id);
-        });
-        for (final (index, task) in categoryRows.indexed) {
-          final position = _positionForIndex(index);
-          if (task.positionKey != position) {
-            operations.add((task: task, position: position));
-          }
+      rows.sort((left, right) {
+        final completion = left.isCompleted == right.isCompleted
+            ? 0
+            : left.isCompleted
+            ? 1
+            : -1;
+        if (completion != 0) return completion;
+        final deadline = left.deadlineUtc.compareTo(right.deadlineUtc);
+        if (deadline != 0) return deadline;
+        return left.id.compareTo(right.id);
+      });
+      for (final (index, task) in rows.indexed) {
+        final position = _positionForIndex(index);
+        if (task.positionKey != position) {
+          operations.add((task: task, position: position));
         }
       }
       if (operations.isEmpty) return;

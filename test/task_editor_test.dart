@@ -303,7 +303,7 @@ class _RecordingTaskRepository implements TaskRepository {
   Future<void> setCompleted(int taskId, bool completed) async {}
 
   @override
-  Future<void> sortByDeadline() async {}
+  Future<void> sortByDeadline(int? categoryId) async {}
 
   @override
   Future<void> update({
