@@ -301,8 +301,10 @@ extension SyncDatabase on AppDatabase {
                   (row) => OrderingTerm.asc(row.id),
                 ]))
               .get();
-      final targetIndex =
-          (index ?? targetRows.length).clamp(0, targetRows.length) as int;
+      final targetIndex = (index ?? targetRows.length).clamp(
+        0,
+        targetRows.length,
+      );
       final ordered = [...targetRows]..insert(targetIndex, task);
       final newCategorySyncId = await _categorySyncId(categoryId);
       final operations = <({Task task, Map<String, Object?> changes})>[];

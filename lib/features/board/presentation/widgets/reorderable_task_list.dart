@@ -143,7 +143,7 @@ class _ReorderableTaskListState extends ConsumerState<ReorderableTaskList> {
                     child: Opacity(
                       opacity: 0.24,
                       child: TaskCard(
-                        task: previewTask!,
+                        task: previewTask,
                         snapshot: widget.snapshot,
                         categoryColor: widget.categoryColor,
                         longestRemaining: widget.longestRemaining,
@@ -167,7 +167,7 @@ class _ReorderableTaskListState extends ConsumerState<ReorderableTaskList> {
     if (oldIndex >= 0) next.removeAt(oldIndex);
     var insertionIndex = gapIndex;
     if (oldIndex >= 0 && oldIndex < gapIndex) insertionIndex -= 1;
-    insertionIndex = insertionIndex.clamp(0, next.length) as int;
+    insertionIndex = insertionIndex.clamp(0, next.length);
     next.insert(insertionIndex, taskId);
     return next;
   }
@@ -176,7 +176,7 @@ class _ReorderableTaskListState extends ConsumerState<ReorderableTaskList> {
     final oldIndex = _taskOrder.indexOf(taskId);
     var insertionIndex = gapIndex;
     if (oldIndex >= 0 && oldIndex < gapIndex) insertionIndex -= 1;
-    return insertionIndex.clamp(0, _taskOrder.length) as int;
+    return insertionIndex.clamp(0, _taskOrder.length);
   }
 
   void _setHover(int? index, int? taskId) {

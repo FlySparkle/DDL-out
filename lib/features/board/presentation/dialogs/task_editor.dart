@@ -467,6 +467,10 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
 
   Future<void> _delete() async {
     final l10n = AppLocalizations.of(context);
+    final taskId = widget.task!.id;
+    final repository = ref.read(taskRepositoryProvider);
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
     final confirmed = await showConfirmation(
       context,
       title: l10n.deleteTaskTitle,
@@ -474,13 +478,10 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
       destructive: true,
       confirmLabel: l10n.deleteTaskConfirm,
     );
-    if (!confirmed) return;
-    final taskId = widget.task!.id;
-    final repository = ref.read(taskRepositoryProvider);
-    final messenger = ScaffoldMessenger.of(context);
+    if (!confirmed || !mounted) return;
     await repository.delete(taskId);
     if (!mounted) return;
-    Navigator.pop(context);
+    navigator.pop();
     showDestructiveUndoSnackBar(
       messenger: messenger,
       message: l10n.taskDeleted,
