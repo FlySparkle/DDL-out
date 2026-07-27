@@ -39,8 +39,11 @@ final class DriftTaskRepository implements TaskRepository {
   );
 
   @override
-  Future<void> move(int taskId, int? categoryId) =>
-      _database.moveTask(taskId, categoryId);
+  Future<void> move(int taskId, int? categoryId, {int? index}) =>
+      _database.moveTask(taskId, categoryId, index: index);
+
+  @override
+  Future<void> sortByDeadline() => _database.sortTasksByDeadline();
 
   @override
   Future<void> setCompleted(int taskId, bool completed) =>

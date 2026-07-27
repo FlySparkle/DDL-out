@@ -11,7 +11,8 @@ import '../repositories/board_providers.dart';
 import '../task_details/task_detail_document.dart';
 import '../task_details/task_detail_image.dart';
 
-const backupSchemaVersion = 4;
+const backupSchemaVersion = 5;
+const _backupPositionGap = 1000000000000;
 
 class BackupException implements Exception {
   const BackupException(this.message);
@@ -79,6 +80,7 @@ class BackupService {
               'detailImages': jsonDecode(task.detailImagesJson),
               'deadlineUtc': task.deadlineUtc.toUtc().toIso8601String(),
               'categoryId': task.categoryId,
+              'positionKey': task.positionKey,
               'isCompleted': task.isCompleted,
               'createdAtUtc': task.createdAtUtc.toUtc().toIso8601String(),
               'updatedAtUtc': task.updatedAtUtc.toUtc().toIso8601String(),
@@ -145,12 +147,16 @@ class BackupService {
           <String, Object?>{...row, if (version == 1) 'sortOrder': index},
       ];
       final rawTaskRows = _objectList(decoded['tasks'], 'tasks');
+      final legacyPositions = version < 5
+          ? _legacyTaskPositions(rawTaskRows)
+          : const <int, String>{};
       final taskRows = [
         for (final row in rawTaskRows)
           <String, Object?>{
             ...row,
             if (version < 3) 'details': '',
             if (version < 3) 'detailImages': const <Object?>[],
+            if (version < 5) 'positionKey': legacyPositions[row['id'] as int],
           },
       ];
       _validate(categoryRows, taskRows);
@@ -175,6 +181,36 @@ class BackupService {
       return row.cast<String, Object?>();
     }).toList();
   }
+
+  Map<int, String> _legacyTaskPositions(List<Map<String, Object?>> taskRows) {
+    final sorted = [...taskRows]
+      ..sort((left, right) {
+        final leftCategory = left['categoryId'] as int? ?? -1;
+        final rightCategory = right['categoryId'] as int? ?? -1;
+        final category = leftCategory.compareTo(rightCategory);
+        if (category != 0) return category;
+        final leftCompleted = left['isCompleted'] == true;
+        final rightCompleted = right['isCompleted'] == true;
+        if (leftCompleted != rightCompleted) return leftCompleted ? 1 : -1;
+        final deadline = (left['deadlineUtc'] as String).compareTo(
+          right['deadlineUtc'] as String,
+        );
+        if (deadline != 0) return deadline;
+        return (left['id'] as int).compareTo(right['id'] as int);
+      });
+    final indexes = <int?, int>{};
+    final positions = <int, String>{};
+    for (final row in sorted) {
+      final categoryId = row['categoryId'] as int?;
+      final index = indexes[categoryId] ?? 0;
+      indexes[categoryId] = index + 1;
+      positions[row['id']! as int] = _backupPositionForIndex(index);
+    }
+    return positions;
+  }
+
+  String _backupPositionForIndex(int index) =>
+      ((index + 1) * _backupPositionGap).toString().padLeft(24, '0');
 
   void _validate(
     List<Map<String, Object?>> categoryRows,
@@ -201,6 +237,7 @@ class BackupService {
     }
 
     final taskIds = <int>{};
+    final taskPositions = <int?, Set<String>>{};
     for (final row in taskRows) {
       final id = _positiveInt(row, 'id');
       if (!taskIds.add(id)) throw const BackupException('事项 ID 重复');
@@ -227,6 +264,16 @@ class BackupService {
       }
       if (row['isCompleted'] is! bool) {
         throw const BackupException('事项完成状态无效');
+      }
+      final positionKey = row['positionKey'];
+      if (positionKey is! String ||
+          positionKey.isEmpty ||
+          positionKey.length > 100 ||
+          BigInt.tryParse(positionKey) == null ||
+          !taskPositions
+              .putIfAbsent(categoryId as int?, () => <String>{})
+              .add(positionKey)) {
+        throw const BackupException('事项顺序无效');
       }
       _utc(row, 'deadlineUtc');
       _utc(row, 'createdAtUtc');
@@ -280,6 +327,7 @@ class BackupService {
         detailImagesJson: Value(jsonEncode(row['detailImages']! as List)),
         deadlineUtc: _utc(row, 'deadlineUtc'),
         categoryId: Value(row['categoryId'] as int?),
+        positionKey: Value(row['positionKey']! as String),
         isCompleted: Value(row['isCompleted']! as bool),
         createdAtUtc: _utc(row, 'createdAtUtc'),
         updatedAtUtc: _utc(row, 'updatedAtUtc'),

@@ -663,6 +663,17 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
       'REFERENCES categories (id) ON DELETE SET NULL',
     ),
   );
+  static const VerificationMeta _positionKeyMeta = const VerificationMeta(
+    'positionKey',
+  );
+  @override
+  late final GeneratedColumn<String> positionKey = GeneratedColumn<String>(
+    'position_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _isCompletedMeta = const VerificationMeta(
     'isCompleted',
   );
@@ -732,6 +743,7 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
     detailImagesJson,
     deadlineUtc,
     categoryId,
+    positionKey,
     isCompleted,
     createdAtUtc,
     updatedAtUtc,
@@ -797,6 +809,15 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
       context.handle(
         _categoryIdMeta,
         categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    }
+    if (data.containsKey('position_key')) {
+      context.handle(
+        _positionKeyMeta,
+        positionKey.isAcceptableOrUnknown(
+          data['position_key']!,
+          _positionKeyMeta,
+        ),
       );
     }
     if (data.containsKey('is_completed')) {
@@ -885,6 +906,10 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
         DriftSqlType.int,
         data['${effectivePrefix}category_id'],
       ),
+      positionKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}position_key'],
+      ),
       isCompleted: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_completed'],
@@ -922,6 +947,7 @@ class Task extends DataClass implements Insertable<Task> {
   final String detailImagesJson;
   final DateTime deadlineUtc;
   final int? categoryId;
+  final String? positionKey;
   final bool isCompleted;
   final DateTime createdAtUtc;
   final DateTime updatedAtUtc;
@@ -935,6 +961,7 @@ class Task extends DataClass implements Insertable<Task> {
     required this.detailImagesJson,
     required this.deadlineUtc,
     this.categoryId,
+    this.positionKey,
     required this.isCompleted,
     required this.createdAtUtc,
     required this.updatedAtUtc,
@@ -954,6 +981,9 @@ class Task extends DataClass implements Insertable<Task> {
     map['deadline_utc'] = Variable<DateTime>(deadlineUtc);
     if (!nullToAbsent || categoryId != null) {
       map['category_id'] = Variable<int>(categoryId);
+    }
+    if (!nullToAbsent || positionKey != null) {
+      map['position_key'] = Variable<String>(positionKey);
     }
     map['is_completed'] = Variable<bool>(isCompleted);
     map['created_at_utc'] = Variable<DateTime>(createdAtUtc);
@@ -980,6 +1010,9 @@ class Task extends DataClass implements Insertable<Task> {
       categoryId: categoryId == null && nullToAbsent
           ? const Value.absent()
           : Value(categoryId),
+      positionKey: positionKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(positionKey),
       isCompleted: Value(isCompleted),
       createdAtUtc: Value(createdAtUtc),
       updatedAtUtc: Value(updatedAtUtc),
@@ -1005,6 +1038,7 @@ class Task extends DataClass implements Insertable<Task> {
       detailImagesJson: serializer.fromJson<String>(json['detailImagesJson']),
       deadlineUtc: serializer.fromJson<DateTime>(json['deadlineUtc']),
       categoryId: serializer.fromJson<int?>(json['categoryId']),
+      positionKey: serializer.fromJson<String?>(json['positionKey']),
       isCompleted: serializer.fromJson<bool>(json['isCompleted']),
       createdAtUtc: serializer.fromJson<DateTime>(json['createdAtUtc']),
       updatedAtUtc: serializer.fromJson<DateTime>(json['updatedAtUtc']),
@@ -1023,6 +1057,7 @@ class Task extends DataClass implements Insertable<Task> {
       'detailImagesJson': serializer.toJson<String>(detailImagesJson),
       'deadlineUtc': serializer.toJson<DateTime>(deadlineUtc),
       'categoryId': serializer.toJson<int?>(categoryId),
+      'positionKey': serializer.toJson<String?>(positionKey),
       'isCompleted': serializer.toJson<bool>(isCompleted),
       'createdAtUtc': serializer.toJson<DateTime>(createdAtUtc),
       'updatedAtUtc': serializer.toJson<DateTime>(updatedAtUtc),
@@ -1039,6 +1074,7 @@ class Task extends DataClass implements Insertable<Task> {
     String? detailImagesJson,
     DateTime? deadlineUtc,
     Value<int?> categoryId = const Value.absent(),
+    Value<String?> positionKey = const Value.absent(),
     bool? isCompleted,
     DateTime? createdAtUtc,
     DateTime? updatedAtUtc,
@@ -1052,6 +1088,7 @@ class Task extends DataClass implements Insertable<Task> {
     detailImagesJson: detailImagesJson ?? this.detailImagesJson,
     deadlineUtc: deadlineUtc ?? this.deadlineUtc,
     categoryId: categoryId.present ? categoryId.value : this.categoryId,
+    positionKey: positionKey.present ? positionKey.value : this.positionKey,
     isCompleted: isCompleted ?? this.isCompleted,
     createdAtUtc: createdAtUtc ?? this.createdAtUtc,
     updatedAtUtc: updatedAtUtc ?? this.updatedAtUtc,
@@ -1075,6 +1112,9 @@ class Task extends DataClass implements Insertable<Task> {
       categoryId: data.categoryId.present
           ? data.categoryId.value
           : this.categoryId,
+      positionKey: data.positionKey.present
+          ? data.positionKey.value
+          : this.positionKey,
       isCompleted: data.isCompleted.present
           ? data.isCompleted.value
           : this.isCompleted,
@@ -1103,6 +1143,7 @@ class Task extends DataClass implements Insertable<Task> {
           ..write('detailImagesJson: $detailImagesJson, ')
           ..write('deadlineUtc: $deadlineUtc, ')
           ..write('categoryId: $categoryId, ')
+          ..write('positionKey: $positionKey, ')
           ..write('isCompleted: $isCompleted, ')
           ..write('createdAtUtc: $createdAtUtc, ')
           ..write('updatedAtUtc: $updatedAtUtc, ')
@@ -1121,6 +1162,7 @@ class Task extends DataClass implements Insertable<Task> {
     detailImagesJson,
     deadlineUtc,
     categoryId,
+    positionKey,
     isCompleted,
     createdAtUtc,
     updatedAtUtc,
@@ -1138,6 +1180,7 @@ class Task extends DataClass implements Insertable<Task> {
           other.detailImagesJson == this.detailImagesJson &&
           other.deadlineUtc == this.deadlineUtc &&
           other.categoryId == this.categoryId &&
+          other.positionKey == this.positionKey &&
           other.isCompleted == this.isCompleted &&
           other.createdAtUtc == this.createdAtUtc &&
           other.updatedAtUtc == this.updatedAtUtc &&
@@ -1153,6 +1196,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
   final Value<String> detailImagesJson;
   final Value<DateTime> deadlineUtc;
   final Value<int?> categoryId;
+  final Value<String?> positionKey;
   final Value<bool> isCompleted;
   final Value<DateTime> createdAtUtc;
   final Value<DateTime> updatedAtUtc;
@@ -1166,6 +1210,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.detailImagesJson = const Value.absent(),
     this.deadlineUtc = const Value.absent(),
     this.categoryId = const Value.absent(),
+    this.positionKey = const Value.absent(),
     this.isCompleted = const Value.absent(),
     this.createdAtUtc = const Value.absent(),
     this.updatedAtUtc = const Value.absent(),
@@ -1180,6 +1225,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.detailImagesJson = const Value.absent(),
     required DateTime deadlineUtc,
     this.categoryId = const Value.absent(),
+    this.positionKey = const Value.absent(),
     this.isCompleted = const Value.absent(),
     required DateTime createdAtUtc,
     required DateTime updatedAtUtc,
@@ -1197,6 +1243,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     Expression<String>? detailImagesJson,
     Expression<DateTime>? deadlineUtc,
     Expression<int>? categoryId,
+    Expression<String>? positionKey,
     Expression<bool>? isCompleted,
     Expression<DateTime>? createdAtUtc,
     Expression<DateTime>? updatedAtUtc,
@@ -1211,6 +1258,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
       if (detailImagesJson != null) 'detail_images_json': detailImagesJson,
       if (deadlineUtc != null) 'deadline_utc': deadlineUtc,
       if (categoryId != null) 'category_id': categoryId,
+      if (positionKey != null) 'position_key': positionKey,
       if (isCompleted != null) 'is_completed': isCompleted,
       if (createdAtUtc != null) 'created_at_utc': createdAtUtc,
       if (updatedAtUtc != null) 'updated_at_utc': updatedAtUtc,
@@ -1227,6 +1275,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     Value<String>? detailImagesJson,
     Value<DateTime>? deadlineUtc,
     Value<int?>? categoryId,
+    Value<String?>? positionKey,
     Value<bool>? isCompleted,
     Value<DateTime>? createdAtUtc,
     Value<DateTime>? updatedAtUtc,
@@ -1241,6 +1290,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
       detailImagesJson: detailImagesJson ?? this.detailImagesJson,
       deadlineUtc: deadlineUtc ?? this.deadlineUtc,
       categoryId: categoryId ?? this.categoryId,
+      positionKey: positionKey ?? this.positionKey,
       isCompleted: isCompleted ?? this.isCompleted,
       createdAtUtc: createdAtUtc ?? this.createdAtUtc,
       updatedAtUtc: updatedAtUtc ?? this.updatedAtUtc,
@@ -1273,6 +1323,9 @@ class TasksCompanion extends UpdateCompanion<Task> {
     if (categoryId.present) {
       map['category_id'] = Variable<int>(categoryId.value);
     }
+    if (positionKey.present) {
+      map['position_key'] = Variable<String>(positionKey.value);
+    }
     if (isCompleted.present) {
       map['is_completed'] = Variable<bool>(isCompleted.value);
     }
@@ -1301,6 +1354,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
           ..write('detailImagesJson: $detailImagesJson, ')
           ..write('deadlineUtc: $deadlineUtc, ')
           ..write('categoryId: $categoryId, ')
+          ..write('positionKey: $positionKey, ')
           ..write('isCompleted: $isCompleted, ')
           ..write('createdAtUtc: $createdAtUtc, ')
           ..write('updatedAtUtc: $updatedAtUtc, ')
@@ -4526,6 +4580,7 @@ typedef $$TasksTableCreateCompanionBuilder =
       Value<String> detailImagesJson,
       required DateTime deadlineUtc,
       Value<int?> categoryId,
+      Value<String?> positionKey,
       Value<bool> isCompleted,
       required DateTime createdAtUtc,
       required DateTime updatedAtUtc,
@@ -4541,6 +4596,7 @@ typedef $$TasksTableUpdateCompanionBuilder =
       Value<String> detailImagesJson,
       Value<DateTime> deadlineUtc,
       Value<int?> categoryId,
+      Value<String?> positionKey,
       Value<bool> isCompleted,
       Value<DateTime> createdAtUtc,
       Value<DateTime> updatedAtUtc,
@@ -4605,6 +4661,11 @@ class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
 
   ColumnFilters<DateTime> get deadlineUtc => $composableBuilder(
     column: $table.deadlineUtc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get positionKey => $composableBuilder(
+    column: $table.positionKey,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4696,6 +4757,11 @@ class $$TasksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get positionKey => $composableBuilder(
+    column: $table.positionKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isCompleted => $composableBuilder(
     column: $table.isCompleted,
     builder: (column) => ColumnOrderings(column),
@@ -4773,6 +4839,11 @@ class $$TasksTableAnnotationComposer
 
   GeneratedColumn<DateTime> get deadlineUtc => $composableBuilder(
     column: $table.deadlineUtc,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get positionKey => $composableBuilder(
+    column: $table.positionKey,
     builder: (column) => column,
   );
 
@@ -4860,6 +4931,7 @@ class $$TasksTableTableManager
                 Value<String> detailImagesJson = const Value.absent(),
                 Value<DateTime> deadlineUtc = const Value.absent(),
                 Value<int?> categoryId = const Value.absent(),
+                Value<String?> positionKey = const Value.absent(),
                 Value<bool> isCompleted = const Value.absent(),
                 Value<DateTime> createdAtUtc = const Value.absent(),
                 Value<DateTime> updatedAtUtc = const Value.absent(),
@@ -4873,6 +4945,7 @@ class $$TasksTableTableManager
                 detailImagesJson: detailImagesJson,
                 deadlineUtc: deadlineUtc,
                 categoryId: categoryId,
+                positionKey: positionKey,
                 isCompleted: isCompleted,
                 createdAtUtc: createdAtUtc,
                 updatedAtUtc: updatedAtUtc,
@@ -4888,6 +4961,7 @@ class $$TasksTableTableManager
                 Value<String> detailImagesJson = const Value.absent(),
                 required DateTime deadlineUtc,
                 Value<int?> categoryId = const Value.absent(),
+                Value<String?> positionKey = const Value.absent(),
                 Value<bool> isCompleted = const Value.absent(),
                 required DateTime createdAtUtc,
                 required DateTime updatedAtUtc,
@@ -4901,6 +4975,7 @@ class $$TasksTableTableManager
                 detailImagesJson: detailImagesJson,
                 deadlineUtc: deadlineUtc,
                 categoryId: categoryId,
+                positionKey: positionKey,
                 isCompleted: isCompleted,
                 createdAtUtc: createdAtUtc,
                 updatedAtUtc: updatedAtUtc,

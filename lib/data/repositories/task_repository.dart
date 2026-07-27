@@ -18,7 +18,8 @@ abstract interface class TaskRepository {
     String? detailImagesJson,
   });
 
-  Future<void> move(int taskId, int? categoryId);
+  Future<void> move(int taskId, int? categoryId, {int? index});
+  Future<void> sortByDeadline();
   Future<void> setCompleted(int taskId, bool completed);
   Future<void> delete(int id);
   Future<void> restore(int id);

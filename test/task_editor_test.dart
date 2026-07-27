@@ -291,7 +291,7 @@ class _RecordingTaskRepository implements TaskRepository {
   Future<void> delete(int id) async {}
 
   @override
-  Future<void> move(int taskId, int? categoryId) async {}
+  Future<void> move(int taskId, int? categoryId, {int? index}) async {}
 
   @override
   Future<void> restore(int id) async {}
@@ -301,6 +301,9 @@ class _RecordingTaskRepository implements TaskRepository {
 
   @override
   Future<void> setCompleted(int taskId, bool completed) async {}
+
+  @override
+  Future<void> sortByDeadline() async {}
 
   @override
   Future<void> update({

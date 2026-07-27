@@ -37,6 +37,7 @@ class Tasks extends Table {
     #id,
     onDelete: KeyAction.setNull,
   )();
+  TextColumn get positionKey => text().nullable()();
   BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAtUtc => dateTime()();
   DateTimeColumn get updatedAtUtc => dateTime()();
@@ -151,7 +152,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -180,6 +181,23 @@ class AppDatabase extends _$AppDatabase {
         await migrator.addColumn(tasks, tasks.details);
         await migrator.addColumn(tasks, tasks.detailImagesJson);
       }
+      if (from < 5) {
+        await migrator.addColumn(tasks, tasks.positionKey);
+        final rows = await customSelect(
+          'SELECT id, category_id FROM tasks '
+          'ORDER BY category_id, is_completed, deadline_utc, id',
+        ).get();
+        final categoryIndexes = <int?, int>{};
+        for (final row in rows) {
+          final categoryId = row.readNullable<int>('category_id');
+          final index = categoryIndexes[categoryId] ?? 0;
+          categoryIndexes[categoryId] = index + 1;
+          await customStatement(
+            'UPDATE tasks SET position_key = ? WHERE id = ?',
+            [_positionForIndex(index), row.read<int>('id')],
+          );
+        }
+      }
     },
     beforeOpen: (_) async {
       await customStatement('PRAGMA foreign_keys = ON');
@@ -205,8 +223,7 @@ class AppDatabase extends _$AppDatabase {
           await (select(tasks)
                 ..where((row) => row.deletedAtUtc.isNull())
                 ..orderBy([
-                  (row) => OrderingTerm.asc(row.isCompleted),
-                  (row) => OrderingTerm.asc(row.deadlineUtc),
+                  (row) => OrderingTerm.asc(row.positionKey),
                   (row) => OrderingTerm.asc(row.id),
                 ]))
               .get();
@@ -226,7 +243,10 @@ class AppDatabase extends _$AppDatabase {
   Future<List<Task>> readTasks() =>
       (select(tasks)
             ..where((row) => row.deletedAtUtc.isNull())
-            ..orderBy([(row) => OrderingTerm.asc(row.id)]))
+            ..orderBy([
+              (row) => OrderingTerm.asc(row.positionKey),
+              (row) => OrderingTerm.asc(row.id),
+            ]))
           .get();
 
   Future<int> createCategory(String name, int colorArgb) async {
@@ -285,9 +305,11 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  Future<void> moveTask(int taskId, int? categoryId) {
-    return moveSyncedTask(taskId, categoryId);
+  Future<void> moveTask(int taskId, int? categoryId, {int? index}) {
+    return moveSyncedTask(taskId, categoryId, index: index);
   }
+
+  Future<void> sortTasksByDeadline() => sortSyncedTasksByDeadline();
 
   Future<void> setTaskCompleted(int taskId, bool completed) {
     return setSyncedTaskCompleted(taskId, completed);

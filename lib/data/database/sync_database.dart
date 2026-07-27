@@ -231,6 +231,7 @@ extension SyncDatabase on AppDatabase {
           SyncField.detailImages: jsonDecode(detailImagesJson),
           SyncField.deadlineUtc: deadlineUtc.toUtc().toIso8601String(),
           SyncField.categorySyncId: await _categorySyncId(categoryId),
+          SyncField.positionKey: await nextTaskPosition(categoryId),
           SyncField.completion: {'isCompleted': false, 'completedAtUtc': null},
           SyncField.deleted: null,
           'createdAtUtc': now.toIso8601String(),
@@ -280,20 +281,102 @@ extension SyncDatabase on AppDatabase {
     });
   }
 
-  Future<void> moveSyncedTask(int taskId, int? categoryId) async {
+  Future<void> moveSyncedTask(int taskId, int? categoryId, {int? index}) async {
     await transaction(() async {
       final task = await (select(
         tasks,
       )..where((row) => row.id.equals(taskId))).getSingle();
-      final oldSyncId = await _categorySyncId(task.categoryId);
-      final newSyncId = await _categorySyncId(categoryId);
-      if (oldSyncId == newSyncId) return;
-      await _recordLocalOperation(
-        entityType: SyncEntityType.task,
-        entitySyncId: task.syncId!,
-        kind: SyncOperationKind.patch,
-        changes: {SyncField.categorySyncId: newSyncId},
-      );
+      final targetRows =
+          await (select(tasks)
+                ..where(
+                  (row) =>
+                      (categoryId == null
+                          ? row.categoryId.isNull()
+                          : row.categoryId.equals(categoryId)) &
+                      row.deletedAtUtc.isNull() &
+                      row.id.equals(taskId).not(),
+                )
+                ..orderBy([
+                  (row) => OrderingTerm.asc(row.positionKey),
+                  (row) => OrderingTerm.asc(row.id),
+                ]))
+              .get();
+      final targetIndex =
+          (index ?? targetRows.length).clamp(0, targetRows.length) as int;
+      final ordered = [...targetRows]..insert(targetIndex, task);
+      final newCategorySyncId = await _categorySyncId(categoryId);
+      final operations = <({Task task, Map<String, Object?> changes})>[];
+      for (final (positionIndex, row) in ordered.indexed) {
+        final position = _positionForIndex(positionIndex);
+        final changes = <String, Object?>{};
+        if (row.positionKey != position) {
+          changes[SyncField.positionKey] = position;
+        }
+        if (row.id == taskId && task.categoryId != categoryId) {
+          changes[SyncField.categorySyncId] = newCategorySyncId;
+        }
+        if (changes.isNotEmpty) {
+          operations.add((task: row, changes: changes));
+        }
+      }
+      if (operations.isEmpty) return;
+      final transactionId = const Uuid().v4();
+      for (final (operationIndex, operation) in operations.indexed) {
+        await _recordLocalOperation(
+          entityType: SyncEntityType.task,
+          entitySyncId: operation.task.syncId!,
+          kind: SyncOperationKind.patch,
+          changes: operation.changes,
+          transactionId: transactionId,
+          transactionIndex: operationIndex,
+          transactionCount: operations.length,
+        );
+      }
+    });
+  }
+
+  Future<void> sortSyncedTasksByDeadline() async {
+    await transaction(() async {
+      final rows = await (select(
+        tasks,
+      )..where((row) => row.deletedAtUtc.isNull())).get();
+      final byCategory = <int?, List<Task>>{};
+      for (final task in rows) {
+        byCategory.putIfAbsent(task.categoryId, () => []).add(task);
+      }
+      final operations = <({Task task, String position})>[];
+      for (final categoryRows in byCategory.values) {
+        categoryRows.sort((left, right) {
+          final completion = left.isCompleted == right.isCompleted
+              ? 0
+              : left.isCompleted
+              ? 1
+              : -1;
+          if (completion != 0) return completion;
+          final deadline = left.deadlineUtc.compareTo(right.deadlineUtc);
+          if (deadline != 0) return deadline;
+          return left.id.compareTo(right.id);
+        });
+        for (final (index, task) in categoryRows.indexed) {
+          final position = _positionForIndex(index);
+          if (task.positionKey != position) {
+            operations.add((task: task, position: position));
+          }
+        }
+      }
+      if (operations.isEmpty) return;
+      final transactionId = const Uuid().v4();
+      for (final (index, operation) in operations.indexed) {
+        await _recordLocalOperation(
+          entityType: SyncEntityType.task,
+          entitySyncId: operation.task.syncId!,
+          kind: SyncOperationKind.patch,
+          changes: {SyncField.positionKey: operation.position},
+          transactionId: transactionId,
+          transactionIndex: index,
+          transactionCount: operations.length,
+        );
+      }
     });
   }
 
@@ -499,12 +582,21 @@ extension SyncDatabase on AppDatabase {
       final syncId =
           task.syncId ??
           'legacy-task-${task.id}-${task.createdAtUtc.microsecondsSinceEpoch}';
-      if (task.syncId == null) {
+      final positionKey =
+          task.positionKey ?? await nextTaskPosition(task.categoryId);
+      if (task.syncId == null || task.positionKey == null) {
         await (update(tasks)..where((row) => row.id.equals(task.id))).write(
-          TasksCompanion(syncId: Value(syncId)),
+          TasksCompanion(
+            syncId: Value(syncId),
+            positionKey: Value(positionKey),
+          ),
         );
       }
-      if (!await _hasEntityOperation(SyncEntityType.task, syncId)) {
+      final hasEntityOperation = await _hasEntityOperation(
+        SyncEntityType.task,
+        syncId,
+      );
+      if (!hasEntityOperation) {
         await _recordLocalOperation(
           entityType: SyncEntityType.task,
           entitySyncId: syncId,
@@ -516,6 +608,7 @@ extension SyncDatabase on AppDatabase {
             SyncField.detailImages: jsonDecode(task.detailImagesJson),
             SyncField.deadlineUtc: task.deadlineUtc.toUtc().toIso8601String(),
             SyncField.categorySyncId: await _categorySyncId(task.categoryId),
+            SyncField.positionKey: positionKey,
             SyncField.completion: {
               'isCompleted': task.isCompleted,
               'completedAtUtc': task.completedAtUtc?.toUtc().toIso8601String(),
@@ -523,6 +616,17 @@ extension SyncDatabase on AppDatabase {
             SyncField.deleted: task.deletedAtUtc?.toIso8601String(),
             'createdAtUtc': task.createdAtUtc.toUtc().toIso8601String(),
           },
+        );
+      } else if (!await _hasFieldHead(
+        SyncEntityType.task,
+        syncId,
+        SyncField.positionKey,
+      )) {
+        await _recordLocalOperation(
+          entityType: SyncEntityType.task,
+          entitySyncId: syncId,
+          kind: SyncOperationKind.patch,
+          changes: {SyncField.positionKey: positionKey},
         );
       }
     }
@@ -566,6 +670,24 @@ extension SyncDatabase on AppDatabase {
     return row != null;
   }
 
+  Future<bool> _hasFieldHead(
+    String entityType,
+    String syncId,
+    String fieldName,
+  ) async {
+    final row =
+        await (select(syncFieldHeads)
+              ..where(
+                (head) =>
+                    head.entityType.equals(entityType) &
+                    head.entitySyncId.equals(syncId) &
+                    head.fieldName.equals(fieldName),
+              )
+              ..limit(1))
+            .getSingleOrNull();
+    return row != null;
+  }
+
   Future<String?> _categorySyncId(int? categoryId) async {
     if (categoryId == null) return null;
     return (select(categories)..where((row) => row.id.equals(categoryId)))
@@ -589,6 +711,26 @@ extension SyncDatabase on AppDatabase {
     final rows =
         await (select(categories)
               ..where((row) => row.deletedAtUtc.isNull())
+              ..orderBy([(row) => OrderingTerm.desc(row.positionKey)])
+              ..limit(1))
+            .get();
+    if (rows.isEmpty || rows.single.positionKey == null) {
+      return _positionForIndex(rows.length);
+    }
+    final value = BigInt.tryParse(rows.single.positionKey!) ?? BigInt.zero;
+    return (value + BigInt.from(_positionGap)).toString().padLeft(24, '0');
+  }
+
+  Future<String> nextTaskPosition(int? categoryId) async {
+    final rows =
+        await (select(tasks)
+              ..where(
+                (row) =>
+                    (categoryId == null
+                        ? row.categoryId.isNull()
+                        : row.categoryId.equals(categoryId)) &
+                    row.deletedAtUtc.isNull(),
+              )
               ..orderBy([(row) => OrderingTerm.desc(row.positionKey)])
               ..limit(1))
             .get();
@@ -756,6 +898,14 @@ extension SyncDatabase on AppDatabase {
             operation.occurredAtUtc,
         categoryId: Value(
           await _categoryLocalId(changes[SyncField.categorySyncId] as String?),
+        ),
+        positionKey: Value(
+          (changes[SyncField.positionKey] as String?) ??
+              await nextTaskPosition(
+                await _categoryLocalId(
+                  changes[SyncField.categorySyncId] as String?,
+                ),
+              ),
         ),
         isCompleted: Value(completionMap['isCompleted'] as bool? ?? false),
         createdAtUtc:
@@ -982,6 +1132,10 @@ extension SyncDatabase on AppDatabase {
       ),
       SyncField.categorySyncId => TasksCompanion(
         categoryId: Value(await _categoryLocalId(value as String?)),
+        updatedAtUtc: Value(occurredAtUtc),
+      ),
+      SyncField.positionKey => TasksCompanion(
+        positionKey: Value(value! as String),
         updatedAtUtc: Value(occurredAtUtc),
       ),
       SyncField.completion => _completionCompanion(value, occurredAtUtc),
@@ -1301,6 +1455,7 @@ extension SyncDatabase on AppDatabase {
             'detailImages': jsonDecode(row.detailImagesJson),
             'deadlineUtc': row.deadlineUtc.toUtc().toIso8601String(),
             'categorySyncId': await _categorySyncId(row.categoryId),
+            'positionKey': row.positionKey,
             'isCompleted': row.isCompleted,
             'completedAtUtc': row.completedAtUtc?.toUtc().toIso8601String(),
             'deletedAtUtc': row.deletedAtUtc?.toUtc().toIso8601String(),
