@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill/quill_delta.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../data/task_details/task_detail_document.dart';
 import '../../../../data/task_details/task_detail_image.dart';
@@ -43,49 +46,44 @@ class TaskDetailContentEditor extends ConsumerStatefulWidget {
 
 class TaskDetailContentEditorState
     extends ConsumerState<TaskDetailContentEditor> {
-  late final List<_DetailEditorEntry> _entries;
-  _DetailTextEntry? _activeTextEntry;
+  late final QuillController _controller;
+  late final StreamSubscription<DocChange> _documentChanges;
+  final _focusNode = FocusNode();
+  final _scrollController = ScrollController();
+  final _imagesById = <String, TaskDetailImage>{};
   bool _pasting = false;
 
-  TaskDetailDocument get document {
-    final blocks = <TaskDetailBlock>[];
-    for (final entry in _entries) {
-      switch (entry) {
-        case _DetailTextEntry():
-          if (entry.controller.text.isNotEmpty) {
-            blocks.add(TaskDetailTextBlock(entry.controller.text));
-          }
-        case _DetailImageEntry():
-          blocks.add(TaskDetailImageBlock(entry.image));
-      }
-    }
-    if (blocks.isEmpty) blocks.add(const TaskDetailTextBlock(''));
-    return TaskDetailDocument(List.unmodifiable(blocks));
-  }
+  QuillController get controller => _controller;
+
+  TaskDetailDocument get document => TaskDetailDocumentCodec.fromDelta(
+    operations: _controller.document.toDelta().toJson().cast<Object?>(),
+    images: _imagesById.values.toList(growable: false),
+  );
 
   @override
   void initState() {
     super.initState();
-    _entries = [];
-    for (final block in widget.initialDocument.blocks) {
-      switch (block) {
-        case TaskDetailTextBlock():
-          _entries.add(_createTextEntry(block.text));
-        case TaskDetailImageBlock():
-          _entries.add(_DetailImageEntry(block.image));
-      }
-    }
-    if (_entries.whereType<_DetailTextEntry>().isEmpty) {
-      _entries.add(_createTextEntry(''));
-    }
-    _activeTextEntry = _entries.whereType<_DetailTextEntry>().first;
+    _imagesById.addEntries(
+      widget.initialDocument.images.map((image) => MapEntry(image.id, image)),
+    );
+    _controller = QuillController(
+      document: Document.fromJson(
+        TaskDetailDocumentCodec.toDelta(widget.initialDocument),
+      ),
+      selection: const TextSelection.collapsed(offset: 0),
+      onReplaceText: _allowReplacement,
+    );
+    _documentChanges = _controller.document.changes.listen((_) {
+      widget.onChanged(document);
+    });
   }
 
   @override
   void dispose() {
-    for (final entry in _entries) {
-      entry.dispose();
-    }
+    _documentChanges.cancel();
+    _controller.dispose();
+    _focusNode.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -98,71 +96,234 @@ class TaskDetailContentEditorState
       textField: true,
       child: Container(
         key: const ValueKey('task-detail-content-editor'),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        constraints: const BoxConstraints(minHeight: 144),
         decoration: BoxDecoration(
           color: scheme.surfaceContainerLowest,
           border: Border.all(color: scheme.outline),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Column(
-          key: const ValueKey('task-detail-images'),
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var index = 0; index < _entries.length; index++)
-              switch (_entries[index]) {
-                final _DetailTextEntry entry => _buildTextField(
-                  entry,
-                  index,
-                  l10n,
-                ),
-                final _DetailImageEntry entry => _buildImageRow(entry, l10n),
-              },
-          ],
+        clipBehavior: Clip.antiAlias,
+        child: QuillEditor(
+          key: const ValueKey('task-details-field'),
+          controller: _controller,
+          focusNode: _focusNode,
+          scrollController: _scrollController,
+          config: QuillEditorConfig(
+            scrollable: false,
+            minHeight: 142,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            placeholder: l10n.taskDetailsHint,
+            customShortcuts: const {
+              SingleActivator(LogicalKeyboardKey.keyV, control: true):
+                  _PasteTaskDetailIntent(),
+              SingleActivator(LogicalKeyboardKey.keyV, meta: true):
+                  _PasteTaskDetailIntent(),
+            },
+            customActions: {
+              _PasteTaskDetailIntent: CallbackAction<Intent>(
+                onInvoke: (_) {
+                  unawaited(
+                    _pasteFromClipboard(
+                      showEmptyMessage: false,
+                      allowTextFallback: true,
+                    ),
+                  );
+                  return null;
+                },
+              ),
+            },
+            embedBuilders: [
+              _TaskDetailImageEmbedBuilder(
+                imagesById: _imagesById,
+                onOpen: _openImage,
+                onRemove: _removeImage,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Future<void> pasteImagesOnly() =>
-      _pasteFromClipboard(allowTextFallback: false);
-
-  Widget _buildTextField(
-    _DetailTextEntry entry,
-    int index,
-    AppLocalizations l10n,
-  ) {
-    return CallbackShortcuts(
-      bindings: {
-        const SingleActivator(LogicalKeyboardKey.keyV, control: true): () =>
-            _pasteFromClipboard(allowTextFallback: true),
-        const SingleActivator(LogicalKeyboardKey.keyV, meta: true): () =>
-            _pasteFromClipboard(allowTextFallback: true),
-      },
-      child: TextField(
-        key: index == 0
-            ? const ValueKey('task-details-field')
-            : ValueKey('task-details-field-$index'),
-        controller: entry.controller,
-        focusNode: entry.focusNode,
-        minLines: 1,
-        maxLines: null,
-        maxLength: TaskDetailDocumentCodec.maximumTextLength,
-        maxLengthEnforcement: MaxLengthEnforcement.enforced,
-        buildCounter:
-            (_, {required currentLength, required isFocused, maxLength}) =>
-                null,
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          isDense: true,
-          contentPadding: const EdgeInsets.symmetric(vertical: 6),
-          hintText: _isOnlyEmptyTextEntry(entry) ? l10n.taskDetailsHint : null,
-        ),
-        onChanged: (value) => _handleTextChanged(entry, value),
-      ),
-    );
+  Future<void> pasteImagesOnly() async {
+    await _pasteFromClipboard(showEmptyMessage: true, allowTextFallback: false);
   }
 
-  Widget _buildImageRow(_DetailImageEntry entry, AppLocalizations l10n) {
+  bool _allowReplacement(int index, int length, Object? data) {
+    try {
+      final candidate = Document.fromDelta(_controller.document.toDelta());
+      candidate.replace(index, length, data);
+      final candidateDocument = TaskDetailDocumentCodec.fromDelta(
+        operations: candidate.toDelta().toJson().cast<Object?>(),
+        images: _imagesById.values.toList(growable: false),
+      );
+      return candidateDocument.textLength <=
+          TaskDetailDocumentCodec.maximumTextLength;
+    } on Object {
+      return false;
+    }
+  }
+
+  Future<void> _pasteFromClipboard({
+    required bool showEmptyMessage,
+    required bool allowTextFallback,
+  }) async {
+    if (_pasting) return;
+    _setPasting(true);
+    final l10n = AppLocalizations.of(context);
+    try {
+      final pasted = await ref.read(taskImageClipboardProvider).readImages();
+      if (!mounted) return;
+      if (pasted.isEmpty) {
+        if (allowTextFallback) {
+          final clipboard = await Clipboard.getData(Clipboard.kTextPlain);
+          if (!mounted) return;
+          final text = clipboard?.text;
+          if (text != null && text.isNotEmpty) {
+            _insertText(text);
+            return;
+          }
+        }
+        if (showEmptyMessage) _showMessage(l10n.noImageInClipboard);
+        return;
+      }
+
+      final combined = [...document.images, ...pasted];
+      TaskDetailImageCodec.validate(combined);
+      _insertImages(pasted);
+    } on Object {
+      if (mounted) _showMessage(l10n.imagePasteFailed);
+    } finally {
+      if (mounted) _setPasting(false);
+    }
+  }
+
+  void _insertText(String text) {
+    final selection = _controller.selection;
+    final start = math.max(
+      0,
+      math.min(selection.start, _controller.document.length - 1),
+    );
+    final end = math.max(
+      start,
+      math.min(selection.end, _controller.document.length - 1),
+    );
+    _controller.replaceText(
+      start,
+      end - start,
+      text,
+      TextSelection.collapsed(offset: end + text.length),
+    );
+    _focusNode.requestFocus();
+  }
+
+  void _insertImages(List<TaskDetailImage> images) {
+    for (final image in images) {
+      _imagesById[image.id] = image;
+    }
+
+    final selection = _controller.selection;
+    final start = math.max(
+      0,
+      math.min(selection.start, _controller.document.length - 1),
+    );
+    final end = math.max(
+      start,
+      math.min(selection.end, _controller.document.length - 1),
+    );
+    final plainText = _controller.document.toPlainText();
+    final replacement = Delta();
+    var insertedLength = 0;
+
+    if (start > 0 && plainText[start - 1] != '\n') {
+      replacement.insert('\n');
+      insertedLength++;
+    }
+    for (final image in images) {
+      replacement
+        ..insert(
+          BlockEmbed.image(
+            TaskDetailDocumentCodec.imageSourceFor(image.id),
+          ).toJson(),
+        )
+        ..insert('\n');
+      insertedLength += 2;
+    }
+
+    _controller.replaceText(start, end - start, replacement, null);
+    _controller.updateSelection(
+      TextSelection.collapsed(offset: start + insertedLength),
+      ChangeSource.local,
+    );
+    _focusNode.requestFocus();
+  }
+
+  void _removeImage(String imageId, int documentOffset) {
+    if (!_imagesById.containsKey(imageId)) return;
+    _controller.replaceText(
+      documentOffset,
+      1,
+      '',
+      TextSelection.collapsed(offset: documentOffset),
+    );
+    _imagesById.remove(imageId);
+    widget.onChanged(document);
+    _focusNode.requestFocus();
+  }
+
+  Future<void> _openImage(TaskDetailImage image) async {
+    try {
+      await ref.read(taskImageViewerProvider).open(context, image);
+    } on Object {
+      if (mounted) _showMessage(AppLocalizations.of(context).imagePasteFailed);
+    }
+  }
+
+  void _setPasting(bool value) {
+    _pasting = value;
+    widget.onPastingChanged(value);
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+}
+
+final class _PasteTaskDetailIntent extends Intent {
+  const _PasteTaskDetailIntent();
+}
+
+final class _TaskDetailImageEmbedBuilder extends EmbedBuilder {
+  const _TaskDetailImageEmbedBuilder({
+    required this.imagesById,
+    required this.onOpen,
+    required this.onRemove,
+  });
+
+  final Map<String, TaskDetailImage> imagesById;
+  final ValueChanged<TaskDetailImage> onOpen;
+  final void Function(String imageId, int documentOffset) onRemove;
+
+  @override
+  String get key => BlockEmbed.imageType;
+
+  @override
+  Widget build(BuildContext context, EmbedContext embedContext) {
+    final source = embedContext.node.value.data;
+    final imageId = source is String
+        ? TaskDetailDocumentCodec.imageIdFromSource(source)
+        : null;
+    final image = imageId == null ? null : imagesById[imageId];
+    if (image == null) {
+      return const SizedBox(
+        height: TaskDetailImageLayout.maximumEditorHeight,
+        child: Center(child: Icon(Icons.broken_image_outlined)),
+      );
+    }
+
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final usesDesktopWindow = TaskDetailImageLayout.usesDesktopWindow(
       Theme.of(context).platform,
@@ -172,11 +333,9 @@ class TaskDetailContentEditorState
       child: Stack(
         children: [
           GestureDetector(
-            key: ValueKey('task-detail-image-${entry.image.id}'),
-            onTap: usesDesktopWindow ? null : () => _openImage(entry.image),
-            onDoubleTap: usesDesktopWindow
-                ? () => _openImage(entry.image)
-                : null,
+            key: ValueKey('task-detail-image-${image.id}'),
+            onTap: usesDesktopWindow ? null : () => onOpen(image),
+            onDoubleTap: usesDesktopWindow ? () => onOpen(image) : null,
             child: Tooltip(
               message: usesDesktopWindow
                   ? l10n.openImageDesktop
@@ -197,7 +356,7 @@ class TaskDetailContentEditorState
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: Image.memory(
-                        entry.image.bytes,
+                        image.bytes,
                         fit: BoxFit.contain,
                         errorBuilder: (_, _, _) => SizedBox(
                           width: 160,
@@ -220,7 +379,8 @@ class TaskDetailContentEditorState
             child: IconButton.filledTonal(
               tooltip: l10n.removeImage,
               visualDensity: VisualDensity.compact,
-              onPressed: () => _removeImage(entry),
+              onPressed: () =>
+                  onRemove(image.id, embedContext.node.documentOffset),
               icon: const Icon(Icons.close, size: 18),
             ),
           ),
@@ -228,198 +388,4 @@ class TaskDetailContentEditorState
       ),
     );
   }
-
-  _DetailTextEntry _createTextEntry(String text) {
-    late final _DetailTextEntry entry;
-    entry = _DetailTextEntry(text);
-    entry.focusNode.addListener(() {
-      if (entry.focusNode.hasFocus) _activeTextEntry = entry;
-    });
-    return entry;
-  }
-
-  bool _isOnlyEmptyTextEntry(_DetailTextEntry entry) =>
-      _entries.whereType<_DetailImageEntry>().isEmpty &&
-      _entries.whereType<_DetailTextEntry>().length == 1 &&
-      entry.controller.text.isEmpty;
-
-  void _handleTextChanged(_DetailTextEntry entry, String value) {
-    if (document.textLength > TaskDetailDocumentCodec.maximumTextLength) {
-      entry.controller.value = TextEditingValue(
-        text: entry.lastValidText,
-        selection: TextSelection.collapsed(
-          offset: math.min(
-            entry.lastValidText.length,
-            entry.controller.selection.extentOffset,
-          ),
-        ),
-      );
-      return;
-    }
-    entry.lastValidText = value;
-    _notifyChanged();
-  }
-
-  Future<void> _pasteFromClipboard({required bool allowTextFallback}) async {
-    if (_pasting) return;
-    _setPasting(true);
-    final l10n = AppLocalizations.of(context);
-    try {
-      final pasted = await ref.read(taskImageClipboardProvider).readImages();
-      if (!mounted) return;
-      if (pasted.isNotEmpty) {
-        final combined = [...document.images, ...pasted];
-        TaskDetailImageCodec.validate(combined);
-        _insertImages(pasted);
-        return;
-      }
-      if (allowTextFallback) {
-        final data = await Clipboard.getData(Clipboard.kTextPlain);
-        if (!mounted) return;
-        final text = data?.text;
-        if (text != null && text.isNotEmpty) {
-          _insertText(text);
-          return;
-        }
-      }
-      _showMessage(l10n.noImageInClipboard);
-    } on Object {
-      if (mounted) _showMessage(l10n.imagePasteFailed);
-    } finally {
-      if (mounted) _setPasting(false);
-    }
-  }
-
-  void _insertImages(List<TaskDetailImage> images) {
-    final target =
-        _activeTextEntry ?? _entries.whereType<_DetailTextEntry>().last;
-    final targetIndex = _entries.indexOf(target);
-    final value = target.controller.value;
-    final selection = value.selection.isValid
-        ? value.selection
-        : TextSelection.collapsed(offset: value.text.length);
-    final start = math.max(0, math.min(selection.start, value.text.length));
-    final end = math.max(start, math.min(selection.end, value.text.length));
-    final before = value.text.substring(0, start);
-    final after = value.text.substring(end);
-    target.controller.value = TextEditingValue(
-      text: before,
-      selection: TextSelection.collapsed(offset: before.length),
-    );
-    target.lastValidText = before;
-
-    final trailing = _createTextEntry(after);
-    _entries.insertAll(targetIndex + 1, [
-      for (final image in images) _DetailImageEntry(image),
-      trailing,
-    ]);
-    _activeTextEntry = trailing;
-    setState(_notifyChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      trailing.focusNode.requestFocus();
-      trailing.controller.selection = const TextSelection.collapsed(offset: 0);
-    });
-  }
-
-  void _insertText(String text) {
-    final target =
-        _activeTextEntry ?? _entries.whereType<_DetailTextEntry>().last;
-    final value = target.controller.value;
-    final selection = value.selection.isValid
-        ? value.selection
-        : TextSelection.collapsed(offset: value.text.length);
-    final start = math.max(0, math.min(selection.start, value.text.length));
-    final end = math.max(start, math.min(selection.end, value.text.length));
-    final nextText = value.text.replaceRange(start, end, text);
-    if (document.textLength - value.text.length + nextText.length >
-        TaskDetailDocumentCodec.maximumTextLength) {
-      return;
-    }
-    final offset = start + text.length;
-    target.controller.value = TextEditingValue(
-      text: nextText,
-      selection: TextSelection.collapsed(offset: offset),
-    );
-    target.lastValidText = nextText;
-    _notifyChanged();
-  }
-
-  void _removeImage(_DetailImageEntry imageEntry) {
-    final index = _entries.indexOf(imageEntry);
-    if (index < 0) return;
-    _entries.removeAt(index);
-    imageEntry.dispose();
-
-    final left = index > 0 ? _entries[index - 1] : null;
-    final right = index < _entries.length ? _entries[index] : null;
-    if (left is _DetailTextEntry && right is _DetailTextEntry) {
-      final leftLength = left.controller.text.length;
-      left.controller.text += right.controller.text;
-      left.lastValidText = left.controller.text;
-      _entries.remove(right);
-      right.dispose();
-      _activeTextEntry = left;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        left.focusNode.requestFocus();
-        left.controller.selection = TextSelection.collapsed(offset: leftLength);
-      });
-    }
-    if (_entries.whereType<_DetailTextEntry>().isEmpty) {
-      final empty = _createTextEntry('');
-      _entries.add(empty);
-      _activeTextEntry = empty;
-    }
-    setState(_notifyChanged);
-  }
-
-  Future<void> _openImage(TaskDetailImage image) async {
-    try {
-      await ref.read(taskImageViewerProvider).open(context, image);
-    } on Object {
-      if (mounted) _showMessage(AppLocalizations.of(context).imagePasteFailed);
-    }
-  }
-
-  void _setPasting(bool value) {
-    _pasting = value;
-    widget.onPastingChanged(value);
-  }
-
-  void _notifyChanged() => widget.onChanged(document);
-
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
-  }
-}
-
-sealed class _DetailEditorEntry {
-  const _DetailEditorEntry();
-
-  void dispose() {}
-}
-
-final class _DetailTextEntry extends _DetailEditorEntry {
-  _DetailTextEntry(String text)
-    : controller = TextEditingController(text: text),
-      lastValidText = text;
-
-  final TextEditingController controller;
-  final FocusNode focusNode = FocusNode();
-  String lastValidText;
-
-  @override
-  void dispose() {
-    controller.dispose();
-    focusNode.dispose();
-  }
-}
-
-final class _DetailImageEntry extends _DetailEditorEntry {
-  const _DetailImageEntry(this.image);
-
-  final TaskDetailImage image;
 }

@@ -7,8 +7,10 @@ import 'package:ddl_out/data/task_details/task_detail_document.dart';
 import 'package:ddl_out/data/task_details/task_detail_image.dart';
 import 'package:ddl_out/features/board/application/task_image_clipboard.dart';
 import 'package:ddl_out/features/board/presentation/dialogs/task_editor.dart';
+import 'package:ddl_out/features/board/presentation/widgets/task_detail_content_editor.dart';
 import 'package:ddl_out/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -137,24 +139,36 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.byType(QuillEditor), findsOneWidget);
     await tester.enterText(
       find.widgetWithText(TextFormField, 'Task name'),
       'Task with image',
     );
     final detailsField = find.byKey(const ValueKey('task-details-field'));
     await tester.tap(detailsField);
-    await tester.enterText(detailsField, 'BeforeAfter');
-    final detailsTextField = tester.widget<TextField>(detailsField);
-    detailsTextField.controller!.selection = const TextSelection.collapsed(
-      offset: 6,
+    final detailEditor = tester.state<TaskDetailContentEditorState>(
+      find.byType(TaskDetailContentEditor),
     );
+    detailEditor.controller.replaceText(
+      0,
+      0,
+      'BeforeAfter',
+      const TextSelection.collapsed(offset: 11),
+    );
+    detailEditor.controller.updateSelection(
+      const TextSelection.collapsed(offset: 6),
+      ChangeSource.local,
+    );
+    await tester.pump();
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyV);
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('task-detail-images')), findsOneWidget);
-    expect(find.byType(Image), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('task-detail-image-clipboard-image')),
+      findsOneWidget,
+    );
 
     await tester.tap(find.widgetWithText(FilledButton, 'Save'));
     await tester.pumpAndSettle();
@@ -172,6 +186,77 @@ void main() {
     expect((document.blocks[0] as TaskDetailTextBlock).text, 'Before');
     expect((document.blocks[1] as TaskDetailImageBlock).image.id, image.id);
     expect((document.blocks[2] as TaskDetailTextBlock).text, 'After');
+  });
+
+  testWidgets('removing an embedded image drops its persisted bytes', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final repository = _RecordingTaskRepository();
+    final image = TaskDetailImage(
+      id: 'removed-image',
+      mimeType: 'image/png',
+      bytes: Uint8List.fromList(
+        base64Decode(
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          taskRepositoryProvider.overrideWithValue(repository),
+          taskImageClipboardProvider.overrideWithValue(
+            _FakeTaskImageClipboard([image]),
+          ),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: const Scaffold(
+            body: TaskEditor(
+              snapshot: BoardSnapshot(categories: [], tasks: []),
+              initialCategoryId: null,
+              task: null,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Task name'),
+      'Task without image',
+    );
+    await tester.tap(find.widgetWithText(TextButton, 'Paste image'));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('task-detail-image-removed-image')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byTooltip('Remove image'));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('task-detail-image-removed-image')),
+      findsNothing,
+    );
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.pumpAndSettle();
+
+    expect(
+      TaskDetailImageCodec.decode(repository.createdDetailImagesJson!),
+      isEmpty,
+    );
+    final document = TaskDetailDocumentCodec.decode(
+      details: repository.createdDetails!,
+      images: const [],
+    );
+    expect(document.images, isEmpty);
   });
 }
 

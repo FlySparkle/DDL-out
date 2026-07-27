@@ -1,5 +1,6 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -102,7 +103,10 @@ class DdlOutApp extends ConsumerWidget {
             dynamicScheme: useDynamic ? darkDynamic : null,
             fontFamily: fontFamily,
           ),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            FlutterQuillLocalizations.delegate,
+          ],
           supportedLocales: AppLocalizations.supportedLocales,
           builder: (_, child) =>
               AppShell(navigatorKey: _rootNavigatorKey, child: child!),
