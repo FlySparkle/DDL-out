@@ -14,8 +14,8 @@ abstract final class AppNavigationLayout {
   static const double collapsedWidth = 72;
   static const double expandedWidth = 256;
   static const Duration expansionDuration = Duration(milliseconds: 220);
-  static const Duration hoverExpansionDelay = Duration(milliseconds: 450);
-  static const Duration hoverCollapseDelay = Duration(milliseconds: 500);
+  static const Duration hoverExpansionDelay = Duration(milliseconds: 50);
+  static const Duration hoverCollapseDelay = Duration(milliseconds: 50);
 
   static bool canUseFixed(double width) => width >= minimumFixedWidth;
 
