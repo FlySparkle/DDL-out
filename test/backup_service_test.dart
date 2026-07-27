@@ -38,6 +38,9 @@ void main() {
     await source.reorderCategories([secondCategoryId, categoryId]);
     await source.createTask(
       name: '发布版本',
+      details: '附上界面截图',
+      detailImagesJson:
+          '[{"id":"shot","mimeType":"image/png","base64Data":"AQID"}]',
       deadlineUtc: DateTime.utc(2026, 8, 1, 12),
       categoryId: categoryId,
     );
@@ -55,6 +58,8 @@ void main() {
     ]);
     final task = (await target.readTasks()).single;
     expect(task.name, '发布版本');
+    expect(task.details, '附上界面截图');
+    expect(task.detailImagesJson, contains('"id":"shot"'));
     expect(task.categoryId, categoryId);
     expect(task.deadlineUtc.toUtc(), DateTime.utc(2026, 8, 1, 12));
   });

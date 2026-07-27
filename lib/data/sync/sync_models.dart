@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-const syncProtocolVersion = 1;
+const syncProtocolVersion = 2;
 
 abstract final class SyncEntityType {
   static const category = 'category';
@@ -19,6 +19,8 @@ abstract final class SyncField {
   static const name = 'name';
   static const colorArgb = 'colorArgb';
   static const positionKey = 'positionKey';
+  static const details = 'details';
+  static const detailImages = 'detailImages';
   static const deadlineUtc = 'deadlineUtc';
   static const categorySyncId = 'categorySyncId';
   static const completion = 'completion';

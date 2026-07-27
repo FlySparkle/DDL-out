@@ -57,6 +57,30 @@ class AppLocalizationsJa extends AppLocalizations {
   String get taskName => 'タスク名';
 
   @override
+  String get taskTitleSection => 'タイトル';
+
+  @override
+  String get taskDetailsSection => '詳細';
+
+  @override
+  String get taskDetailsHint => 'メモを追加できます。Ctrl+V でテキストや画像を貼り付けられます';
+
+  @override
+  String get taskDetailImages => '詳細画像';
+
+  @override
+  String get pasteImage => '画像を貼り付け';
+
+  @override
+  String get removeImage => '画像を削除';
+
+  @override
+  String get noImageInClipboard => 'クリップボードに使用できる画像がありません';
+
+  @override
+  String get imagePasteFailed => '画像を貼り付けられません。形式とサイズを確認してください。';
+
+  @override
   String get taskCategory => 'カテゴリー';
 
   @override

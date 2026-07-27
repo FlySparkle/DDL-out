@@ -57,6 +57,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taskName => 'Task name';
 
   @override
+  String get taskTitleSection => 'Title';
+
+  @override
+  String get taskDetailsSection => 'Details';
+
+  @override
+  String get taskDetailsHint =>
+      'Add notes; press Ctrl+V here to paste text or images';
+
+  @override
+  String get taskDetailImages => 'Detail images';
+
+  @override
+  String get pasteImage => 'Paste image';
+
+  @override
+  String get removeImage => 'Remove image';
+
+  @override
+  String get noImageInClipboard => 'There is no usable image in the clipboard';
+
+  @override
+  String get imagePasteFailed =>
+      'Could not paste the image. Check its format and size.';
+
+  @override
   String get taskCategory => 'Category';
 
   @override

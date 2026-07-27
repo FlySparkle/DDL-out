@@ -57,6 +57,33 @@ void main() {
     await subscription.cancel();
   });
 
+  test('task details and image payload persist through updates', () async {
+    final id = await database.createTask(
+      name: '带详情事项',
+      details: '第一版详情',
+      detailImagesJson:
+          '[{"id":"one","mimeType":"image/png","base64Data":"AQID"}]',
+      deadlineUtc: DateTime.now().toUtc(),
+      categoryId: null,
+    );
+    final task = (await database.readTasks()).single;
+
+    await database.updateTask(
+      task: task,
+      name: task.name,
+      details: '第二版详情',
+      detailImagesJson:
+          '[{"id":"two","mimeType":"image/jpeg","base64Data":"BAUG"}]',
+      deadlineUtc: task.deadlineUtc,
+      categoryId: task.categoryId,
+    );
+
+    final updated = (await database.readTasks()).single;
+    expect(updated.id, id);
+    expect(updated.details, '第二版详情');
+    expect(updated.detailImagesJson, contains('"id":"two"'));
+  });
+
   test('category order can be changed and persists in reads', () async {
     final first = await database.createCategory('第一', 0xFF4A90E2);
     final second = await database.createCategory('第二', 0xFF50E3C2);

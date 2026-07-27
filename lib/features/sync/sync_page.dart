@@ -536,6 +536,8 @@ class _ConflictCard extends ConsumerWidget {
 
   String _fieldLabel(AppLocalizations l10n, String field) => switch (field) {
     SyncField.name => l10n.taskName,
+    SyncField.details => l10n.taskDetailsSection,
+    SyncField.detailImages => l10n.taskDetailImages,
     SyncField.colorArgb => l10n.categoryColor,
     SyncField.positionKey => l10n.categoryOrder,
     SyncField.deadlineUtc => l10n.deadline,
@@ -568,6 +570,9 @@ class _ConflictCard extends ConsumerWidget {
     }
     if (field == SyncField.categorySyncId && value == null) {
       return l10n.uncategorized;
+    }
+    if (field == SyncField.detailImages && value is List) {
+      return '${l10n.taskDetailImages} (${value.length})';
     }
     return value?.toString() ?? l10n.emptyValue;
   }

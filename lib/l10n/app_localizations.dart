@@ -196,6 +196,54 @@ abstract class AppLocalizations {
   /// **'事项名称'**
   String get taskName;
 
+  /// No description provided for @taskTitleSection.
+  ///
+  /// In zh, this message translates to:
+  /// **'标题'**
+  String get taskTitleSection;
+
+  /// No description provided for @taskDetailsSection.
+  ///
+  /// In zh, this message translates to:
+  /// **'详情'**
+  String get taskDetailsSection;
+
+  /// No description provided for @taskDetailsHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'补充说明；可在此处按 Ctrl+V 粘贴文字或图片'**
+  String get taskDetailsHint;
+
+  /// No description provided for @taskDetailImages.
+  ///
+  /// In zh, this message translates to:
+  /// **'详情图片'**
+  String get taskDetailImages;
+
+  /// No description provided for @pasteImage.
+  ///
+  /// In zh, this message translates to:
+  /// **'粘贴图片'**
+  String get pasteImage;
+
+  /// No description provided for @removeImage.
+  ///
+  /// In zh, this message translates to:
+  /// **'移除图片'**
+  String get removeImage;
+
+  /// No description provided for @noImageInClipboard.
+  ///
+  /// In zh, this message translates to:
+  /// **'剪贴板中没有可用图片'**
+  String get noImageInClipboard;
+
+  /// No description provided for @imagePasteFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'无法粘贴图片，请确认图片格式和大小'**
+  String get imagePasteFailed;
+
   /// No description provided for @taskCategory.
   ///
   /// In zh, this message translates to:

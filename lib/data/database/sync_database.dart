@@ -6,6 +6,8 @@ const _syncableFields = <String>{
   SyncField.name,
   SyncField.colorArgb,
   SyncField.positionKey,
+  SyncField.details,
+  SyncField.detailImages,
   SyncField.deadlineUtc,
   SyncField.categorySyncId,
   SyncField.completion,
@@ -198,6 +200,8 @@ extension SyncDatabase on AppDatabase {
     required String name,
     required DateTime deadlineUtc,
     required int? categoryId,
+    String details = '',
+    String detailImagesJson = '[]',
   }) async {
     return transaction(() async {
       final syncId = const Uuid().v4();
@@ -208,6 +212,8 @@ extension SyncDatabase on AppDatabase {
         kind: SyncOperationKind.create,
         changes: {
           SyncField.name: name.trim(),
+          SyncField.details: details,
+          SyncField.detailImages: jsonDecode(detailImagesJson),
           SyncField.deadlineUtc: deadlineUtc.toUtc().toIso8601String(),
           SyncField.categorySyncId: await _categorySyncId(categoryId),
           SyncField.completion: {'isCompleted': false, 'completedAtUtc': null},
@@ -226,10 +232,16 @@ extension SyncDatabase on AppDatabase {
     required String name,
     required DateTime deadlineUtc,
     required int? categoryId,
+    required String details,
+    required String detailImagesJson,
   }) async {
     final changes = <String, Object?>{};
     final normalizedName = name.trim();
     if (task.name != normalizedName) changes[SyncField.name] = normalizedName;
+    if (task.details != details) changes[SyncField.details] = details;
+    if (task.detailImagesJson != detailImagesJson) {
+      changes[SyncField.detailImages] = jsonDecode(detailImagesJson);
+    }
     final normalizedDeadline = deadlineUtc.toUtc();
     if (task.deadlineUtc.toUtc() != normalizedDeadline) {
       changes[SyncField.deadlineUtc] = normalizedDeadline.toIso8601String();
@@ -447,6 +459,8 @@ extension SyncDatabase on AppDatabase {
           occurredAtUtc: task.updatedAtUtc,
           changes: {
             SyncField.name: task.name,
+            SyncField.details: task.details,
+            SyncField.detailImages: jsonDecode(task.detailImagesJson),
             SyncField.deadlineUtc: task.deadlineUtc.toUtc().toIso8601String(),
             SyncField.categorySyncId: await _categorySyncId(task.categoryId),
             SyncField.completion: {
@@ -678,6 +692,10 @@ extension SyncDatabase on AppDatabase {
       TasksCompanion.insert(
         syncId: Value(operation.entitySyncId),
         name: (changes[SyncField.name] as String?) ?? '未命名事项',
+        details: Value((changes[SyncField.details] as String?) ?? ''),
+        detailImagesJson: Value(
+          jsonEncode(changes[SyncField.detailImages] ?? const []),
+        ),
         deadlineUtc:
             DateTime.tryParse(
               changes[SyncField.deadlineUtc] as String? ?? '',
@@ -895,6 +913,14 @@ extension SyncDatabase on AppDatabase {
     final companion = switch (fieldName) {
       SyncField.name => TasksCompanion(
         name: Value(value! as String),
+        updatedAtUtc: Value(occurredAtUtc),
+      ),
+      SyncField.details => TasksCompanion(
+        details: Value(value! as String),
+        updatedAtUtc: Value(occurredAtUtc),
+      ),
+      SyncField.detailImages => TasksCompanion(
+        detailImagesJson: Value(jsonEncode(value ?? const [])),
         updatedAtUtc: Value(occurredAtUtc),
       ),
       SyncField.deadlineUtc => TasksCompanion(
@@ -1218,6 +1244,8 @@ extension SyncDatabase on AppDatabase {
           {
             'syncId': row.syncId,
             'name': row.name,
+            'details': row.details,
+            'detailImages': jsonDecode(row.detailImagesJson),
             'deadlineUtc': row.deadlineUtc.toUtc().toIso8601String(),
             'categorySyncId': await _categorySyncId(row.categoryId),
             'isCompleted': row.isCompleted,

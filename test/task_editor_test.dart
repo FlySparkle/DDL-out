@@ -1,10 +1,15 @@
+import 'dart:convert';
+
 import 'package:ddl_out/data/database/app_database.dart';
 import 'package:ddl_out/data/repositories/board_providers.dart';
 import 'package:ddl_out/data/repositories/task_repository.dart';
+import 'package:ddl_out/data/task_details/task_detail_image.dart';
+import 'package:ddl_out/features/board/application/task_image_clipboard.dart';
 import 'package:ddl_out/features/board/presentation/dialogs/task_editor.dart';
 import 'package:ddl_out/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,6 +25,8 @@ void main() {
     final task = Task(
       id: 1,
       name: 'Overdue task',
+      details: '',
+      detailImagesJson: '[]',
       deadlineUtc: deadline,
       categoryId: null,
       isCompleted: false,
@@ -48,8 +55,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('Remaining time'));
     await tester.tap(find.text('Remaining time'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Date and time'));
     await tester.tap(find.text('Date and time'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, 'Save'));
@@ -87,10 +96,77 @@ void main() {
     expect(find.text('Tomorrow'), findsOneWidget);
     expect(find.text('This weekend'), findsOneWidget);
   });
+
+  testWidgets('details accepts a pasted image and persists it with the task', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final repository = _RecordingTaskRepository();
+    final image = TaskDetailImage(
+      id: 'clipboard-image',
+      mimeType: 'image/png',
+      bytes: Uint8List.fromList(
+        base64Decode(
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          taskRepositoryProvider.overrideWithValue(repository),
+          taskImageClipboardProvider.overrideWithValue(
+            _FakeTaskImageClipboard([image]),
+          ),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: const Scaffold(
+            body: TaskEditor(
+              snapshot: BoardSnapshot(categories: [], tasks: []),
+              initialCategoryId: null,
+              task: null,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Task name'),
+      'Task with image',
+    );
+    final detailsField = find.byKey(const ValueKey('task-details-field'));
+    await tester.tap(detailsField);
+    await tester.enterText(detailsField, 'Reference screenshot');
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyV);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('task-detail-images')), findsOneWidget);
+    expect(find.byType(Image), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.pumpAndSettle();
+
+    expect(repository.createdDetails, 'Reference screenshot');
+    final stored = TaskDetailImageCodec.decode(
+      repository.createdDetailImagesJson!,
+    );
+    expect(stored, hasLength(1));
+    expect(stored.single.bytes, image.bytes);
+  });
 }
 
 class _RecordingTaskRepository implements TaskRepository {
   DateTime? updatedDeadline;
+  String? createdDetails;
+  String? createdDetailImagesJson;
 
   @override
   Future<void> clearCompletedInCategory(int? categoryId) async {}
@@ -103,7 +179,13 @@ class _RecordingTaskRepository implements TaskRepository {
     required String name,
     required DateTime deadlineUtc,
     required int? categoryId,
-  }) async => 1;
+    String details = '',
+    String detailImagesJson = '[]',
+  }) async {
+    createdDetails = details;
+    createdDetailImagesJson = detailImagesJson;
+    return 1;
+  }
 
   @override
   Future<void> delete(int id) async {}
@@ -120,7 +202,18 @@ class _RecordingTaskRepository implements TaskRepository {
     required String name,
     required DateTime deadlineUtc,
     required int? categoryId,
+    String? details,
+    String? detailImagesJson,
   }) async {
     updatedDeadline = deadlineUtc;
   }
+}
+
+class _FakeTaskImageClipboard implements TaskImageClipboard {
+  const _FakeTaskImageClipboard(this.images);
+
+  final List<TaskDetailImage> images;
+
+  @override
+  Future<List<TaskDetailImage>> readImages() async => images;
 }

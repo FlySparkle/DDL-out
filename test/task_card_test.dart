@@ -17,6 +17,8 @@ void main() {
     final task = Task(
       id: 1,
       name: 'Ship release',
+      details: '',
+      detailImagesJson: '[]',
       deadlineUtc: now.toUtc().add(const Duration(hours: 2)),
       categoryId: null,
       isCompleted: false,
@@ -83,6 +85,8 @@ void main() {
     final task = Task(
       id: 1,
       name: 'Long press task',
+      details: '',
+      detailImagesJson: '[]',
       deadlineUtc: now.toUtc().add(const Duration(hours: 2)),
       categoryId: null,
       isCompleted: false,
@@ -134,6 +138,8 @@ void main() {
     final task = Task(
       id: 1,
       name: 'Touch task',
+      details: '',
+      detailImagesJson: '[]',
       deadlineUtc: now.toUtc().add(const Duration(hours: 2)),
       categoryId: null,
       isCompleted: false,
@@ -174,5 +180,50 @@ void main() {
     expect(find.text('Touch task'), findsNWidgets(2));
     await gesture.up();
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('task card separates title from persisted details', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final now = DateTime(2026, 7, 19, 12);
+    final task = Task(
+      id: 1,
+      name: 'Card title',
+      details: 'Card details',
+      detailImagesJson: '[]',
+      deadlineUtc: now.toUtc().add(const Duration(hours: 2)),
+      categoryId: null,
+      isCompleted: false,
+      createdAtUtc: now.toUtc(),
+      updatedAtUtc: now.toUtc(),
+      completedAtUtc: null,
+      syncId: null,
+      deletedAtUtc: null,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: Scaffold(
+            body: TaskCard(
+              task: task,
+              snapshot: BoardSnapshot(categories: const [], tasks: [task]),
+              categoryColor: Colors.blue,
+              longestRemaining: const Duration(hours: 2),
+              now: now,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Card title'), findsOneWidget);
+    expect(find.text('Card details'), findsOneWidget);
+    expect(find.byKey(const ValueKey('task-details-block')), findsOneWidget);
   });
 }

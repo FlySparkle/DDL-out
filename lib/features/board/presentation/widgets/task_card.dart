@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/time/deadline_service.dart';
 import '../../../../data/database/app_database.dart';
 import '../../../../data/repositories/board_providers.dart';
+import '../../../../data/task_details/task_detail_image.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../settings/application/settings.dart';
 import '../dialogs/task_editor.dart';
@@ -29,6 +30,7 @@ class TaskCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
+    final detailImages = _decodeImages(task.detailImagesJson);
     final showDragHandle = ref.watch(
       settingsControllerProvider.select(
         (settings) => settings.showTaskDragHandle,
@@ -107,7 +109,7 @@ class TaskCard extends ConsumerWidget {
                 constraints: const BoxConstraints(minHeight: 58),
                 child: Row(
                   children: [
-                    if (dragHandle != null) dragHandle,
+                    ?dragHandle,
                     IconButton(
                       tooltip: task.isCompleted
                           ? l10n.markIncomplete
@@ -120,19 +122,7 @@ class TaskCard extends ConsumerWidget {
                       ),
                     ),
                     Expanded(
-                      child: Text(
-                        task.name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          decoration: task.isCompleted
-                              ? TextDecoration.lineThrough
-                              : null,
-                          color: task.isCompleted
-                              ? scheme.onSurfaceVariant
-                              : scheme.onSurface,
-                        ),
-                      ),
+                      child: _TaskSummary(task: task, images: detailImages),
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -159,6 +149,14 @@ class TaskCard extends ConsumerWidget {
       childWhenDragging: Opacity(opacity: 0.35, child: card),
       child: card,
     );
+  }
+
+  List<TaskDetailImage> _decodeImages(String source) {
+    try {
+      return TaskDetailImageCodec.decode(source);
+    } on FormatException {
+      return const [];
+    }
   }
 
   Widget _dragHandle(
@@ -252,6 +250,101 @@ class TaskCard extends ConsumerWidget {
       snapshot: snapshot,
       initialCategoryId: task.categoryId,
       task: task,
+    );
+  }
+}
+
+class _TaskSummary extends StatelessWidget {
+  const _TaskSummary({required this.task, required this.images});
+
+  final Task task;
+  final List<TaskDetailImage> images;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final completedColor = task.isCompleted
+        ? scheme.onSurfaceVariant
+        : scheme.onSurface;
+    final hasDetails = task.details.trim().isNotEmpty || images.isNotEmpty;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            task.name,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+              color: completedColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          if (hasDetails) ...[
+            const SizedBox(height: 5),
+            Container(
+              key: const ValueKey('task-details-block'),
+              padding: const EdgeInsets.only(top: 5),
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: scheme.outlineVariant.withValues(alpha: 0.75),
+                  ),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (task.details.trim().isNotEmpty)
+                    Text(
+                      task.details.trim(),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  if (images.isNotEmpty) ...[
+                    if (task.details.trim().isNotEmpty)
+                      const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        for (final image in images.take(3))
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Image.memory(
+                              image.bytes,
+                              width: 42,
+                              height: 34,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, _, _) => SizedBox(
+                                width: 42,
+                                height: 34,
+                                child: ColoredBox(
+                                  color: scheme.surfaceContainerHighest,
+                                  child: const Icon(
+                                    Icons.broken_image_outlined,
+                                    size: 18,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

@@ -356,6 +356,8 @@ void main() {
         Task(
           id: 1,
           name: '孤立事项',
+          details: '',
+          detailImagesJson: '[]',
           deadlineUtc: now.toUtc().add(const Duration(hours: 2)),
           categoryId: null,
           isCompleted: false,
@@ -513,6 +515,8 @@ BoardSnapshot _snapshotWithTask(DateTime now) {
       Task(
         id: 1,
         name: 'Ship release',
+        details: '',
+        detailImagesJson: '[]',
         deadlineUtc: utc.add(const Duration(hours: 2)),
         categoryId: 1,
         isCompleted: false,

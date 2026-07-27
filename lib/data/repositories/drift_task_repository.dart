@@ -11,10 +11,14 @@ final class DriftTaskRepository implements TaskRepository {
     required String name,
     required DateTime deadlineUtc,
     required int? categoryId,
+    String details = '',
+    String detailImagesJson = '[]',
   }) => _database.createTask(
     name: name,
     deadlineUtc: deadlineUtc,
     categoryId: categoryId,
+    details: details,
+    detailImagesJson: detailImagesJson,
   );
 
   @override
@@ -23,11 +27,15 @@ final class DriftTaskRepository implements TaskRepository {
     required String name,
     required DateTime deadlineUtc,
     required int? categoryId,
+    String? details,
+    String? detailImagesJson,
   }) => _database.updateTask(
     task: task,
     name: name,
     deadlineUtc: deadlineUtc,
     categoryId: categoryId,
+    details: details,
+    detailImagesJson: detailImagesJson,
   );
 
   @override

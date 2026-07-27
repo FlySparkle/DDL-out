@@ -5,6 +5,8 @@ abstract interface class TaskRepository {
     required String name,
     required DateTime deadlineUtc,
     required int? categoryId,
+    String details = '',
+    String detailImagesJson = '[]',
   });
 
   Future<void> update({
@@ -12,6 +14,8 @@ abstract interface class TaskRepository {
     required String name,
     required DateTime deadlineUtc,
     required int? categoryId,
+    String? details,
+    String? detailImagesJson,
   });
 
   Future<void> move(int taskId, int? categoryId);

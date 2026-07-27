@@ -57,6 +57,30 @@ class AppLocalizationsZh extends AppLocalizations {
   String get taskName => '事项名称';
 
   @override
+  String get taskTitleSection => '标题';
+
+  @override
+  String get taskDetailsSection => '详情';
+
+  @override
+  String get taskDetailsHint => '补充说明；可在此处按 Ctrl+V 粘贴文字或图片';
+
+  @override
+  String get taskDetailImages => '详情图片';
+
+  @override
+  String get pasteImage => '粘贴图片';
+
+  @override
+  String get removeImage => '移除图片';
+
+  @override
+  String get noImageInClipboard => '剪贴板中没有可用图片';
+
+  @override
+  String get imagePasteFailed => '无法粘贴图片，请确认图片格式和大小';
+
+  @override
   String get taskCategory => '所属分类';
 
   @override

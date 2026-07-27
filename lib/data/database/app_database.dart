@@ -29,6 +29,8 @@ class Tasks extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get syncId => text().nullable()();
   TextColumn get name => text().withLength(min: 1, max: 200)();
+  TextColumn get details => text().withDefault(const Constant(''))();
+  TextColumn get detailImagesJson => text().withDefault(const Constant('[]'))();
   DateTimeColumn get deadlineUtc => dateTime()();
   IntColumn get categoryId => integer().nullable().references(
     Categories,
@@ -149,7 +151,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -173,6 +175,10 @@ class AppDatabase extends _$AppDatabase {
         await migrator.createTable(syncOperations);
         await migrator.createTable(syncFieldHeads);
         await migrator.createTable(syncConflicts);
+      }
+      if (from < 4) {
+        await migrator.addColumn(tasks, tasks.details);
+        await migrator.addColumn(tasks, tasks.detailImagesJson);
       }
     },
     beforeOpen: (_) async {
@@ -247,11 +253,15 @@ class AppDatabase extends _$AppDatabase {
     required String name,
     required DateTime deadlineUtc,
     required int? categoryId,
+    String details = '',
+    String detailImagesJson = '[]',
   }) {
     return createSyncedTask(
       name: name,
       deadlineUtc: deadlineUtc,
       categoryId: categoryId,
+      details: details,
+      detailImagesJson: detailImagesJson,
     );
   }
 
@@ -260,12 +270,16 @@ class AppDatabase extends _$AppDatabase {
     required String name,
     required DateTime deadlineUtc,
     required int? categoryId,
+    String? details,
+    String? detailImagesJson,
   }) {
     return updateSyncedTask(
       task: task,
       name: name,
       deadlineUtc: deadlineUtc,
       categoryId: categoryId,
+      details: details ?? task.details,
+      detailImagesJson: detailImagesJson ?? task.detailImagesJson,
     );
   }
 

@@ -8,8 +8,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/version/app_version.dart';
 import '../database/app_database.dart';
 import '../repositories/board_providers.dart';
+import '../task_details/task_detail_image.dart';
 
-const backupSchemaVersion = 2;
+const backupSchemaVersion = 3;
 
 class BackupException implements Exception {
   const BackupException(this.message);
@@ -73,6 +74,8 @@ class BackupService {
             (task) => <String, Object?>{
               'id': task.id,
               'name': task.name,
+              'details': task.details,
+              'detailImages': jsonDecode(task.detailImagesJson),
               'deadlineUtc': task.deadlineUtc.toUtc().toIso8601String(),
               'categoryId': task.categoryId,
               'isCompleted': task.isCompleted,
@@ -140,7 +143,15 @@ class BackupService {
         for (final (index, row) in rawCategoryRows.indexed)
           <String, Object?>{...row, if (version == 1) 'sortOrder': index},
       ];
-      final taskRows = _objectList(decoded['tasks'], 'tasks');
+      final rawTaskRows = _objectList(decoded['tasks'], 'tasks');
+      final taskRows = [
+        for (final row in rawTaskRows)
+          <String, Object?>{
+            ...row,
+            if (version < 3) 'details': '',
+            if (version < 3) 'detailImages': const <Object?>[],
+          },
+      ];
       _validate(categoryRows, taskRows);
       return BackupPreview(
         categories: categoryRows,
@@ -193,6 +204,19 @@ class BackupService {
       final id = _positiveInt(row, 'id');
       if (!taskIds.add(id)) throw const BackupException('事项 ID 重复');
       _name(row, 200);
+      final details = row['details'];
+      if (details is! String || details.length > 10000) {
+        throw const BackupException('事项详情无效');
+      }
+      final detailImages = row['detailImages'];
+      if (detailImages is! List) {
+        throw const BackupException('事项详情图片无效');
+      }
+      try {
+        TaskDetailImageCodec.decode(jsonEncode(detailImages));
+      } on FormatException {
+        throw const BackupException('事项详情图片无效');
+      }
       final categoryId = row['categoryId'];
       if (categoryId != null &&
           (categoryId is! int || !categoryIds.contains(categoryId))) {
@@ -249,6 +273,8 @@ class BackupService {
       return TasksCompanion.insert(
         id: Value(row['id']! as int),
         name: _name(row, 200),
+        details: Value(row['details']! as String),
+        detailImagesJson: Value(jsonEncode(row['detailImages']! as List)),
         deadlineUtc: _utc(row, 'deadlineUtc'),
         categoryId: Value(row['categoryId'] as int?),
         isCompleted: Value(row['isCompleted']! as bool),

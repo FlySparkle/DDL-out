@@ -124,6 +124,30 @@ void main() {
         await phone.computeSyncStateDigest(),
       );
     });
+
+    test('task details and pasted images sync to the paired device', () async {
+      await _seedAndPair(computer, phone);
+      final task = (await computer.readTasks()).single;
+
+      await computer.updateTask(
+        task: task,
+        name: task.name,
+        details: '同步详情',
+        detailImagesJson:
+            '[{"id":"sync-image","mimeType":"image/png","base64Data":"AQID"}]',
+        deadlineUtc: task.deadlineUtc,
+        categoryId: task.categoryId,
+      );
+      await _exchange(computer, phone);
+
+      final remote = (await phone.readTasks()).single;
+      expect(remote.details, '同步详情');
+      expect(remote.detailImagesJson, contains('sync-image'));
+      expect(
+        await computer.computeSyncStateDigest(),
+        await phone.computeSyncStateDigest(),
+      );
+    });
   });
 }
 
