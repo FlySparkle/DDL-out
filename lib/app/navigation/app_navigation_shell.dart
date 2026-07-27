@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/settings/application/settings.dart';
@@ -71,18 +72,57 @@ class AppNavigationShell extends ConsumerWidget {
         );
         return ColoredBox(
           color: Theme.of(context).scaffoldBackgroundColor,
-          child: AppNavigationScope(
-            fixed: fixed,
-            child: fixed
-                ? FixedAppNavigation(
-                    selectedDestination: selectedDestination,
-                    child: child,
-                  )
-                : child,
+          child: Focus(
+            autofocus: true,
+            child: CallbackShortcuts(
+              bindings: _isDesktopPlatform(context)
+                  ? {
+                      const SingleActivator(LogicalKeyboardKey.escape): () =>
+                          _handleEscape(context, selectedDestination),
+                    }
+                  : const {},
+              child: AppNavigationScope(
+                fixed: fixed,
+                child: fixed
+                    ? FixedAppNavigation(
+                        selectedDestination: selectedDestination,
+                        child: child,
+                      )
+                    : child,
+              ),
+            ),
           ),
         );
       },
     );
+  }
+
+  bool _isDesktopPlatform(BuildContext context) {
+    return switch (Theme.of(context).platform) {
+      TargetPlatform.windows ||
+      TargetPlatform.linux ||
+      TargetPlatform.macOS => true,
+      _ => false,
+    };
+  }
+
+  void _handleEscape(
+    BuildContext context,
+    AppNavigationDestinationId destination,
+  ) {
+    if (destination == AppNavigationDestinationId.board) return;
+
+    final router = GoRouter.of(context);
+    if (location == destination.route) {
+      router.go(AppNavigationDestinationId.board.route);
+      return;
+    }
+
+    if (router.canPop()) {
+      router.pop();
+    } else {
+      router.go(destination.route);
+    }
   }
 }
 

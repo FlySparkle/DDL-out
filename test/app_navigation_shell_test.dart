@@ -5,6 +5,7 @@ import 'package:ddl_out/data/repositories/board_providers.dart';
 import 'package:ddl_out/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -113,6 +114,59 @@ void main() {
 
     expect(find.text('settings-content'), findsOneWidget);
     expect(router.routeInformationProvider.value.uri.path, '/settings');
+  });
+
+  testWidgets('escape returns from a desktop destination home to deadlines', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({'navigation_mode': 'fixed'});
+    final router = _router(initialLocation: '/about');
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(_testApp(router));
+    await tester.pumpAndSettle();
+    expect(find.text('about-content'), findsOneWidget);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(router.routeInformationProvider.value.uri.path, '/');
+    expect(find.text('board-content'), findsOneWidget);
+  });
+
+  testWidgets('escape returns from a desktop detail to its destination home', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({'navigation_mode': 'fixed'});
+    final router = _router(initialLocation: '/sync/conflicts');
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(_testApp(router));
+    await tester.pumpAndSettle();
+    expect(find.text('conflicts-content'), findsOneWidget);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(router.routeInformationProvider.value.uri.path, '/sync');
+    expect(find.text('sync-content'), findsOneWidget);
+  });
+
+  testWidgets('escape does not replace mobile system back behavior', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({'navigation_mode': 'floating'});
+    final router = _router(initialLocation: '/settings');
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(_testApp(router, mobile: true));
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(router.routeInformationProvider.value.uri.path, '/settings');
+    expect(find.text('settings-content'), findsOneWidget);
   });
 
   testWidgets('sidebar labels use the global font', (tester) async {
@@ -232,6 +286,13 @@ GoRouter _router({String? initialLocation}) {
             ),
           ),
           GoRoute(
+            path: '/sync/conflicts',
+            builder: (context, state) => const _TestPage(
+              selectedDestination: AppNavigationDestinationId.sync,
+              content: 'conflicts-content',
+            ),
+          ),
+          GoRoute(
             path: '/settings/community',
             builder: (context, state) => const _TestPage(
               selectedDestination: AppNavigationDestinationId.settings,
@@ -255,7 +316,9 @@ Widget _testApp(GoRouter router, {ThemeData? theme, bool mobile = false}) {
       routerConfig: router,
       theme:
           theme ??
-          (mobile ? ThemeData(platform: TargetPlatform.android) : null),
+          ThemeData(
+            platform: mobile ? TargetPlatform.android : TargetPlatform.windows,
+          ),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: const Locale('en'),
