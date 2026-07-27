@@ -166,14 +166,8 @@ class _CategoryEditorState extends ConsumerState<CategoryEditor> {
 
   Future<void> _delete() async {
     final l10n = AppLocalizations.of(context);
-    final confirmed = await showConfirmation(
-      context,
-      title: l10n.deleteCategoryTitle,
-      body: l10n.deleteCategoryBody(widget.taskCount),
-      destructive: true,
-      confirmLabel: l10n.deleteCategoryConfirm,
-    );
-    if (!confirmed) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
     final categoryId = widget.category!.id;
     final affectedTaskIds =
         ref
@@ -187,10 +181,17 @@ class _CategoryEditorState extends ConsumerState<CategoryEditor> {
     final categoryRepository = ref.read(categoryRepositoryProvider);
     final taskRepository = ref.read(taskRepositoryProvider);
     final settingsController = ref.read(settingsControllerProvider.notifier);
-    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showConfirmation(
+      context,
+      title: l10n.deleteCategoryTitle,
+      body: l10n.deleteCategoryBody(widget.taskCount),
+      destructive: true,
+      confirmLabel: l10n.deleteCategoryConfirm,
+    );
+    if (!confirmed || !mounted) return;
     await categoryRepository.delete(categoryId);
     if (!mounted) return;
-    Navigator.pop(context);
+    navigator.pop();
     showDestructiveUndoSnackBar(
       messenger: messenger,
       message: l10n.categoryDeleted,
