@@ -55,6 +55,8 @@
   "emptyBody": "まずやることを記録しましょう。カテゴリー分けは後からでもできます。",
   "noTasks": "このカテゴリーにはタスクがありません",
   "clearCompleted": "完了済みタスクを削除",
+  "sortTasks": "期限順に自動整列",
+  "tasksSorted": "期限順に並べ替えました",
   "clearCategoryTasks": "このカテゴリーの完了済みを削除",
   "categoryActions": "カテゴリー操作",
   "reorderCategory": "ドラッグしてカテゴリーを並べ替え",

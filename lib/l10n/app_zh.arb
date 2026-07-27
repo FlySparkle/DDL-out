@@ -55,6 +55,8 @@
   "emptyBody": "先记下要完成的事，之后也可以再整理分类。",
   "noTasks": "这个分类还没有事项",
   "clearCompleted": "移除已完成事项",
+  "sortTasks": "按截止时间自动排序",
+  "tasksSorted": "已按截止时间排序",
   "clearCategoryTasks": "移除本分类已完成事项",
   "categoryActions": "分类操作",
   "reorderCategory": "拖动调整分类顺序",

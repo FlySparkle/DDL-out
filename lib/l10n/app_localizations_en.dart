@@ -176,6 +176,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearCompleted => 'Remove completed tasks';
 
   @override
+  String get sortTasks => 'Sort by deadline';
+
+  @override
+  String get tasksSorted => 'Sorted by deadline';
+
+  @override
   String get clearCategoryTasks => 'Remove completed tasks in this category';
 
   @override

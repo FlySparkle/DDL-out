@@ -11,6 +11,7 @@ import 'presentation/dialogs/confirmation_dialog.dart';
 import 'presentation/dialogs/task_editor.dart';
 import 'presentation/widgets/board_content.dart';
 import 'presentation/widgets/board_states.dart';
+import 'presentation/widgets/task_auto_sort_icon.dart';
 
 export 'application/current_time_provider.dart';
 
@@ -47,6 +48,13 @@ class BoardPage extends ConsumerWidget {
             tooltip: l10n.newCategory,
             onPressed: () => showCategoryEditor(context),
             icon: const Icon(Icons.create_new_folder_outlined),
+          ),
+          IconButton(
+            tooltip: l10n.sortTasks,
+            onPressed: (board.value?.tasks.isEmpty ?? true)
+                ? null
+                : () => _sortTasks(context, ref),
+            icon: const TaskAutoSortIcon(),
           ),
           IconButton(
             tooltip: l10n.clearCompleted,
@@ -106,5 +114,15 @@ class BoardPage extends ConsumerWidget {
       undoLabel: l10n.undoCountdown,
       onUndo: () => repository.restoreMany(deletedIds),
     );
+  }
+
+  Future<void> _sortTasks(BuildContext context, WidgetRef ref) async {
+    await ref.read(taskRepositoryProvider).sortByDeadline();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).tasksSorted)),
+      );
   }
 }

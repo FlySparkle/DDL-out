@@ -55,6 +55,8 @@
   "emptyBody": "Capture what you need to finish now. You can organize it later.",
   "noTasks": "No tasks in this category",
   "clearCompleted": "Remove completed tasks",
+  "sortTasks": "Sort by deadline",
+  "tasksSorted": "Sorted by deadline",
   "clearCategoryTasks": "Remove completed tasks in this category",
   "categoryActions": "Category actions",
   "reorderCategory": "Drag to reorder category",

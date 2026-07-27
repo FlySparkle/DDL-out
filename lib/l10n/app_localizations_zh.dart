@@ -174,6 +174,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get clearCompleted => '移除已完成事项';
 
   @override
+  String get sortTasks => '按截止时间自动排序';
+
+  @override
+  String get tasksSorted => '已按截止时间排序';
+
+  @override
   String get clearCategoryTasks => '移除本分类已完成事项';
 
   @override

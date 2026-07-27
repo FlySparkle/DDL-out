@@ -174,6 +174,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get clearCompleted => '完了済みタスクを削除';
 
   @override
+  String get sortTasks => '期限順に自動整列';
+
+  @override
+  String get tasksSorted => '期限順に並べ替えました';
+
+  @override
   String get clearCategoryTasks => 'このカテゴリーの完了済みを削除';
 
   @override

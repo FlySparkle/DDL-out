@@ -11,7 +11,7 @@ import '../../application/current_time_provider.dart';
 import '../dialogs/category_editor.dart';
 import '../dialogs/confirmation_dialog.dart';
 import '../dialogs/task_editor.dart';
-import 'task_card.dart';
+import 'reorderable_task_list.dart';
 
 @immutable
 class CategoryDragData {
@@ -96,20 +96,14 @@ class CategorySection extends ConsumerWidget {
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           )
-                        : Column(
-                            children: [
-                              for (final task in tasks)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 6),
-                                  child: TaskCard(
-                                    task: task,
-                                    snapshot: snapshot,
-                                    categoryColor: color,
-                                    longestRemaining: longestRemaining,
-                                    now: now,
-                                  ),
-                                ),
-                            ],
+                        : ReorderableTaskList(
+                            snapshot: snapshot,
+                            categoryId: category?.id,
+                            categoryTitle: title,
+                            categoryColor: color,
+                            tasks: tasks,
+                            longestRemaining: longestRemaining,
+                            now: now,
                           ),
                   ),
                 ),

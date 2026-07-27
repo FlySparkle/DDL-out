@@ -430,6 +430,18 @@ abstract class AppLocalizations {
   /// **'移除已完成事项'**
   String get clearCompleted;
 
+  /// No description provided for @sortTasks.
+  ///
+  /// In zh, this message translates to:
+  /// **'按截止时间自动排序'**
+  String get sortTasks;
+
+  /// No description provided for @tasksSorted.
+  ///
+  /// In zh, this message translates to:
+  /// **'已按截止时间排序'**
+  String get tasksSorted;
+
   /// No description provided for @clearCategoryTasks.
   ///
   /// In zh, this message translates to:
