@@ -143,9 +143,20 @@ invalid line
           isFalse,
         );
       } finally {
-        await Future<void>.delayed(const Duration(seconds: 3));
-        await root.delete(recursive: true);
+        await _deleteTemporaryDirectory(root);
       }
     },
   );
+}
+
+Future<void> _deleteTemporaryDirectory(Directory directory) async {
+  for (var attempt = 0; attempt < 10; attempt++) {
+    try {
+      await directory.delete(recursive: true);
+      return;
+    } on FileSystemException {
+      if (attempt == 9) rethrow;
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    }
+  }
 }
