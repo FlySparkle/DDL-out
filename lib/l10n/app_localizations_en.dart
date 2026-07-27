@@ -688,6 +688,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String syncTransferProgress(String transferred, String total) {
+    return 'Transferred $transferred/$total';
+  }
+
+  @override
   String get otherDevice => 'the other device';
 
   @override

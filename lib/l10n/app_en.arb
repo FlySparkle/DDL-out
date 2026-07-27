@@ -224,6 +224,8 @@
   "connectingDevice": "Connecting to the computer…",
   "syncingWith": "Merging changes with {device}…",
   "@syncingWith": {"placeholders": {"device": {"type": "String"}}},
+  "syncTransferProgress": "Transferred {transferred}/{total}",
+  "@syncTransferProgress": {"placeholders": {"transferred": {"type": "String"}, "total": {"type": "String"}}},
   "otherDevice": "the other device",
   "syncCompleted": "Sync complete: received {received}, sent {sent}, found {conflicts} conflicts.",
   "@syncCompleted": {"placeholders": {"received": {"type": "int"}, "sent": {"type": "int"}, "conflicts": {"type": "int"}}},

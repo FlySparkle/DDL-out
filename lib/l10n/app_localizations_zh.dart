@@ -666,6 +666,11 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String syncTransferProgress(String transferred, String total) {
+    return '已传输 $transferred/$total';
+  }
+
+  @override
   String get otherDevice => '另一台设备';
 
   @override

@@ -1329,6 +1329,12 @@ abstract class AppLocalizations {
   /// **'正在与 {device} 合并改动…'**
   String syncingWith(String device);
 
+  /// No description provided for @syncTransferProgress.
+  ///
+  /// In zh, this message translates to:
+  /// **'已传输 {transferred}/{total}'**
+  String syncTransferProgress(String transferred, String total);
+
   /// No description provided for @otherDevice.
   ///
   /// In zh, this message translates to:
