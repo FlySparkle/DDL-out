@@ -12,8 +12,7 @@ class AboutSettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return SettingsPageScaffold(
-      destination: AppNavigationDestinationId.settings,
-      showBackButton: true,
+      destination: AppNavigationDestinationId.about,
       title: l10n.aboutSettingsTitle,
       body: ListView(
         padding: SettingsPageScaffold.contentPadding,

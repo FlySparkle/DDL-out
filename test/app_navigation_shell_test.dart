@@ -81,7 +81,7 @@ void main() {
     expect(find.text('settings-content'), findsNothing);
   });
 
-  testWidgets('settings detail routes keep the single settings destination', (
+  testWidgets('top-level destinations have independent selected states', (
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({'navigation_mode': 'floating'});
@@ -90,14 +90,14 @@ void main() {
 
     await tester.pumpWidget(_testApp(router, mobile: true));
     await tester.pumpAndSettle();
-    router.go('/settings/about');
+    router.go('/about');
     await tester.pumpAndSettle();
 
     expect(find.text('about-content'), findsOneWidget);
     await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
     expect(
-      find.byKey(const ValueKey('navigation-destination-settings')),
+      find.byKey(const ValueKey('navigation-destination-about')),
       findsOneWidget,
     );
     expect(find.text('Appearance & personalization'), findsNothing);
@@ -218,10 +218,17 @@ GoRouter _router({String? initialLocation}) {
             ),
           ),
           GoRoute(
-            path: '/settings/about',
+            path: '/about',
             builder: (context, state) => const _TestPage(
-              selectedDestination: AppNavigationDestinationId.settings,
+              selectedDestination: AppNavigationDestinationId.about,
               content: 'about-content',
+            ),
+          ),
+          GoRoute(
+            path: '/sync',
+            builder: (context, state) => const _TestPage(
+              selectedDestination: AppNavigationDestinationId.sync,
+              content: 'sync-content',
             ),
           ),
           GoRoute(

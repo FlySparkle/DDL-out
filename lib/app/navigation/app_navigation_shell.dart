@@ -158,6 +158,8 @@ void _navigateToDestination(
 
 enum AppNavigationDestinationId {
   board('/'),
+  sync('/sync'),
+  about('/about'),
   settings('/settings');
 
   const AppNavigationDestinationId(this.route);
@@ -165,9 +167,9 @@ enum AppNavigationDestinationId {
   final String route;
 
   static AppNavigationDestinationId fromLocation(String location) {
-    if (location.startsWith('/settings') || location.startsWith('/sync')) {
-      return settings;
-    }
+    if (location.startsWith('/sync')) return sync;
+    if (location.startsWith('/about')) return about;
+    if (location.startsWith('/settings')) return settings;
     return board;
   }
 }
@@ -387,8 +389,19 @@ class _AppNavigationDestinations extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final boardDestination = destinations.first;
-    final boardButton = _destinationButton(boardDestination);
+    final primaryDestinations = destinations.take(3);
+    final settingsDestinations = destinations.skip(3);
+    final primaryGroup = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final destination in primaryDestinations) ...[
+          _destinationButton(destination),
+          if (destination != primaryDestinations.last)
+            const SizedBox(height: 8),
+        ],
+      ],
+    );
     final settingsGroup = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
@@ -400,9 +413,10 @@ class _AppNavigationDestinations extends StatelessWidget {
           child: const Divider(height: 1),
         ),
         const SizedBox(height: 8),
-        for (final destination in destinations.skip(1)) ...[
+        for (final destination in settingsDestinations) ...[
           _destinationButton(destination),
-          if (destination != destinations.last) const SizedBox(height: 8),
+          if (destination != settingsDestinations.last)
+            const SizedBox(height: 8),
         ],
       ],
     );
@@ -416,7 +430,7 @@ class _AppNavigationDestinations extends StatelessWidget {
         SidebarAlignment.alignBetween => MainAxisAlignment.spaceBetween,
       },
       children: [
-        boardButton,
+        primaryGroup,
         if (alignment != SidebarAlignment.alignBetween)
           const SizedBox(height: 8),
         settingsGroup,
@@ -556,6 +570,18 @@ List<_AppNavigationDestination> _destinations(AppLocalizations l10n) => [
     label: l10n.boardTitle,
     icon: Icons.home_outlined,
     selectedIcon: Icons.home,
+  ),
+  _AppNavigationDestination(
+    id: AppNavigationDestinationId.sync,
+    label: l10n.nearbySync,
+    icon: Icons.sync_alt,
+    selectedIcon: Icons.sync,
+  ),
+  _AppNavigationDestination(
+    id: AppNavigationDestinationId.about,
+    label: l10n.aboutSettingsTitle,
+    icon: Icons.info_outline,
+    selectedIcon: Icons.info,
   ),
   _AppNavigationDestination(
     id: AppNavigationDestinationId.settings,

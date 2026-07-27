@@ -27,8 +27,7 @@ class SyncPage extends ConsumerWidget {
     final conflicts = ref.watch(syncConflictCountProvider).value ?? 0;
     final devices = ref.watch(syncDevicesProvider);
     return SettingsPageScaffold(
-      destination: AppNavigationDestinationId.settings,
-      showBackButton: true,
+      destination: AppNavigationDestinationId.sync,
       title: l10n.nearbySync,
       body: ListView(
         padding: SettingsPageScaffold.contentPadding,
@@ -398,7 +397,7 @@ class SyncConflictsPage extends ConsumerWidget {
     final canResolve = _isDesktop || sync.isCoordinator;
     final conflicts = ref.watch(syncConflictsProvider);
     return SettingsPageScaffold(
-      destination: AppNavigationDestinationId.settings,
+      destination: AppNavigationDestinationId.sync,
       showBackButton: true,
       title: l10n.syncConflicts,
       body: conflicts.when(

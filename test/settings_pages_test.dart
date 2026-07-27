@@ -38,7 +38,7 @@ void main() {
     }
   });
 
-  testWidgets('settings hub groups all low-frequency destinations', (
+  testWidgets('settings hub excludes top-level nearby sync and about', (
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({});
@@ -49,8 +49,9 @@ void main() {
 
     expect(find.text('Appearance & personalization'), findsOneWidget);
     expect(find.text('System & data'), findsOneWidget);
-    expect(find.text('About'), findsOneWidget);
     expect(find.text('Community & support'), findsOneWidget);
+    expect(find.text('About'), findsNothing);
+    expect(find.text('Nearby sync'), findsNothing);
   });
 
   testWidgets('content tiles use the navigation shape and edge inset', (

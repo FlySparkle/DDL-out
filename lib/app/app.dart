@@ -44,7 +44,7 @@ final _router = GoRouter(
           builder: (context, state) => const SystemDataSettingsPage(),
         ),
         GoRoute(
-          path: '/settings/about',
+          path: '/about',
           builder: (context, state) => const AboutSettingsPage(),
           routes: [
             GoRoute(
