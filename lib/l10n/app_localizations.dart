@@ -211,7 +211,7 @@ abstract class AppLocalizations {
   /// No description provided for @taskDetailsHint.
   ///
   /// In zh, this message translates to:
-  /// **'补充说明；可在此处按 Ctrl+V 粘贴文字或图片'**
+  /// **'支持 Ctrl+V 粘贴图片'**
   String get taskDetailsHint;
 
   /// No description provided for @taskDetailImages.
@@ -243,18 +243,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'点击全屏查看图片'**
   String get openImageMobile;
-
-  /// No description provided for @imageDetailHelpDesktop.
-  ///
-  /// In zh, this message translates to:
-  /// **'图片独占一行，最多显示 8 行文字的高度；双击可独立打开并缩放。'**
-  String get imageDetailHelpDesktop;
-
-  /// No description provided for @imageDetailHelpMobile.
-  ///
-  /// In zh, this message translates to:
-  /// **'图片独占一行，最多显示 8 行文字的高度；点击可全屏查看并缩放。'**
-  String get imageDetailHelpMobile;
 
   /// No description provided for @imageViewerTitle.
   ///

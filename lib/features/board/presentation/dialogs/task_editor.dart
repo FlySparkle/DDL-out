@@ -64,7 +64,6 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
   late bool _relativeDirty;
   late TaskDetailDocument _detailDocument;
   bool _saving = false;
-  bool _pastingImage = false;
 
   @override
   void initState() {
@@ -150,47 +149,15 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
               },
             ),
             const Divider(height: 32),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.taskDetailsSection,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ),
-                TextButton.icon(
-                  onPressed: _pastingImage
-                      ? null
-                      : () => _detailEditorKey.currentState?.pasteImagesOnly(),
-                  icon: _pastingImage
-                      ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.content_paste_go_outlined),
-                  label: Text(l10n.pasteImage),
-                ),
-              ],
+            Text(
+              l10n.taskDetailsSection,
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             TaskDetailContentEditor(
               key: _detailEditorKey,
               initialDocument: _detailDocument,
               onChanged: (document) => _detailDocument = document,
-              onPastingChanged: (value) {
-                if (mounted) setState(() => _pastingImage = value);
-              },
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Text(
-                TaskDetailImageLayout.usesDesktopWindow(
-                      Theme.of(context).platform,
-                    )
-                    ? l10n.imageDetailHelpDesktop
-                    : l10n.imageDetailHelpMobile,
-                style: const TextStyle(fontSize: 12),
-              ),
             ),
             const Divider(height: 32),
             DropdownButtonFormField<int>(

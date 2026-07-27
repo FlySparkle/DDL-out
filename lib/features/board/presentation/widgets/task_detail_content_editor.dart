@@ -14,10 +14,10 @@ import '../../application/task_image_clipboard.dart';
 import '../../application/task_image_viewer.dart';
 
 abstract final class TaskDetailImageLayout {
-  static const maximumEditorLines = 8;
-  static const lineHeight = 20.0;
-  static const maximumEditorHeight = maximumEditorLines * lineHeight;
   static const maximumCardHeight = 72.0;
+
+  static double maximumEditorHeight(BuildContext context) =>
+      math.min(720, MediaQuery.sizeOf(context).height * 0.55);
 
   static bool usesDesktopWindow(TargetPlatform platform) => switch (platform) {
     TargetPlatform.windows ||
@@ -31,13 +31,11 @@ class TaskDetailContentEditor extends ConsumerStatefulWidget {
   const TaskDetailContentEditor({
     required this.initialDocument,
     required this.onChanged,
-    required this.onPastingChanged,
     super.key,
   });
 
   final TaskDetailDocument initialDocument;
   final ValueChanged<TaskDetailDocument> onChanged;
-  final ValueChanged<bool> onPastingChanged;
 
   @override
   ConsumerState<TaskDetailContentEditor> createState() =>
@@ -91,6 +89,11 @@ class TaskDetailContentEditorState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
+    final defaultStyles = DefaultStyles.getInstance(context);
+    final defaultPlaceholderStyle = defaultStyles.placeHolder!;
+    final placeholderStyle = defaultPlaceholderStyle.copyWith(
+      style: defaultPlaceholderStyle.style.copyWith(fontSize: 12),
+    );
     return Semantics(
       label: l10n.taskDetailsSection,
       textField: true,
@@ -113,6 +116,7 @@ class TaskDetailContentEditorState
             minHeight: 142,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             placeholder: l10n.taskDetailsHint,
+            customStyles: DefaultStyles(placeHolder: placeholderStyle),
             customShortcuts: const {
               SingleActivator(LogicalKeyboardKey.keyV, control: true):
                   _PasteTaskDetailIntent(),
@@ -143,10 +147,6 @@ class TaskDetailContentEditorState
         ),
       ),
     );
-  }
-
-  Future<void> pasteImagesOnly() async {
-    await _pasteFromClipboard(showEmptyMessage: true, allowTextFallback: false);
   }
 
   bool _allowReplacement(int index, int length, Object? data) {
@@ -233,11 +233,9 @@ class TaskDetailContentEditorState
     );
     final plainText = _controller.document.toPlainText();
     final replacement = Delta();
-    var insertedLength = 0;
 
     if (start > 0 && plainText[start - 1] != '\n') {
       replacement.insert('\n');
-      insertedLength++;
     }
     for (final image in images) {
       replacement
@@ -247,13 +245,13 @@ class TaskDetailContentEditorState
           ).toJson(),
         )
         ..insert('\n');
-      insertedLength += 2;
     }
 
-    _controller.replaceText(start, end - start, replacement, null);
-    _controller.updateSelection(
-      TextSelection.collapsed(offset: start + insertedLength),
-      ChangeSource.local,
+    _controller.replaceText(
+      start,
+      end - start,
+      replacement,
+      TextSelection.collapsed(offset: end),
     );
     _focusNode.requestFocus();
   }
@@ -281,7 +279,6 @@ class TaskDetailContentEditorState
 
   void _setPasting(bool value) {
     _pasting = value;
-    widget.onPastingChanged(value);
   }
 
   void _showMessage(String message) {
@@ -317,9 +314,9 @@ final class _TaskDetailImageEmbedBuilder extends EmbedBuilder {
         : null;
     final image = imageId == null ? null : imagesById[imageId];
     if (image == null) {
-      return const SizedBox(
-        height: TaskDetailImageLayout.maximumEditorHeight,
-        child: Center(child: Icon(Icons.broken_image_outlined)),
+      return SizedBox(
+        height: TaskDetailImageLayout.maximumEditorHeight(context),
+        child: const Center(child: Icon(Icons.broken_image_outlined)),
       );
     }
 
@@ -350,20 +347,29 @@ final class _TaskDetailImageEmbedBuilder extends EmbedBuilder {
                     constraints: const BoxConstraints(
                       minWidth: 120,
                       minHeight: 80,
-                      maxWidth: 360,
-                      maxHeight: TaskDetailImageLayout.maximumEditorHeight,
+                      maxWidth: double.infinity,
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.memory(
-                        image.bytes,
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, _, _) => SizedBox(
-                          width: 160,
-                          height: TaskDetailImageLayout.maximumEditorHeight,
-                          child: ColoredBox(
-                            color: scheme.surfaceContainerHighest,
-                            child: const Icon(Icons.broken_image_outlined),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: TaskDetailImageLayout.maximumEditorHeight(
+                          context,
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.memory(
+                          image.bytes,
+                          width: double.infinity,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, _, _) => SizedBox(
+                            width: double.infinity,
+                            height: TaskDetailImageLayout.maximumEditorHeight(
+                              context,
+                            ),
+                            child: ColoredBox(
+                              color: scheme.surfaceContainerHighest,
+                              child: const Icon(Icons.broken_image_outlined),
+                            ),
                           ),
                         ),
                       ),

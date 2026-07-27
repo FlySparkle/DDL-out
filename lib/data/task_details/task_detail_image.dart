@@ -21,8 +21,8 @@ final class TaskDetailImage {
 
 abstract final class TaskDetailImageCodec {
   static const int maximumImageCount = 12;
-  static const int maximumImageBytes = 10 * 1024 * 1024;
-  static const int maximumTotalBytes = 30 * 1024 * 1024;
+  static const int maximumImageBytes = 48 * 1024 * 1024;
+  static const int maximumTotalBytes = 144 * 1024 * 1024;
 
   static const supportedMimeTypes = {
     'image/png',

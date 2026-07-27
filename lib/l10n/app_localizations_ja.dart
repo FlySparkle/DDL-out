@@ -63,7 +63,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get taskDetailsSection => '詳細';
 
   @override
-  String get taskDetailsHint => 'メモを追加できます。Ctrl+V でテキストや画像を貼り付けられます';
+  String get taskDetailsHint => 'Ctrl+V で画像を貼り付けられます';
 
   @override
   String get taskDetailImages => '詳細画像';
@@ -79,14 +79,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get openImageMobile => 'タップして画像を全画面表示';
-
-  @override
-  String get imageDetailHelpDesktop =>
-      '画像は独立した行に表示され、高さは本文 8 行分までです。ダブルクリックすると別ウィンドウで拡大・縮小できます。';
-
-  @override
-  String get imageDetailHelpMobile =>
-      '画像は独立した行に表示され、高さは本文 8 行分までです。タップすると全画面で拡大・縮小できます。';
 
   @override
   String get imageViewerTitle => '画像ビューアー';

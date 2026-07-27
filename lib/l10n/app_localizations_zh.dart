@@ -63,7 +63,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get taskDetailsSection => '详情';
 
   @override
-  String get taskDetailsHint => '补充说明；可在此处按 Ctrl+V 粘贴文字或图片';
+  String get taskDetailsHint => '支持 Ctrl+V 粘贴图片';
 
   @override
   String get taskDetailImages => '详情图片';
@@ -79,12 +79,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get openImageMobile => '点击全屏查看图片';
-
-  @override
-  String get imageDetailHelpDesktop => '图片独占一行，最多显示 8 行文字的高度；双击可独立打开并缩放。';
-
-  @override
-  String get imageDetailHelpMobile => '图片独占一行，最多显示 8 行文字的高度；点击可全屏查看并缩放。';
 
   @override
   String get imageViewerTitle => '图片查看';

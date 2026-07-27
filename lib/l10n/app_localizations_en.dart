@@ -63,8 +63,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taskDetailsSection => 'Details';
 
   @override
-  String get taskDetailsHint =>
-      'Add notes; press Ctrl+V here to paste text or images';
+  String get taskDetailsHint => 'Supports Ctrl+V image paste';
 
   @override
   String get taskDetailImages => 'Detail images';
@@ -80,14 +79,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openImageMobile => 'Tap to view image full screen';
-
-  @override
-  String get imageDetailHelpDesktop =>
-      'Images occupy their own line and use at most 8 lines of text height. Double-click to open a separate zoomable window.';
-
-  @override
-  String get imageDetailHelpMobile =>
-      'Images occupy their own line and use at most 8 lines of text height. Tap to view and zoom full screen.';
 
   @override
   String get imageViewerTitle => 'Image viewer';

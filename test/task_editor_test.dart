@@ -231,7 +231,10 @@ void main() {
       find.widgetWithText(TextFormField, 'Task name'),
       'Task without image',
     );
-    await tester.tap(find.widgetWithText(TextButton, 'Paste image'));
+    await tester.tap(find.byKey(const ValueKey('task-details-field')));
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyV);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pumpAndSettle();
     expect(
       find.byKey(const ValueKey('task-detail-image-removed-image')),
