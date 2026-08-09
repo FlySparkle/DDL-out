@@ -1,7 +1,35 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-const syncProtocolVersion = 4;
+const syncProtocolVersion = 5;
+
+abstract final class SyncPairingKeyCodec {
+  static const prefix = 'DDL5:';
+
+  static String encode(Map<String, Object?> payload) {
+    final encoded = base64Url.encode(utf8.encode(jsonEncode(payload)));
+    return '$prefix${encoded.replaceAll('=', '')}';
+  }
+
+  static Map<String, dynamic> decode(String source) {
+    final normalized = source.trim();
+    if (normalized.startsWith('{')) {
+      final decoded = jsonDecode(normalized);
+      if (decoded is Map<String, dynamic>) return decoded;
+      throw const FormatException('Invalid pairing information.');
+    }
+    if (!normalized.startsWith(prefix)) {
+      throw const FormatException('Invalid pairing key.');
+    }
+    final body = normalized.substring(prefix.length);
+    final padded = body.padRight(body.length + (4 - body.length % 4) % 4, '=');
+    final decoded = jsonDecode(utf8.decode(base64Url.decode(padded)));
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException('Invalid pairing information.');
+    }
+    return decoded;
+  }
+}
 
 abstract final class SyncEntityType {
   static const category = 'category';
@@ -218,12 +246,14 @@ final class SyncConflictCandidate {
     required this.deviceName,
     required this.value,
     required this.occurredAtUtc,
+    this.displayValue,
   });
 
   final String operationId;
   final String deviceId;
   final String deviceName;
   final Object? value;
+  final Object? displayValue;
   final DateTime occurredAtUtc;
 }
 

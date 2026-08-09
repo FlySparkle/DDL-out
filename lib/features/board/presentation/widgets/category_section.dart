@@ -12,7 +12,6 @@ import '../dialogs/category_editor.dart';
 import '../dialogs/confirmation_dialog.dart';
 import '../dialogs/task_editor.dart';
 import 'reorderable_task_list.dart';
-import 'task_auto_sort_icon.dart';
 
 @immutable
 class CategoryDragData {
@@ -190,7 +189,7 @@ class CategorySection extends ConsumerWidget {
           IconButton(
             tooltip: l10n.sortTasks,
             onPressed: tasks.length < 2 ? null : () => _sortTasks(context, ref),
-            icon: const TaskAutoSortIcon(),
+            icon: const Icon(Icons.sort),
           ),
           if (category != null) _categoryDragHandle(context),
         ],

@@ -69,6 +69,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get taskDetailImages => '详情图片';
 
   @override
+  String get chooseImages => '从相册选择图片';
+
+  @override
+  String get imagePickFailed => '无法插入所选图片，请检查格式或大小';
+
+  @override
   String get pasteImage => '粘贴图片';
 
   @override
@@ -606,7 +612,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nearbySync => '附近同步';
 
   @override
-  String get nearbySyncSubtitle => '同一局域网内扫码，点对点同步';
+  String get nearbySyncSubtitle => '同一局域网内通过二维码或配对密钥点对点同步';
 
   @override
   String get showSyncQr => '在电脑上显示二维码';
@@ -640,7 +646,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get scanWithinTwoMinutes => '请用手机在 2 分钟内扫描；首次连接可能需要允许防火墙访问。';
+  String get scanWithinTwoMinutes => '请在另一台设备上于 2 分钟内扫码或粘贴密钥；首次连接可能需要允许防火墙访问。';
 
   @override
   String get computerCreatesQr => '电脑将建立一次性同步会话，手机扫码后双方自动合并改动。';
@@ -658,7 +664,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get preparingSync => '正在准备安全连接…';
 
   @override
-  String get connectingDevice => '正在连接电脑…';
+  String get connectingDevice => '正在连接另一台设备…';
 
   @override
   String syncingWith(String device) {
@@ -685,7 +691,48 @@ class AppLocalizationsZh extends AppLocalizations {
   String get conflictApprovalHere => '当前设备负责冲突审批。选择一个版本后，该决定会在下次同步时传给另一端。';
 
   @override
-  String get conflictApprovalOnComputer => '默认由生成二维码的电脑审批；当前手机先保持只读，避免两端重复操作。';
+  String get conflictApprovalOnComputer => '默认由发起同步的设备审批；当前设备先保持只读，避免两端重复操作。';
+
+  @override
+  String get conflictApprovalOnInitiator => '默认由发起同步的设备审批；当前设备先保持只读，避免两端重复操作。';
+
+  @override
+  String get syncRoleDescription =>
+      '任意设备都可以发起或接收同步。发起方生成二维码和一次性密钥，接收方扫码或粘贴密钥即可连接。';
+
+  @override
+  String get joinSyncSession => '接收同步';
+
+  @override
+  String get syncPairingKey => '配对密钥';
+
+  @override
+  String get pasteSyncKey => '粘贴密钥';
+
+  @override
+  String get connectAndSync => '连接并同步';
+
+  @override
+  String get copySyncKey => '复制密钥';
+
+  @override
+  String get syncKeyCopied => '配对密钥已复制';
+
+  @override
+  String get largeFileTransfer => '大文件传输';
+
+  @override
+  String get largeFileTransferSubtitle =>
+      '双方开启后使用分块流式传输，不设置应用层大小上限；仅受设备存储与系统资源限制。';
+
+  @override
+  String get syncDataConflict => '同步数据';
+
+  @override
+  String get syncDataChoice => '此设备的版本';
+
+  @override
+  String get orderingConflict => '排序冲突';
 
   @override
   String get resolveOnThisDevice => '改在此设备审批';

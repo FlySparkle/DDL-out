@@ -69,6 +69,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taskDetailImages => 'Detail images';
 
   @override
+  String get chooseImages => 'Choose images from gallery';
+
+  @override
+  String get imagePickFailed =>
+      'Could not insert the selected images. Check their format or size.';
+
+  @override
   String get pasteImage => 'Paste image';
 
   @override
@@ -624,7 +631,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nearbySync => 'Nearby sync';
 
   @override
-  String get nearbySyncSubtitle => 'Scan on the same LAN for peer-to-peer sync';
+  String get nearbySyncSubtitle =>
+      'Sync peer-to-peer on the same LAN with a QR code or pairing key';
 
   @override
   String get showSyncQr => 'Show a QR code on this computer';
@@ -660,7 +668,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scanWithinTwoMinutes =>
-      'Scan from your phone within 2 minutes. You may need to allow firewall access the first time.';
+      'Scan or paste the key on another device within 2 minutes. You may need to allow firewall access the first time.';
 
   @override
   String get computerCreatesQr =>
@@ -680,7 +688,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get preparingSync => 'Preparing a secure connection…';
 
   @override
-  String get connectingDevice => 'Connecting to the computer…';
+  String get connectingDevice => 'Connecting to the other device…';
 
   @override
   String syncingWith(String device) {
@@ -709,7 +717,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get conflictApprovalOnComputer =>
-      'The computer that created the QR code reviews conflicts by default. This phone is read-only to prevent duplicate decisions.';
+      'The device that started the session reviews conflicts by default. This device is read-only to prevent duplicate decisions.';
+
+  @override
+  String get conflictApprovalOnInitiator =>
+      'The device that started the session reviews conflicts by default. This device is read-only to prevent duplicate decisions.';
+
+  @override
+  String get syncRoleDescription =>
+      'Any device can start or receive a sync. The initiator creates a QR code and one-time key; the receiver scans or pastes the key.';
+
+  @override
+  String get joinSyncSession => 'Receive sync';
+
+  @override
+  String get syncPairingKey => 'Pairing key';
+
+  @override
+  String get pasteSyncKey => 'Paste key';
+
+  @override
+  String get connectAndSync => 'Connect and sync';
+
+  @override
+  String get copySyncKey => 'Copy key';
+
+  @override
+  String get syncKeyCopied => 'Pairing key copied';
+
+  @override
+  String get largeFileTransfer => 'Large file transfer';
+
+  @override
+  String get largeFileTransferSubtitle =>
+      'When enabled on both devices, chunked streaming has no application-level size limit; device storage and system resources still apply.';
+
+  @override
+  String get syncDataConflict => 'Sync data';
+
+  @override
+  String get syncDataChoice => 'This device\'s version';
+
+  @override
+  String get orderingConflict => 'Ordering conflict';
 
   @override
   String get resolveOnThisDevice => 'Review on this device';

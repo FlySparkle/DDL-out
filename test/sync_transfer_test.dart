@@ -13,6 +13,20 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
 
+  test('pairing key round-trips the session payload', () {
+    final payload = <String, Object?>{
+      'type': 'ddl-out-lan-sync',
+      'version': syncProtocolVersion,
+      'hosts': ['192.168.1.20'],
+      'port': 4242,
+    };
+
+    final key = SyncPairingKeyCodec.encode(payload);
+
+    expect(key, startsWith('DDL5:'));
+    expect(SyncPairingKeyCodec.decode(key), payload);
+  });
+
   test('large synchronization operations are split below the frame limit', () {
     final operation = SyncOperationEnvelope(
       operationId: 'operation-1',

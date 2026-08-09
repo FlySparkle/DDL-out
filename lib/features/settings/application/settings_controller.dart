@@ -22,6 +22,7 @@ class SettingsController extends Notifier<AppSettingsState> {
   static const _navigationModeKey = 'navigation_mode';
   static const _sidebarAlignmentKey = 'sidebar_alignment';
   static const _checkForUpdatesOnStartupKey = 'check_updates_on_startup';
+  static const _largeSyncTransferKey = 'large_sync_transfer';
   static const _legacyAdaptiveDesktopSidebarKey = 'adaptive_desktop_sidebar';
   static const _collapsedKey = 'collapsed_categories';
   static const _deadlineModeKey = 'deadline_mode';
@@ -54,6 +55,8 @@ class SettingsController extends Notifier<AppSettingsState> {
       sidebarAlignment: _readSidebarAlignment(preferences),
       checkForUpdatesOnStartup:
           preferences.getBool(_checkForUpdatesOnStartupKey) ?? true,
+      largeSyncTransferEnabled:
+          preferences.getBool(_largeSyncTransferKey) ?? false,
       collapsedCategoryIds:
           (preferences.getStringList(_collapsedKey) ?? const [])
               .map(int.tryParse)
@@ -158,6 +161,11 @@ class SettingsController extends Notifier<AppSettingsState> {
   Future<void> setCheckForUpdatesOnStartup(bool value) async {
     state = state.copyWith(checkForUpdatesOnStartup: value);
     await (await _prefs()).setBool(_checkForUpdatesOnStartupKey, value);
+  }
+
+  Future<void> setLargeSyncTransferEnabled(bool value) async {
+    state = state.copyWith(largeSyncTransferEnabled: value);
+    await (await _prefs()).setBool(_largeSyncTransferKey, value);
   }
 
   Future<void> toggleCategory(int id) async {

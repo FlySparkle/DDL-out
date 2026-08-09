@@ -11,6 +11,7 @@ import '../../../../data/task_details/task_detail_document.dart';
 import '../../../../data/task_details/task_detail_image.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../application/task_image_clipboard.dart';
+import '../../application/task_image_picker.dart';
 import '../../application/task_image_viewer.dart';
 
 abstract final class TaskDetailImageLayout {
@@ -48,6 +49,7 @@ class TaskDetailContentEditorState
   final _scrollController = ScrollController();
   final _imagesById = <String, TaskDetailImage>{};
   bool _pasting = false;
+  bool _picking = false;
 
   QuillController get controller => _controller;
 
@@ -92,6 +94,9 @@ class TaskDetailContentEditorState
     final placeholderStyle = defaultPlaceholderStyle.copyWith(
       style: defaultPlaceholderStyle.style.copyWith(fontSize: 12),
     );
+    final isMobile = !TaskDetailImageLayout.usesDesktopWindow(
+      Theme.of(context).platform,
+    );
     return Semantics(
       label: l10n.taskDetailsSection,
       textField: true,
@@ -104,44 +109,64 @@ class TaskDetailContentEditorState
           borderRadius: BorderRadius.circular(12),
         ),
         clipBehavior: Clip.antiAlias,
-        child: QuillEditor(
-          key: const ValueKey('task-details-field'),
-          controller: _controller,
-          focusNode: _focusNode,
-          scrollController: _scrollController,
-          config: QuillEditorConfig(
-            scrollable: false,
-            minHeight: 142,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            placeholder: l10n.taskDetailsHint,
-            customStyles: DefaultStyles(placeHolder: placeholderStyle),
-            customShortcuts: const {
-              SingleActivator(LogicalKeyboardKey.keyV, control: true):
-                  _PasteTaskDetailIntent(),
-              SingleActivator(LogicalKeyboardKey.keyV, meta: true):
-                  _PasteTaskDetailIntent(),
-            },
-            customActions: {
-              _PasteTaskDetailIntent: CallbackAction<Intent>(
-                onInvoke: (_) {
-                  unawaited(
-                    _pasteFromClipboard(
-                      showEmptyMessage: false,
-                      allowTextFallback: true,
-                    ),
-                  );
-                  return null;
+        child: Stack(
+          children: [
+            QuillEditor(
+              key: const ValueKey('task-details-field'),
+              controller: _controller,
+              focusNode: _focusNode,
+              scrollController: _scrollController,
+              config: QuillEditorConfig(
+                scrollable: false,
+                minHeight: 142,
+                padding: EdgeInsets.fromLTRB(12, 10, 12, isMobile ? 56 : 10),
+                placeholder: l10n.taskDetailsHint,
+                customStyles: DefaultStyles(placeHolder: placeholderStyle),
+                customShortcuts: const {
+                  SingleActivator(LogicalKeyboardKey.keyV, control: true):
+                      _PasteTaskDetailIntent(),
+                  SingleActivator(LogicalKeyboardKey.keyV, meta: true):
+                      _PasteTaskDetailIntent(),
                 },
+                customActions: {
+                  _PasteTaskDetailIntent: CallbackAction<Intent>(
+                    onInvoke: (_) {
+                      unawaited(
+                        _pasteFromClipboard(
+                          showEmptyMessage: false,
+                          allowTextFallback: true,
+                        ),
+                      );
+                      return null;
+                    },
+                  ),
+                },
+                embedBuilders: [
+                  _TaskDetailImageEmbedBuilder(
+                    imagesById: _imagesById,
+                    onOpen: _openImage,
+                    onRemove: _removeImage,
+                  ),
+                ],
               ),
-            },
-            embedBuilders: [
-              _TaskDetailImageEmbedBuilder(
-                imagesById: _imagesById,
-                onOpen: _openImage,
-                onRemove: _removeImage,
+            ),
+            if (isMobile)
+              PositionedDirectional(
+                end: 8,
+                bottom: 8,
+                child: IconButton.filledTonal(
+                  key: const ValueKey('pick-task-detail-images'),
+                  tooltip: l10n.chooseImages,
+                  onPressed: _picking ? null : _pickImages,
+                  icon: _picking
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.add_photo_alternate_outlined),
+                ),
               ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -159,6 +184,21 @@ class TaskDetailContentEditorState
           TaskDetailDocumentCodec.maximumTextLength;
     } on Object {
       return false;
+    }
+  }
+
+  Future<void> _pickImages() async {
+    if (_picking) return;
+    setState(() => _picking = true);
+    try {
+      final images = await ref.read(taskImagePickerProvider).pickImages();
+      if (!mounted || images.isEmpty) return;
+      TaskDetailImageCodec.validate([...document.images, ...images]);
+      _insertImages(images);
+    } on Object {
+      if (mounted) _showMessage(AppLocalizations.of(context).imagePickFailed);
+    } finally {
+      if (mounted) setState(() => _picking = false);
     }
   }
 

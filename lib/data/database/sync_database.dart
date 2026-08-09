@@ -1357,6 +1357,10 @@ extension SyncDatabase on AppDatabase {
               deviceId: operation.originDeviceId,
               deviceName: await _deviceName(operation.originDeviceId),
               value: operation.changes[row.fieldName],
+              displayValue: await _conflictDisplayValue(
+                row.fieldName,
+                operation.changes[row.fieldName],
+              ),
               occurredAtUtc: operation.occurredAtUtc,
             ),
           );
@@ -1384,7 +1388,14 @@ extension SyncDatabase on AppDatabase {
               ..where((row) => row.deviceId.equals(deviceId)))
             .map((row) => row.displayName)
             .getSingleOrNull() ??
-        '设备 ${deviceId.substring(0, 4)}';
+        '其他设备';
+  }
+
+  Future<Object?> _conflictDisplayValue(String field, Object? value) async {
+    if (field != SyncField.categorySyncId || value is! String) return null;
+    return (select(categories)..where((row) => row.syncId.equals(value)))
+        .map((row) => row.name)
+        .getSingleOrNull();
   }
 
   Future<String> _entityName(String type, String syncId) async {

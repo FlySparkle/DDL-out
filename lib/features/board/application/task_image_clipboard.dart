@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pasteboard/pasteboard.dart';
+import 'package:path/path.dart' as path_utils;
 import 'package:uuid/uuid.dart';
 
 import '../../../data/task_details/task_detail_image.dart';
@@ -33,6 +34,7 @@ final class SystemTaskImageClipboard implements TaskImageClipboard {
             id: const Uuid().v4(),
             mimeType: mimeType,
             bytes: bytes,
+            fileName: path_utils.basename(path),
           ),
         );
       }
@@ -48,6 +50,9 @@ final class SystemTaskImageClipboard implements TaskImageClipboard {
       id: const Uuid().v4(),
       mimeType: Platform.isWindows ? 'image/bmp' : 'image/png',
       bytes: bytes,
+      fileName: Platform.isWindows
+          ? 'clipboard-image.bmp'
+          : 'clipboard-image.png',
     );
     TaskDetailImageCodec.validate([image]);
     return [image];
