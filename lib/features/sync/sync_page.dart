@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -11,14 +10,13 @@ import '../../data/database/app_database.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/sync/lan_sync_service.dart';
 import '../../data/sync/sync_models.dart';
+import '../../data/task_details/task_detail_document.dart';
 import '../../l10n/app_localizations.dart';
+import '../settings/application/settings_controller.dart';
 import '../settings/settings_page.dart';
 
 class SyncPage extends ConsumerWidget {
   const SyncPage({super.key});
-
-  bool get _isDesktop =>
-      Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,15 +24,28 @@ class SyncPage extends ConsumerWidget {
     final sync = ref.watch(lanSyncControllerProvider);
     final conflicts = ref.watch(syncConflictCountProvider).value ?? 0;
     final devices = ref.watch(syncDevicesProvider);
+    final settings = ref.watch(settingsControllerProvider);
     return SettingsPageScaffold(
       destination: AppNavigationDestinationId.sync,
       title: l10n.nearbySync,
       body: ListView(
         padding: SettingsPageScaffold.contentPadding,
         children: [
-          _IntroCard(isDesktop: _isDesktop),
+          const _IntroCard(),
           const SizedBox(height: 12),
-          _SessionCard(isDesktop: _isDesktop, sync: sync),
+          _SessionCard(sync: sync),
+          const SizedBox(height: 12),
+          Card(
+            child: SwitchListTile(
+              secondary: const Icon(Icons.data_saver_off_outlined),
+              title: Text(l10n.largeFileTransfer),
+              subtitle: Text(l10n.largeFileTransferSubtitle),
+              value: settings.largeSyncTransferEnabled,
+              onChanged: ref
+                  .read(settingsControllerProvider.notifier)
+                  .setLargeSyncTransferEnabled,
+            ),
+          ),
           const SizedBox(height: 12),
           Card(
             child: ListTile(
@@ -127,9 +138,7 @@ class SyncPage extends ConsumerWidget {
 }
 
 class _IntroCard extends StatelessWidget {
-  const _IntroCard({required this.isDesktop});
-
-  final bool isDesktop;
+  const _IntroCard();
 
   @override
   Widget build(BuildContext context) {
@@ -142,18 +151,14 @@ class _IntroCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              isDesktop ? Icons.qr_code_2 : Icons.qr_code_scanner,
-              color: colors.onSecondaryContainer,
-              size: 32,
-            ),
+            Icon(Icons.sync_alt, color: colors.onSecondaryContainer, size: 32),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    isDesktop ? l10n.showSyncQr : l10n.scanSyncQr,
+                    l10n.nearbySync,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 6),
@@ -172,9 +177,8 @@ class _IntroCard extends StatelessWidget {
 }
 
 class _SessionCard extends ConsumerWidget {
-  const _SessionCard({required this.isDesktop, required this.sync});
+  const _SessionCard({required this.sync});
 
-  final bool isDesktop;
   final LanSyncState sync;
 
   @override
@@ -187,10 +191,7 @@ class _SessionCard extends ConsumerWidget {
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 280),
           child: switch (sync.phase) {
-            LanSyncPhase.idle => _IdleSession(
-              key: const ValueKey('idle'),
-              isDesktop: isDesktop,
-            ),
+            LanSyncPhase.idle => _IdleSession(key: const ValueKey('idle')),
             LanSyncPhase.preparing ||
             LanSyncPhase.connecting ||
             LanSyncPhase.transferring => _ProgressSession(
@@ -202,7 +203,7 @@ class _SessionCard extends ConsumerWidget {
               children: [
                 Text(l10n.scanWithinTwoMinutes),
                 const SizedBox(height: 16),
-                if (sync.qrData case final data?)
+                if (sync.qrData case final data?) ...[
                   ColoredBox(
                     color: Colors.white,
                     child: Padding(
@@ -210,6 +211,25 @@ class _SessionCard extends ConsumerWidget {
                       child: QrImageView(data: data, size: 232),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  SelectableText(
+                    data,
+                    maxLines: 2,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 8),
+                  FilledButton.tonalIcon(
+                    onPressed: () async {
+                      await Clipboard.setData(ClipboardData(text: data));
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.syncKeyCopied)),
+                      );
+                    },
+                    icon: const Icon(Icons.content_copy),
+                    label: Text(l10n.copySyncKey),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 TextButton.icon(
                   onPressed: controller.stop,
@@ -236,9 +256,7 @@ class _SessionCard extends ConsumerWidget {
 }
 
 class _IdleSession extends ConsumerWidget {
-  const _IdleSession({required this.isDesktop, super.key});
-
-  final bool isDesktop;
+  const _IdleSession({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -247,26 +265,129 @@ class _IdleSession extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          isDesktop ? l10n.computerCreatesQr : l10n.phoneScansQr,
+          l10n.syncRoleDescription,
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         const SizedBox(height: 16),
         FilledButton.icon(
           onPressed: () async {
             final controller = ref.read(lanSyncControllerProvider.notifier);
-            if (isDesktop) {
-              await controller.startHosting();
-              return;
-            }
-            final value = await Navigator.of(context).push<String>(
-              MaterialPageRoute(builder: (_) => const SyncScannerPage()),
-            );
-            if (value != null) await controller.connectFromQr(value);
+            final largeTransfer = ref
+                .read(settingsControllerProvider)
+                .largeSyncTransferEnabled;
+            await controller.startHosting(largeTransferEnabled: largeTransfer);
           },
-          icon: Icon(isDesktop ? Icons.qr_code_2 : Icons.qr_code_scanner),
-          label: Text(isDesktop ? l10n.createSyncQr : l10n.scanAndSync),
+          icon: const Icon(Icons.qr_code_2),
+          label: Text(l10n.createSyncQr),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () => _joinSession(context, ref),
+          icon: const Icon(Icons.qr_code_scanner),
+          label: Text(l10n.joinSyncSession),
         ),
       ],
+    );
+  }
+
+  Future<void> _joinSession(BuildContext context, WidgetRef ref) async {
+    final value = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => const _JoinSyncSheet(),
+    );
+    if (value == null || !context.mounted) return;
+    await ref
+        .read(lanSyncControllerProvider.notifier)
+        .connectFromQr(
+          value,
+          largeTransferEnabled: ref
+              .read(settingsControllerProvider)
+              .largeSyncTransferEnabled,
+        );
+  }
+}
+
+class _JoinSyncSheet extends StatefulWidget {
+  const _JoinSyncSheet();
+
+  @override
+  State<_JoinSyncSheet> createState() => _JoinSyncSheetState();
+}
+
+class _JoinSyncSheetState extends State<_JoinSyncSheet> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          24,
+          0,
+          24,
+          24 + MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              l10n.joinSyncSession,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _controller,
+              minLines: 2,
+              maxLines: 4,
+              decoration: InputDecoration(
+                labelText: l10n.syncPairingKey,
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  tooltip: l10n.pasteSyncKey,
+                  icon: const Icon(Icons.content_paste),
+                  onPressed: () async {
+                    final data = await Clipboard.getData(Clipboard.kTextPlain);
+                    if (data?.text case final text?) {
+                      _controller.text = text;
+                    }
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () async {
+                final value = await Navigator.of(context).push<String>(
+                  MaterialPageRoute(builder: (_) => const SyncScannerPage()),
+                );
+                if (value != null && context.mounted) {
+                  Navigator.of(context).pop(value);
+                }
+              },
+              icon: const Icon(Icons.qr_code_scanner),
+              label: Text(l10n.scanSyncQr),
+            ),
+            const SizedBox(height: 8),
+            FilledButton(
+              onPressed: () {
+                final value = _controller.text.trim();
+                if (value.isNotEmpty) Navigator.of(context).pop(value);
+              },
+              child: Text(l10n.connectAndSync),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -409,14 +530,11 @@ class _SyncScannerPageState extends State<SyncScannerPage> {
 class SyncConflictsPage extends ConsumerWidget {
   const SyncConflictsPage({super.key});
 
-  bool get _isDesktop =>
-      Platform.isWindows || Platform.isLinux || Platform.isMacOS;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final sync = ref.watch(lanSyncControllerProvider);
-    final canResolve = _isDesktop || sync.isCoordinator;
+    final canResolve = sync.isCoordinator;
     final conflicts = ref.watch(syncConflictsProvider);
     return SettingsPageScaffold(
       destination: AppNavigationDestinationId.sync,
@@ -438,7 +556,7 @@ class SyncConflictsPage extends ConsumerWidget {
                     Text(
                       canResolve
                           ? l10n.conflictApprovalHere
-                          : l10n.conflictApprovalOnComputer,
+                          : l10n.conflictApprovalOnInitiator,
                     ),
                     if (!canResolve) ...[
                       const SizedBox(height: 8),
@@ -539,7 +657,7 @@ class _ConflictCard extends ConsumerWidget {
                           context,
                           l10n,
                           conflict.fieldName,
-                          candidate.value,
+                          candidate,
                         ),
                       ),
                       Text(
@@ -566,15 +684,17 @@ class _ConflictCard extends ConsumerWidget {
     SyncField.categorySyncId => l10n.taskCategory,
     SyncField.completion => l10n.completionState,
     SyncField.deleted => l10n.deletionState,
-    _ => field,
+    _ => l10n.syncDataConflict,
   };
 
   String _valueLabel(
     BuildContext context,
     AppLocalizations l10n,
     String field,
-    Object? value,
+    SyncConflictCandidate candidate,
   ) {
+    final value = candidate.value;
+    if (field == SyncField.positionKey) return l10n.orderingConflict;
     if (field == SyncField.deleted) {
       return value == null ? l10n.keepItem : l10n.deleteItem;
     }
@@ -593,9 +713,41 @@ class _ConflictCard extends ConsumerWidget {
     if (field == SyncField.categorySyncId && value == null) {
       return l10n.uncategorized;
     }
-    if (field == SyncField.detailImages && value is List) {
-      return '${l10n.taskDetailImages} (${value.length})';
+    if (field == SyncField.categorySyncId) {
+      return candidate.displayValue?.toString() ?? l10n.syncDataChoice;
     }
-    return value?.toString() ?? l10n.emptyValue;
+    if (field == SyncField.details && value is String) {
+      try {
+        final document = TaskDetailDocumentCodec.decode(
+          details: value,
+          images: const [],
+        );
+        final text = document.blocks
+            .whereType<TaskDetailTextBlock>()
+            .map((block) => block.text)
+            .join('\n')
+            .trim();
+        return text.isEmpty ? l10n.emptyValue : text;
+      } on FormatException {
+        return l10n.syncDataChoice;
+      }
+    }
+    if (field == SyncField.detailImages && value is List) {
+      final names = <String>[];
+      for (final (index, raw) in value.indexed) {
+        final map = raw is Map ? Map<Object?, Object?>.from(raw) : null;
+        final name = map?['fileName'];
+        names.add(
+          name is String && name.isNotEmpty
+              ? name
+              : '${l10n.taskDetailImages} ${index + 1}',
+        );
+      }
+      return names.isEmpty ? l10n.emptyValue : names.join('\n');
+    }
+    if (field == SyncField.name) {
+      return value?.toString() ?? l10n.emptyValue;
+    }
+    return l10n.syncDataChoice;
   }
 }

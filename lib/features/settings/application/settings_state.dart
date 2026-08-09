@@ -42,6 +42,7 @@ class AppSettingsState {
     this.sidebarMode = SidebarMode.floating,
     this.sidebarAlignment = SidebarAlignment.alignBetween,
     this.checkForUpdatesOnStartup = true,
+    this.largeSyncTransferEnabled = false,
     this.collapsedCategoryIds = const <int>{},
     this.deadlineMode = DeadlineMode.relative,
     this.relativeDays = 1,
@@ -59,6 +60,7 @@ class AppSettingsState {
   final SidebarMode sidebarMode;
   final SidebarAlignment sidebarAlignment;
   final bool checkForUpdatesOnStartup;
+  final bool largeSyncTransferEnabled;
   final Set<int> collapsedCategoryIds;
   final DeadlineMode deadlineMode;
   final int relativeDays;
@@ -78,6 +80,7 @@ class AppSettingsState {
     SidebarMode? sidebarMode,
     SidebarAlignment? sidebarAlignment,
     bool? checkForUpdatesOnStartup,
+    bool? largeSyncTransferEnabled,
     Set<int>? collapsedCategoryIds,
     DeadlineMode? deadlineMode,
     int? relativeDays,
@@ -96,6 +99,8 @@ class AppSettingsState {
       sidebarAlignment: sidebarAlignment ?? this.sidebarAlignment,
       checkForUpdatesOnStartup:
           checkForUpdatesOnStartup ?? this.checkForUpdatesOnStartup,
+      largeSyncTransferEnabled:
+          largeSyncTransferEnabled ?? this.largeSyncTransferEnabled,
       collapsedCategoryIds: collapsedCategoryIds ?? this.collapsedCategoryIds,
       deadlineMode: deadlineMode ?? this.deadlineMode,
       relativeDays: relativeDays ?? this.relativeDays,

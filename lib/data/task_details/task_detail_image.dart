@@ -6,16 +6,19 @@ final class TaskDetailImage {
     required this.id,
     required this.mimeType,
     required Uint8List bytes,
+    this.fileName,
   }) : bytes = Uint8List.fromList(bytes);
 
   final String id;
   final String mimeType;
   final Uint8List bytes;
+  final String? fileName;
 
   Map<String, Object?> toJson() => {
     'id': id,
     'mimeType': mimeType,
     'base64Data': base64Encode(bytes),
+    if (fileName != null) 'fileName': fileName,
   };
 }
 
@@ -54,10 +57,13 @@ abstract final class TaskDetailImageCodec {
       final id = map['id'];
       final mimeType = map['mimeType'];
       final encoded = map['base64Data'];
+      final fileName = map['fileName'];
       if (id is! String ||
           id.isEmpty ||
           id.length > 100 ||
           mimeType is! String ||
+          (fileName != null &&
+              (fileName is! String || fileName.length > 255)) ||
           encoded is! String ||
           encoded.length > ((maximumImageBytes + 2) ~/ 3) * 4) {
         throw const FormatException('Invalid task detail image fields.');
@@ -68,7 +74,14 @@ abstract final class TaskDetailImageCodec {
       } on FormatException {
         throw const FormatException('Invalid task detail image data.');
       }
-      images.add(TaskDetailImage(id: id, mimeType: mimeType, bytes: bytes));
+      images.add(
+        TaskDetailImage(
+          id: id,
+          mimeType: mimeType,
+          bytes: bytes,
+          fileName: fileName as String?,
+        ),
+      );
     }
     validate(images);
     return images;
@@ -86,6 +99,13 @@ abstract final class TaskDetailImageCodec {
       }
       if (!supportedMimeTypes.contains(image.mimeType)) {
         throw const FormatException('Unsupported task detail image type.');
+      }
+      if (image.fileName case final fileName?) {
+        if (fileName.isEmpty ||
+            fileName.length > 255 ||
+            fileName.runes.any((value) => value < 32)) {
+          throw const FormatException('Invalid task detail image name.');
+        }
       }
       if (image.bytes.isEmpty || image.bytes.length > maximumImageBytes) {
         throw const FormatException('Invalid task detail image size.');

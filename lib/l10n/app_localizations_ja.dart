@@ -69,6 +69,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get taskDetailImages => '詳細画像';
 
   @override
+  String get chooseImages => '写真ライブラリから画像を選択';
+
+  @override
+  String get imagePickFailed => '選択した画像を挿入できません。形式またはサイズを確認してください。';
+
+  @override
   String get pasteImage => '画像を貼り付け';
 
   @override
@@ -610,7 +616,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get nearbySync => '近くの端末と同期';
 
   @override
-  String get nearbySyncSubtitle => '同じ LAN で QR コードを読み取り、端末間で同期します';
+  String get nearbySyncSubtitle => '同じ LAN で QR コードまたはペアリングキーを使って端末間同期します';
 
   @override
   String get showSyncQr => 'パソコンに QR コードを表示';
@@ -646,7 +652,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get scanWithinTwoMinutes =>
-      '2 分以内にスマートフォンでスキャンしてください。初回はファイアウォールの許可が必要な場合があります。';
+      '2 分以内に別の端末でスキャンするかキーを貼り付けてください。初回はファイアウォールの許可が必要な場合があります。';
 
   @override
   String get computerCreatesQr =>
@@ -665,7 +671,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get preparingSync => '安全な接続を準備しています…';
 
   @override
-  String get connectingDevice => 'パソコンに接続しています…';
+  String get connectingDevice => '別の端末に接続しています…';
 
   @override
   String syncingWith(String device) {
@@ -693,7 +699,49 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get conflictApprovalOnComputer =>
-      '既定では QR コードを作成したパソコンで競合を確認します。重複操作を防ぐため、この端末は読み取り専用です。';
+      '既定では同期を開始した端末で競合を確認します。重複操作を防ぐため、この端末は読み取り専用です。';
+
+  @override
+  String get conflictApprovalOnInitiator =>
+      '既定では同期を開始した端末で競合を確認します。重複操作を防ぐため、この端末は読み取り専用です。';
+
+  @override
+  String get syncRoleDescription =>
+      'どの端末でも同期を開始または受信できます。開始側が QR コードとワンタイムキーを作成し、受信側がスキャンまたは貼り付けて接続します。';
+
+  @override
+  String get joinSyncSession => '同期を受信';
+
+  @override
+  String get syncPairingKey => 'ペアリングキー';
+
+  @override
+  String get pasteSyncKey => 'キーを貼り付け';
+
+  @override
+  String get connectAndSync => '接続して同期';
+
+  @override
+  String get copySyncKey => 'キーをコピー';
+
+  @override
+  String get syncKeyCopied => 'ペアリングキーをコピーしました';
+
+  @override
+  String get largeFileTransfer => '大容量ファイル転送';
+
+  @override
+  String get largeFileTransferSubtitle =>
+      '両方の端末で有効にすると、分割ストリーミングにアプリ上のサイズ上限はありません。端末容量とシステム資源の制約は適用されます。';
+
+  @override
+  String get syncDataConflict => '同期データ';
+
+  @override
+  String get syncDataChoice => 'この端末のバージョン';
+
+  @override
+  String get orderingConflict => '並び順の競合';
 
   @override
   String get resolveOnThisDevice => 'この端末で確認';

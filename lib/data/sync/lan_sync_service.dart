@@ -5,6 +5,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:crypto/crypto.dart' as crypto;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -13,13 +14,76 @@ import '../database/app_database.dart';
 import '../repositories/repositories.dart';
 import 'sync_models.dart';
 
+sealed class _PreparedOperationPayload {
+  const _PreparedOperationPayload();
+
+  int get length;
+  String get sha256;
+  Stream<Uint8List> chunks();
+  Future<void> dispose();
+}
+
+final class _MemoryOperationPayload extends _PreparedOperationPayload {
+  const _MemoryOperationPayload(this.bytes, this.sha256);
+
+  final Uint8List bytes;
+  @override
+  final String sha256;
+
+  @override
+  int get length => bytes.length;
+
+  @override
+  Stream<Uint8List> chunks() async* {
+    yield* Stream.fromIterable(SyncTransferCodec.chunks(bytes));
+  }
+
+  @override
+  Future<void> dispose() async {}
+}
+
+final class _FileOperationPayload extends _PreparedOperationPayload {
+  const _FileOperationPayload(this.file, this.length, this.sha256);
+
+  final File file;
+  @override
+  final int length;
+  @override
+  final String sha256;
+
+  @override
+  Stream<Uint8List> chunks() async* {
+    final reader = await file.open();
+    try {
+      while (true) {
+        final bytes = await reader.read(SyncTransferCodec.chunkSizeBytes);
+        if (bytes.isEmpty) break;
+        yield Uint8List.fromList(bytes);
+      }
+    } finally {
+      await reader.close();
+    }
+  }
+
+  @override
+  Future<void> dispose() async {
+    if (await file.exists()) await file.delete();
+  }
+}
+
 final class _PreparedSyncTransfer {
   const _PreparedSyncTransfer(this.payloads, this.totalBytes);
 
-  final List<Uint8List> payloads;
+  final List<_PreparedOperationPayload> payloads;
   final int totalBytes;
 
   int get operationCount => payloads.length;
+
+  Future<void> dispose() async {
+    for (final payload in payloads) {
+      await payload.dispose();
+    }
+  }
 }
 
 final class _SyncTransferPlan {
@@ -129,6 +193,7 @@ class LanSyncController extends Notifier<LanSyncState> {
   static const _maximumEncryptedFrameBytes =
       SyncTransferCodec.chunkSizeBytes + 1024;
   static const _maximumOperationBytes = 256 * 1024 * 1024;
+  static const _temporaryFileThresholdBytes = 8 * 1024 * 1024;
   static const _encryptedNonceBytes = 12;
   static const _encryptedMacBytes = 16;
   static const _pushChunkKind = 1;
@@ -144,6 +209,7 @@ class LanSyncController extends Notifier<LanSyncState> {
   bool _claimed = false;
   int _transferredBytes = 0;
   int _totalBytes = 0;
+  final Set<File> _temporaryFiles = {};
 
   AppDatabase get _database => ref.read(appDatabaseProvider);
 
@@ -156,6 +222,7 @@ class LanSyncController extends Notifier<LanSyncState> {
   }
 
   Future<void> startHosting({
+    bool largeTransferEnabled = false,
     @visibleForTesting List<String>? hostAddressesOverride,
   }) async {
     await _closeTransport();
@@ -178,7 +245,7 @@ class LanSyncController extends Notifier<LanSyncState> {
         growable: false,
       );
       final expiresAt = DateTime.now().toUtc().add(_sessionLifetime);
-      final qrData = jsonEncode({
+      final qrData = SyncPairingKeyCodec.encode({
         'type': 'ddl-out-lan-sync',
         'version': syncProtocolVersion,
         'hosts': addresses,
@@ -210,7 +277,13 @@ class LanSyncController extends Notifier<LanSyncState> {
         try {
           final socket = await WebSocketTransformer.upgrade(request);
           _socket = socket;
-          await _runHostSession(socket, SecretKey(keyBytes), token, expiresAt);
+          await _runHostSession(
+            socket,
+            SecretKey(keyBytes),
+            token,
+            expiresAt,
+            largeTransferEnabled,
+          );
         } on Object catch (error) {
           _setError(error);
         }
@@ -221,7 +294,10 @@ class LanSyncController extends Notifier<LanSyncState> {
     }
   }
 
-  Future<void> connectFromQr(String rawQrData) async {
+  Future<void> connectFromQr(
+    String rawQrData, {
+    bool largeTransferEnabled = false,
+  }) async {
     await _closeTransport();
     state = const LanSyncState(phase: LanSyncPhase.connecting);
     try {
@@ -252,7 +328,13 @@ class LanSyncController extends Notifier<LanSyncState> {
         throw SocketException('无法连接电脑，请确认两端在同一局域网：$lastError');
       }
       _socket = socket;
-      await _runClientSession(socket, key, token, spaceId);
+      await _runClientSession(
+        socket,
+        key,
+        token,
+        spaceId,
+        largeTransferEnabled,
+      );
     } on Object catch (error) {
       _setError(error);
       await _closeTransport(keepState: true);
@@ -264,8 +346,10 @@ class LanSyncController extends Notifier<LanSyncState> {
     SecretKey key,
     String expectedToken,
     DateTime expiresAt,
+    bool localLargeTransferEnabled,
   ) async {
     final iterator = StreamIterator<dynamic>(socket);
+    _PreparedSyncTransfer? outgoingTransfer;
     try {
       final hello = await _nextMessage(iterator, key);
       if (hello['type'] != 'hello' ||
@@ -274,6 +358,8 @@ class LanSyncController extends Notifier<LanSyncState> {
         throw const FormatException('连接凭证无效或已经过期');
       }
       final peer = _identityFromJson(hello['identity']);
+      final useLargeTransfer =
+          localLargeTransferEnabled && hello['largeTransferEnabled'] == true;
       final local = await _database.readSyncIdentity();
       if (peer.spaceId != local.spaceId) {
         throw const FormatException('两端不属于同一个同步空间');
@@ -291,18 +377,24 @@ class LanSyncController extends Notifier<LanSyncState> {
       await _sendMessage(socket, key, {
         'type': 'helloAck',
         'identity': local.toJson(),
+        'largeTransferEnabled': localLargeTransferEnabled,
       });
 
       final incomingPlan = _transferPlanFromMessage(
         await _nextMessage(iterator, key),
         'pushPlan',
+        useLargeTransfer,
       );
       final outgoing = await _database.readOperationsMissingFrom(peer.vector);
-      final outgoingTransfer = _prepareTransfer(outgoing);
+      outgoingTransfer = await _prepareTransfer(
+        outgoing,
+        allowLargeTransfer: useLargeTransfer,
+      );
       await _sendMessage(socket, key, {
         'type': 'pullPlan',
         'operationCount': outgoingTransfer.operationCount,
         'totalBytes': outgoingTransfer.totalBytes,
+        'largeTransfer': useLargeTransfer,
       });
       _beginTransferProgress(
         incomingPlan.totalBytes + outgoingTransfer.totalBytes,
@@ -314,6 +406,7 @@ class LanSyncController extends Notifier<LanSyncState> {
         direction: 'push',
         chunkKind: _pushChunkKind,
         plan: incomingPlan,
+        allowLargeTransfer: useLargeTransfer,
       );
       await _sendOperationTransfer(
         socket: socket,
@@ -356,6 +449,7 @@ class LanSyncController extends Notifier<LanSyncState> {
         clearError: true,
       );
     } finally {
+      await outgoingTransfer?.dispose();
       await iterator.cancel();
       await _closeTransport(keepState: true);
     }
@@ -366,20 +460,26 @@ class LanSyncController extends Notifier<LanSyncState> {
     SecretKey key,
     String token,
     String expectedSpaceId,
+    bool localLargeTransferEnabled,
   ) async {
     final iterator = StreamIterator<dynamic>(socket);
+    _PreparedSyncTransfer? outgoingTransfer;
     try {
       final local = await _database.readSyncIdentity();
       await _sendMessage(socket, key, {
         'type': 'hello',
         'token': token,
         'identity': local.toJson(),
+        'largeTransferEnabled': localLargeTransferEnabled,
       });
       final acknowledgement = await _nextMessage(iterator, key);
       if (acknowledgement['type'] != 'helloAck') {
         throw const FormatException('电脑没有接受连接');
       }
       final host = _identityFromJson(acknowledgement['identity']);
+      final useLargeTransfer =
+          localLargeTransferEnabled &&
+          acknowledgement['largeTransferEnabled'] == true;
       if (host.spaceId != expectedSpaceId) {
         throw const FormatException('电脑的同步空间发生了变化');
       }
@@ -388,15 +488,20 @@ class LanSyncController extends Notifier<LanSyncState> {
         peerName: host.deviceName,
       );
       final outgoing = await _database.readOperationsMissingFrom(host.vector);
-      final outgoingTransfer = _prepareTransfer(outgoing);
+      outgoingTransfer = await _prepareTransfer(
+        outgoing,
+        allowLargeTransfer: useLargeTransfer,
+      );
       await _sendMessage(socket, key, {
         'type': 'pushPlan',
         'operationCount': outgoingTransfer.operationCount,
         'totalBytes': outgoingTransfer.totalBytes,
+        'largeTransfer': useLargeTransfer,
       });
       final incomingPlan = _transferPlanFromMessage(
         await _nextMessage(iterator, key),
         'pullPlan',
+        useLargeTransfer,
       );
       _beginTransferProgress(
         outgoingTransfer.totalBytes + incomingPlan.totalBytes,
@@ -416,6 +521,7 @@ class LanSyncController extends Notifier<LanSyncState> {
         direction: 'pull',
         chunkKind: _pullChunkKind,
         plan: incomingPlan,
+        allowLargeTransfer: useLargeTransfer,
       );
       await _sendMessage(socket, key, {
         'type': 'complete',
@@ -442,6 +548,7 @@ class LanSyncController extends Notifier<LanSyncState> {
         clearError: true,
       );
     } finally {
+      await outgoingTransfer?.dispose();
       await iterator.cancel();
       await _closeTransport(keepState: true);
     }
@@ -468,20 +575,32 @@ class LanSyncController extends Notifier<LanSyncState> {
     _claimed = false;
     await socket?.close();
     await server?.close(force: true);
+    for (final file in _temporaryFiles.toList()) {
+      if (await file.exists()) await file.delete();
+      _temporaryFiles.remove(file);
+    }
     if (!keepState && ref.mounted) state = const LanSyncState();
   }
 
-  _PreparedSyncTransfer _prepareTransfer(
-    List<SyncOperationEnvelope> operations,
-  ) {
-    final payloads = <Uint8List>[];
+  Future<_PreparedSyncTransfer> _prepareTransfer(
+    List<SyncOperationEnvelope> operations, {
+    required bool allowLargeTransfer,
+  }) async {
+    final payloads = <_PreparedOperationPayload>[];
     var totalBytes = 0;
     for (final operation in operations) {
       final payload = SyncTransferCodec.encodeOperation(operation);
-      if (payload.length > _maximumOperationBytes) {
+      if (!allowLargeTransfer && payload.length > _maximumOperationBytes) {
         throw const FormatException('单项同步数据过大，无法安全传输');
       }
-      payloads.add(payload);
+      final digest = crypto.sha256.convert(payload).toString();
+      if (allowLargeTransfer && payload.length > _temporaryFileThresholdBytes) {
+        final file = _createTemporaryFile();
+        await file.writeAsBytes(payload, flush: true);
+        payloads.add(_FileOperationPayload(file, payload.length, digest));
+      } else {
+        payloads.add(_MemoryOperationPayload(payload, digest));
+      }
       totalBytes += payload.length;
     }
     return _PreparedSyncTransfer(payloads, totalBytes);
@@ -490,6 +609,7 @@ class LanSyncController extends Notifier<LanSyncState> {
   _SyncTransferPlan _transferPlanFromMessage(
     Map<String, dynamic> message,
     String expectedType,
+    bool expectedLargeTransfer,
   ) {
     final operationCount = message['operationCount'];
     final totalBytes = message['totalBytes'];
@@ -499,6 +619,7 @@ class LanSyncController extends Notifier<LanSyncState> {
         operationCount > 1000000 ||
         totalBytes is! int ||
         totalBytes < 0 ||
+        message['largeTransfer'] != expectedLargeTransfer ||
         (operationCount == 0 && totalBytes != 0) ||
         (operationCount > 0 && totalBytes == 0)) {
       throw const FormatException('同步传输计划无效');
@@ -519,6 +640,7 @@ class LanSyncController extends Notifier<LanSyncState> {
         'type': '${direction}Operation',
         'index': index,
         'byteLength': payload.length,
+        'sha256': payload.sha256,
       });
       final operationAck = await _nextMessage(iterator, key);
       if (operationAck['type'] != '${direction}OperationAck' ||
@@ -526,7 +648,7 @@ class LanSyncController extends Notifier<LanSyncState> {
         throw const FormatException('同步操作确认无效');
       }
       var offset = 0;
-      for (final chunk in SyncTransferCodec.chunks(payload)) {
+      await for (final chunk in payload.chunks()) {
         await _sendPayloadChunk(
           socket: socket,
           key: key,
@@ -554,6 +676,7 @@ class LanSyncController extends Notifier<LanSyncState> {
     required String direction,
     required int chunkKind,
     required _SyncTransferPlan plan,
+    required bool allowLargeTransfer,
   }) async {
     var applied = 0;
     var duplicates = 0;
@@ -561,11 +684,14 @@ class LanSyncController extends Notifier<LanSyncState> {
     for (var index = 0; index < plan.operationCount; index += 1) {
       final operationMessage = await _nextMessage(iterator, key);
       final byteLength = operationMessage['byteLength'];
+      final expectedDigest = operationMessage['sha256'];
       if (operationMessage['type'] != '${direction}Operation' ||
           operationMessage['index'] != index ||
           byteLength is! int ||
           byteLength <= 0 ||
-          byteLength > _maximumOperationBytes ||
+          (!allowLargeTransfer && byteLength > _maximumOperationBytes) ||
+          expectedDigest is! String ||
+          !RegExp(r'^[0-9a-f]{64}$').hasMatch(expectedDigest) ||
           receivedBytes + byteLength > plan.totalBytes) {
         throw const FormatException('同步操作分块信息无效');
       }
@@ -574,6 +700,10 @@ class LanSyncController extends Notifier<LanSyncState> {
         'index': index,
       });
       final builder = BytesBuilder(copy: false);
+      final useTemporaryFile =
+          allowLargeTransfer && byteLength > _temporaryFileThresholdBytes;
+      final temporaryFile = useTemporaryFile ? _createTemporaryFile() : null;
+      final sink = temporaryFile?.openWrite();
       var operationBytes = 0;
       while (operationBytes < byteLength) {
         final chunk = await _nextPayloadChunk(
@@ -585,7 +715,11 @@ class LanSyncController extends Notifier<LanSyncState> {
         if (operationBytes + chunk.length > byteLength) {
           throw const FormatException('同步分块超出声明大小');
         }
-        builder.add(chunk);
+        if (sink != null) {
+          sink.add(chunk);
+        } else {
+          builder.add(chunk);
+        }
         operationBytes += chunk.length;
         receivedBytes += chunk.length;
         _recordTransferredBytes(chunk.length);
@@ -595,7 +729,19 @@ class LanSyncController extends Notifier<LanSyncState> {
           'nextOffset': operationBytes,
         });
       }
-      final operation = SyncTransferCodec.decodeOperation(builder.takeBytes());
+      await sink?.flush();
+      await sink?.close();
+      final bytes = temporaryFile == null
+          ? builder.takeBytes()
+          : await temporaryFile.readAsBytes();
+      if (crypto.sha256.convert(bytes).toString() != expectedDigest) {
+        throw const FormatException('同步数据校验失败');
+      }
+      final operation = SyncTransferCodec.decodeOperation(bytes);
+      if (temporaryFile != null) {
+        await temporaryFile.delete();
+        _temporaryFiles.remove(temporaryFile);
+      }
       final report = await _database.applyRemoteOperations([operation]);
       applied += report.applied;
       duplicates += report.duplicates;
@@ -617,6 +763,15 @@ class LanSyncController extends Notifier<LanSyncState> {
     _totalBytes = totalBytes;
     if (!ref.mounted) return;
     state = state.copyWith(transferredBytes: 0, totalBytes: totalBytes);
+  }
+
+  File _createTemporaryFile() {
+    final file = File(
+      '${Directory.systemTemp.path}${Platform.pathSeparator}'
+      'ddl_out_sync_${_uuid.v4()}.part',
+    );
+    _temporaryFiles.add(file);
+    return file;
   }
 
   void _recordTransferredBytes(int byteCount) {
@@ -750,9 +905,8 @@ class LanSyncController extends Notifier<LanSyncState> {
   }
 
   Map<String, dynamic> _parseQrPayload(String source) {
-    final value = jsonDecode(source);
-    if (value is! Map<String, dynamic> ||
-        value['type'] != 'ddl-out-lan-sync' ||
+    final value = SyncPairingKeyCodec.decode(source);
+    if (value['type'] != 'ddl-out-lan-sync' ||
         value['version'] != syncProtocolVersion ||
         value['hosts'] is! List ||
         value['port'] is! int ||

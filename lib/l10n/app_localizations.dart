@@ -220,6 +220,18 @@ abstract class AppLocalizations {
   /// **'详情图片'**
   String get taskDetailImages;
 
+  /// No description provided for @chooseImages.
+  ///
+  /// In zh, this message translates to:
+  /// **'从相册选择图片'**
+  String get chooseImages;
+
+  /// No description provided for @imagePickFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'无法插入所选图片，请检查格式或大小'**
+  String get imagePickFailed;
+
   /// No description provided for @pasteImage.
   ///
   /// In zh, this message translates to:
@@ -1224,7 +1236,7 @@ abstract class AppLocalizations {
   /// No description provided for @nearbySyncSubtitle.
   ///
   /// In zh, this message translates to:
-  /// **'同一局域网内扫码，点对点同步'**
+  /// **'同一局域网内通过二维码或配对密钥点对点同步'**
   String get nearbySyncSubtitle;
 
   /// No description provided for @showSyncQr.
@@ -1284,7 +1296,7 @@ abstract class AppLocalizations {
   /// No description provided for @scanWithinTwoMinutes.
   ///
   /// In zh, this message translates to:
-  /// **'请用手机在 2 分钟内扫描；首次连接可能需要允许防火墙访问。'**
+  /// **'请在另一台设备上于 2 分钟内扫码或粘贴密钥；首次连接可能需要允许防火墙访问。'**
   String get scanWithinTwoMinutes;
 
   /// No description provided for @computerCreatesQr.
@@ -1320,7 +1332,7 @@ abstract class AppLocalizations {
   /// No description provided for @connectingDevice.
   ///
   /// In zh, this message translates to:
-  /// **'正在连接电脑…'**
+  /// **'正在连接另一台设备…'**
   String get connectingDevice;
 
   /// No description provided for @syncingWith.
@@ -1362,8 +1374,86 @@ abstract class AppLocalizations {
   /// No description provided for @conflictApprovalOnComputer.
   ///
   /// In zh, this message translates to:
-  /// **'默认由生成二维码的电脑审批；当前手机先保持只读，避免两端重复操作。'**
+  /// **'默认由发起同步的设备审批；当前设备先保持只读，避免两端重复操作。'**
   String get conflictApprovalOnComputer;
+
+  /// No description provided for @conflictApprovalOnInitiator.
+  ///
+  /// In zh, this message translates to:
+  /// **'默认由发起同步的设备审批；当前设备先保持只读，避免两端重复操作。'**
+  String get conflictApprovalOnInitiator;
+
+  /// No description provided for @syncRoleDescription.
+  ///
+  /// In zh, this message translates to:
+  /// **'任意设备都可以发起或接收同步。发起方生成二维码和一次性密钥，接收方扫码或粘贴密钥即可连接。'**
+  String get syncRoleDescription;
+
+  /// No description provided for @joinSyncSession.
+  ///
+  /// In zh, this message translates to:
+  /// **'接收同步'**
+  String get joinSyncSession;
+
+  /// No description provided for @syncPairingKey.
+  ///
+  /// In zh, this message translates to:
+  /// **'配对密钥'**
+  String get syncPairingKey;
+
+  /// No description provided for @pasteSyncKey.
+  ///
+  /// In zh, this message translates to:
+  /// **'粘贴密钥'**
+  String get pasteSyncKey;
+
+  /// No description provided for @connectAndSync.
+  ///
+  /// In zh, this message translates to:
+  /// **'连接并同步'**
+  String get connectAndSync;
+
+  /// No description provided for @copySyncKey.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制密钥'**
+  String get copySyncKey;
+
+  /// No description provided for @syncKeyCopied.
+  ///
+  /// In zh, this message translates to:
+  /// **'配对密钥已复制'**
+  String get syncKeyCopied;
+
+  /// No description provided for @largeFileTransfer.
+  ///
+  /// In zh, this message translates to:
+  /// **'大文件传输'**
+  String get largeFileTransfer;
+
+  /// No description provided for @largeFileTransferSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'双方开启后使用分块流式传输，不设置应用层大小上限；仅受设备存储与系统资源限制。'**
+  String get largeFileTransferSubtitle;
+
+  /// No description provided for @syncDataConflict.
+  ///
+  /// In zh, this message translates to:
+  /// **'同步数据'**
+  String get syncDataConflict;
+
+  /// No description provided for @syncDataChoice.
+  ///
+  /// In zh, this message translates to:
+  /// **'此设备的版本'**
+  String get syncDataChoice;
+
+  /// No description provided for @orderingConflict.
+  ///
+  /// In zh, this message translates to:
+  /// **'排序冲突'**
+  String get orderingConflict;
 
   /// No description provided for @resolveOnThisDevice.
   ///
