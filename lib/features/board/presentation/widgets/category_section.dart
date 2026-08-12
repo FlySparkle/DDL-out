@@ -46,8 +46,8 @@ class CategorySection extends ConsumerWidget {
     final now = ref.watch(currentTimeProvider).value ?? DateTime.now();
     final completedCount = tasks.where((task) => task.isCompleted).length;
     final activeDurations = tasks
-        .where((task) => !task.isCompleted)
-        .map((task) => DeadlineService.remaining(task.deadlineUtc, now: now))
+        .where((task) => !task.isCompleted && task.deadlineUtc != null)
+        .map((task) => DeadlineService.remaining(task.deadlineUtc!, now: now))
         .where((duration) => duration > Duration.zero);
     final longestRemaining = activeDurations.fold<Duration>(
       Duration.zero,
@@ -69,7 +69,7 @@ class CategorySection extends ConsumerWidget {
             color.withValues(alpha: 0.16),
             scheme.surfaceContainerLow,
           );
-          return Card(
+          final card = Card(
             color: candidates.isEmpty ? cardColor : scheme.secondaryContainer,
             clipBehavior: Clip.antiAlias,
             child: Column(
@@ -79,7 +79,13 @@ class CategorySection extends ConsumerWidget {
                   height: candidates.isEmpty ? 0 : 4,
                   color: scheme.secondary,
                 ),
-                _buildHeader(context, ref, collapsed, completedCount),
+                _buildHeader(
+                  context,
+                  ref,
+                  collapsed,
+                  completedCount,
+                  settings.showDragHandles,
+                ),
                 AnimatedCrossFade(
                   duration: const Duration(milliseconds: 220),
                   crossFadeState: collapsed
@@ -110,6 +116,15 @@ class CategorySection extends ConsumerWidget {
               ],
             ),
           );
+          if (category == null || settings.showDragHandles) return card;
+          return LongPressDraggable<CategoryDragData>(
+            data: CategoryDragData(category!.id),
+            feedback: _categoryDragFeedback(context),
+            dragAnchorStrategy: childDragAnchorStrategy,
+            maxSimultaneousDrags: 1,
+            childWhenDragging: Opacity(opacity: 0.35, child: card),
+            child: card,
+          );
         },
       ),
     );
@@ -120,6 +135,7 @@ class CategorySection extends ConsumerWidget {
     WidgetRef ref,
     bool collapsed,
     int completedCount,
+    bool showDragHandle,
   ) {
     final l10n = AppLocalizations.of(context);
     void toggle() => ref
@@ -129,6 +145,7 @@ class CategorySection extends ConsumerWidget {
       constraints: const BoxConstraints(minHeight: 56),
       child: Row(
         children: [
+          if (category != null && showDragHandle) _categoryDragHandle(context),
           if (category != null)
             IconButton(
               tooltip: collapsed ? l10n.expandCategory : l10n.collapseCategory,
@@ -191,7 +208,6 @@ class CategorySection extends ConsumerWidget {
             onPressed: tasks.length < 2 ? null : () => _sortTasks(context, ref),
             icon: const Icon(Icons.sort),
           ),
-          if (category != null) _categoryDragHandle(context),
         ],
       ),
     );
@@ -263,7 +279,30 @@ class CategorySection extends ConsumerWidget {
         ),
       ),
     );
-    final feedback = Material(
+    final feedback = _categoryDragFeedback(context);
+    final data = CategoryDragData(category!.id);
+    final platform = Theme.of(context).platform;
+    if (platform == TargetPlatform.android || platform == TargetPlatform.iOS) {
+      return LongPressDraggable<CategoryDragData>(
+        data: data,
+        feedback: feedback,
+        dragAnchorStrategy: childDragAnchorStrategy,
+        delay: const Duration(milliseconds: 120),
+        maxSimultaneousDrags: 1,
+        child: handle,
+      );
+    }
+    return Draggable<CategoryDragData>(
+      data: data,
+      feedback: feedback,
+      dragAnchorStrategy: childDragAnchorStrategy,
+      maxSimultaneousDrags: 1,
+      child: handle,
+    );
+  }
+
+  Widget _categoryDragFeedback(BuildContext context) {
+    return Material(
       elevation: 8,
       color: Theme.of(context).colorScheme.surfaceContainerHigh,
       borderRadius: BorderRadius.circular(12),
@@ -286,25 +325,6 @@ class CategorySection extends ConsumerWidget {
           ),
         ),
       ),
-    );
-    final data = CategoryDragData(category!.id);
-    final platform = Theme.of(context).platform;
-    if (platform == TargetPlatform.android || platform == TargetPlatform.iOS) {
-      return LongPressDraggable<CategoryDragData>(
-        data: data,
-        feedback: feedback,
-        dragAnchorStrategy: pointerDragAnchorStrategy,
-        delay: const Duration(milliseconds: 120),
-        maxSimultaneousDrags: 1,
-        child: handle,
-      );
-    }
-    return Draggable<CategoryDragData>(
-      data: data,
-      feedback: feedback,
-      dragAnchorStrategy: pointerDragAnchorStrategy,
-      maxSimultaneousDrags: 1,
-      child: handle,
     );
   }
 }

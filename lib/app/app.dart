@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/theme/app_theme.dart';
+import '../core/update/update_checker.dart';
 import '../features/board/board_page.dart';
 import '../features/settings/application/settings.dart';
 import '../features/settings/about_settings_page.dart';
@@ -85,33 +86,40 @@ class DdlOutApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsControllerProvider);
-    return DynamicColorBuilder(
-      builder: (lightDynamic, darkDynamic) {
-        final useDynamic = settings.dynamicColorEnabled;
-        final fontFamily = settings.useSystemFont ? null : 'NotoSansSC';
-        return MaterialApp.router(
-          title: 'DDL out!',
-          debugShowCheckedModeBanner: false,
-          routerConfig: _router,
-          locale: settings.language.locale,
-          themeMode: settings.themeMode,
-          theme: AppTheme.light(
-            dynamicScheme: useDynamic ? lightDynamic : null,
-            fontFamily: fontFamily,
-          ),
-          darkTheme: AppTheme.dark(
-            dynamicScheme: useDynamic ? darkDynamic : null,
-            fontFamily: fontFamily,
-          ),
-          localizationsDelegates: [
-            ...AppLocalizations.localizationsDelegates,
-            FlutterQuillLocalizations.delegate,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-          builder: (_, child) =>
-              AppShell(navigatorKey: _rootNavigatorKey, child: child!),
-        );
-      },
+    return ProviderScope(
+      overrides: [
+        githubAccessTokenProvider.overrideWithValue(
+          settings.githubToken.isEmpty ? null : settings.githubToken,
+        ),
+      ],
+      child: DynamicColorBuilder(
+        builder: (lightDynamic, darkDynamic) {
+          final useDynamic = settings.dynamicColorEnabled;
+          final fontFamily = settings.useSystemFont ? null : 'NotoSansSC';
+          return MaterialApp.router(
+            title: 'DDL out!',
+            debugShowCheckedModeBanner: false,
+            routerConfig: _router,
+            locale: settings.language.locale,
+            themeMode: settings.themeMode,
+            theme: AppTheme.light(
+              dynamicScheme: useDynamic ? lightDynamic : null,
+              fontFamily: fontFamily,
+            ),
+            darkTheme: AppTheme.dark(
+              dynamicScheme: useDynamic ? darkDynamic : null,
+              fontFamily: fontFamily,
+            ),
+            localizationsDelegates: [
+              ...AppLocalizations.localizationsDelegates,
+              FlutterQuillLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            builder: (_, child) =>
+                AppShell(navigatorKey: _rootNavigatorKey, child: child!),
+          );
+        },
+      ),
     );
   }
 }

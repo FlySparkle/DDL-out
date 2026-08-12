@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-const syncProtocolVersion = 5;
+const syncProtocolVersion = 6;
 
 abstract final class SyncPairingKeyCodec {
-  static const prefix = 'DDL5:';
+  static const prefix = 'DDL6:';
 
   static String encode(Map<String, Object?> payload) {
     final encoded = base64Url.encode(utf8.encode(jsonEncode(payload)));

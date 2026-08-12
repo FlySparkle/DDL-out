@@ -122,6 +122,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get absoluteTime => 'Date and time';
 
   @override
+  String get noDeadline => 'No deadline';
+
+  @override
+  String get noDeadlineSubtitle =>
+      'This task has no countdown and sorts after tasks that have deadlines.';
+
+  @override
   String get days => 'days';
 
   @override
@@ -248,19 +255,26 @@ class AppLocalizationsEn extends AppLocalizations {
       'When off, the bundled Noto Sans SC font is used';
 
   @override
-  String get showTaskDragHandle => 'Show task drag handle';
+  String get showDragHandles => 'Show drag handles';
 
   @override
-  String get showTaskDragHandleSubtitle =>
-      'When on, drag from the left handle only. When off, long-press the task row to drag.';
+  String get showDragHandlesSubtitle =>
+      'When on, drag tasks and categories from their left handles. When off, long-press a task row or category card to drag.';
 
   @override
   String get fontSize => 'Text size';
 
   @override
-  String fontSizeValue(int percent) {
-    return '$percent%';
-  }
+  String get fontSizeSmaller => 'Smaller';
+
+  @override
+  String get fontSizeStandard => 'Standard';
+
+  @override
+  String get fontSizeLarger => 'Larger';
+
+  @override
+  String get fontSizeExtraLarge => 'Extra large';
 
   @override
   String get navigationMode => 'Sidebar mode';
@@ -498,6 +512,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checkForUpdatesSubtitle => 'Check GitHub for a newer release';
+
+  @override
+  String get githubToken => 'GitHub token (optional)';
+
+  @override
+  String get githubTokenSubtitle =>
+      'Stored only in this app\'s local settings and used only for GitHub Release API requests. It can reduce anonymous rate limiting.';
+
+  @override
+  String get showGithubToken => 'Show token';
+
+  @override
+  String get hideGithubToken => 'Hide token';
+
+  @override
+  String get clearGithubToken => 'Clear';
+
+  @override
+  String get saveGithubToken => 'Save token';
+
+  @override
+  String get invalidGithubToken =>
+      'The token cannot contain spaces or line breaks';
+
+  @override
+  String get githubTokenSaved => 'GitHub token saved';
+
+  @override
+  String get githubTokenCleared => 'GitHub token cleared';
 
   @override
   String get updateAvailableTitle => 'Update available';

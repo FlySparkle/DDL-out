@@ -166,7 +166,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Linux packaging dependencies
-        run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev rpm ruby-full
+        run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev desktop-file-utils rpm ruby-full
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -182,8 +182,19 @@ jobs:
           version=${version%%+*}
           output_dir="$GITHUB_WORKSPACE/build/linux/x64/release"
           bundle_dir="$output_dir/bundle"
-          fpm -s dir -t deb -n ddl-out -v "$version" --architecture amd64 --prefix /opt/ddl-out -C "$bundle_dir" -p "$output_dir/DDL_out_v${version}-linux-amd64.deb" .
-          fpm -s dir -t rpm -n ddl-out -v "$version" --architecture x86_64 --prefix /opt/ddl-out -C "$bundle_dir" -p "$output_dir/DDL_out_v${version}-linux-amd64.rpm" .
+          package_root="$RUNNER_TEMP/ddl-out-package"
+          mkdir -p \
+            "$package_root/opt/ddl-out" \
+            "$package_root/usr/bin" \
+            "$package_root/usr/share/applications" \
+            "$package_root/usr/share/icons/hicolor/1024x1024/apps"
+          cp -a "$bundle_dir/." "$package_root/opt/ddl-out/"
+          ln -s /opt/ddl-out/ddl_out "$package_root/usr/bin/ddl-out"
+          cp linux/packaging/com.flysparkle.ddl_out.desktop "$package_root/usr/share/applications/"
+          cp assets/icon/app_icon.png "$package_root/usr/share/icons/hicolor/1024x1024/apps/com.flysparkle.ddl_out.png"
+          desktop-file-validate "$package_root/usr/share/applications/com.flysparkle.ddl_out.desktop"
+          fpm -s dir -t deb -n ddl-out -v "$version" --architecture amd64 --depends libgtk-3-0 -C "$package_root" -p "$output_dir/DDL_out_v${version}-linux-amd64.deb" .
+          fpm -s dir -t rpm -n ddl-out -v "$version" --architecture x86_64 --depends gtk3 -C "$package_root" -p "$output_dir/DDL_out_v${version}-linux-amd64.rpm" .
           tar -C "$bundle_dir" -czf "$output_dir/DDL_out_v${version}-linux-amd64.tar.gz" .
       - uses: actions/upload-artifact@v4
         with:

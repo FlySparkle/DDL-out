@@ -3,7 +3,7 @@ import '../database/app_database.dart';
 abstract interface class TaskRepository {
   Future<int> create({
     required String name,
-    required DateTime deadlineUtc,
+    required DateTime? deadlineUtc,
     required int? categoryId,
     String details = '',
     String detailImagesJson = '[]',
@@ -12,7 +12,7 @@ abstract interface class TaskRepository {
   Future<void> update({
     required Task task,
     required String name,
-    required DateTime deadlineUtc,
+    required DateTime? deadlineUtc,
     required int? categoryId,
     String? details,
     String? detailImagesJson,

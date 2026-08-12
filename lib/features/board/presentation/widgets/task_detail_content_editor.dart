@@ -104,7 +104,9 @@ class TaskDetailContentEditorState
         key: const ValueKey('task-detail-content-editor'),
         constraints: const BoxConstraints(minHeight: 144),
         decoration: BoxDecoration(
-          color: scheme.surfaceContainerLowest,
+          color:
+              Theme.of(context).inputDecorationTheme.fillColor ??
+              scheme.surfaceContainerHighest,
           border: Border.all(color: scheme.outline),
           borderRadius: BorderRadius.circular(12),
         ),

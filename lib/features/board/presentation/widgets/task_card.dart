@@ -30,22 +30,25 @@ class TaskCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final showDragHandle = ref.watch(
-      settingsControllerProvider.select(
-        (settings) => settings.showTaskDragHandle,
-      ),
+      settingsControllerProvider.select((settings) => settings.showDragHandles),
     );
-    final fill = DeadlineService.urgencyColor(
-      categoryColor,
-      task.deadlineUtc,
-      scheme,
-      now: now,
-    );
-    final progress = DeadlineService.progress(
-      task.deadlineUtc,
-      longestRemaining,
-      now: now,
-      completed: task.isCompleted,
-    );
+    final deadline = task.deadlineUtc;
+    final fill = deadline == null
+        ? categoryColor
+        : DeadlineService.urgencyColor(
+            categoryColor,
+            deadline,
+            scheme,
+            now: now,
+          );
+    final progress = deadline == null
+        ? 0.0
+        : DeadlineService.progress(
+            deadline,
+            longestRemaining,
+            now: now,
+            completed: task.isCompleted,
+          );
     final feedback = Material(
       elevation: 6,
       color: scheme.surfaceContainerHighest,
@@ -74,7 +77,9 @@ class TaskCard extends ConsumerWidget {
         ? _dragHandle(
             context,
             feedback,
-            foreground: DeadlineService.readableForeground(fill),
+            foreground: deadline == null
+                ? scheme.onSurfaceVariant
+                : DeadlineService.readableForeground(fill),
           )
         : null;
     final card = Semantics(
@@ -122,7 +127,7 @@ class TaskCard extends ConsumerWidget {
                     Expanded(child: _TaskSummary(task: task)),
                     const SizedBox(width: 8),
                     Text(
-                      _remainingLabel(context, task.deadlineUtc),
+                      _remainingLabel(context, deadline),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.labelMedium,
@@ -140,7 +145,7 @@ class TaskCard extends ConsumerWidget {
     return LongPressDraggable<int>(
       data: task.id,
       feedback: feedback,
-      dragAnchorStrategy: pointerDragAnchorStrategy,
+      dragAnchorStrategy: childDragAnchorStrategy,
       maxSimultaneousDrags: 1,
       childWhenDragging: Opacity(opacity: 0.35, child: card),
       child: card,
@@ -168,7 +173,7 @@ class TaskCard extends ConsumerWidget {
       return LongPressDraggable<int>(
         data: task.id,
         feedback: feedback,
-        dragAnchorStrategy: pointerDragAnchorStrategy,
+        dragAnchorStrategy: childDragAnchorStrategy,
         delay: const Duration(milliseconds: 120),
         maxSimultaneousDrags: 1,
         child: handle,
@@ -177,14 +182,15 @@ class TaskCard extends ConsumerWidget {
     return Draggable<int>(
       data: task.id,
       feedback: feedback,
-      dragAnchorStrategy: pointerDragAnchorStrategy,
+      dragAnchorStrategy: childDragAnchorStrategy,
       maxSimultaneousDrags: 1,
       child: handle,
     );
   }
 
-  String _remainingLabel(BuildContext context, DateTime deadline) {
+  String _remainingLabel(BuildContext context, DateTime? deadline) {
     final l10n = AppLocalizations.of(context);
+    if (deadline == null) return l10n.noDeadline;
     final value = DeadlineService.remaining(deadline, now: now);
     if (value.isNegative) {
       final overdueMinutes = value.inMinutes.abs();

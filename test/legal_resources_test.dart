@@ -15,7 +15,11 @@ void main() {
         expect(file.existsSync(), isTrue, reason: file.path);
         final contents = file.readAsStringSync();
         expect(contents.trim(), isNotEmpty, reason: file.path);
-        expect(contents, contains('2026-07-15'), reason: file.path);
+        expect(
+          contents,
+          contains(fileName == 'privacy.md' ? '2026-08-12' : '2026-07-15'),
+          reason: file.path,
+        );
       }
     }
   });

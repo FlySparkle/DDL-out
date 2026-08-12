@@ -416,6 +416,10 @@ void main() {
 
     expect(find.text('Ship release'), findsOneWidget);
     expect(find.byIcon(Icons.drag_indicator), findsNWidgets(2));
+    expect(
+      tester.getCenter(find.byTooltip('Drag to reorder category')).dx,
+      lessThan(tester.getCenter(find.byTooltip('Collapse category')).dx),
+    );
     final categoryClear = find.byTooltip(
       'Remove completed tasks in this category',
     );
@@ -490,6 +494,60 @@ void main() {
     expect(repository.lastOrder, [2, 1]);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'hidden category handles make each category card long-pressable',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({'show_drag_handles': false});
+      final now = DateTime(2026, 7, 19, 12).toUtc();
+      final snapshot = BoardSnapshot(
+        categories: [
+          Category(
+            id: 1,
+            name: 'First',
+            colorArgb: 0xFF4A90E2,
+            sortOrder: 0,
+            createdAtUtc: now,
+            updatedAtUtc: now,
+          ),
+          Category(
+            id: 2,
+            name: 'Second',
+            colorArgb: 0xFF50E3C2,
+            sortOrder: 1,
+            createdAtUtc: now,
+            updatedAtUtc: now,
+          ),
+        ],
+        tasks: const [],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            boardProvider.overrideWith((ref) => Stream.value(snapshot)),
+            currentTimeProvider.overrideWith((ref) => Stream.value(now)),
+          ],
+          child: MaterialApp(
+            theme: ThemeData(platform: TargetPlatform.android),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
+            home: const AppNavigationShell(location: '/', child: BoardPage()),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byTooltip('Drag to reorder category'), findsNothing);
+      final draggables = find.byType(LongPressDraggable<CategoryDragData>);
+      expect(draggables, findsNWidgets(2));
+      expect(
+        find.ancestor(of: find.text('First'), matching: draggables),
+        findsOneWidget,
+      );
+    },
+  );
 }
 
 double _fixedNavigationWidth(WidgetTester tester) {

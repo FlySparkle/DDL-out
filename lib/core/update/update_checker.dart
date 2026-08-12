@@ -9,12 +9,26 @@ final githubLatestReleaseUri = Uri.parse(
   'https://api.github.com/repos/FlySparkle/DDL-out/releases/latest',
 );
 
+Map<String, String> githubReleaseRequestHeaders({String? token}) {
+  final accessToken = token?.trim();
+  return {
+    HttpHeaders.acceptHeader: 'application/vnd.github+json',
+    HttpHeaders.userAgentHeader: 'DDL-out update checker',
+    'X-GitHub-Api-Version': '2022-11-28',
+    if (accessToken != null && accessToken.isNotEmpty)
+      HttpHeaders.authorizationHeader: 'Bearer $accessToken',
+  };
+}
+
 abstract interface class LatestReleaseReader {
   Future<LatestRelease> readLatestRelease();
 }
 
+final githubAccessTokenProvider = Provider<String?>((ref) => null);
+
 final latestReleaseReaderProvider = Provider<LatestReleaseReader>(
-  (ref) => const GitHubLatestReleaseReader(),
+  (ref) =>
+      GitHubLatestReleaseReader(token: ref.watch(githubAccessTokenProvider)),
 );
 
 final updateCheckerProvider = Provider<AppUpdateChecker>(
@@ -25,7 +39,9 @@ final updateCheckerProvider = Provider<AppUpdateChecker>(
 );
 
 class GitHubLatestReleaseReader implements LatestReleaseReader {
-  const GitHubLatestReleaseReader();
+  const GitHubLatestReleaseReader({this.token});
+
+  final String? token;
 
   @override
   Future<LatestRelease> readLatestRelease() async {
@@ -34,9 +50,9 @@ class GitHubLatestReleaseReader implements LatestReleaseReader {
       final request = await client
           .getUrl(githubLatestReleaseUri)
           .timeout(const Duration(seconds: 5));
-      request.headers
-        ..set(HttpHeaders.acceptHeader, 'application/vnd.github+json')
-        ..set(HttpHeaders.userAgentHeader, 'DDL-out update checker');
+      for (final header in githubReleaseRequestHeaders(token: token).entries) {
+        request.headers.set(header.key, header.value);
+      }
       final response = await request.close().timeout(
         const Duration(seconds: 5),
       );

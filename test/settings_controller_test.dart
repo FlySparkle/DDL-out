@@ -82,26 +82,91 @@ void main() {
     expect(container.read(settingsControllerProvider).useSystemFont, isFalse);
   });
 
-  test('task drag handle defaults on and persists its toggle', () async {
+  test('drag handles default on and persist as one toggle', () async {
     SharedPreferences.setMockInitialValues({});
     final container = ProviderContainer();
     addTearDown(container.dispose);
     final controller = container.read(settingsControllerProvider.notifier);
     await pumpEventQueue();
 
-    expect(
-      container.read(settingsControllerProvider).showTaskDragHandle,
-      isTrue,
-    );
+    expect(container.read(settingsControllerProvider).showDragHandles, isTrue);
 
-    await controller.setShowTaskDragHandle(false);
+    await controller.setShowDragHandles(false);
 
     final preferences = await SharedPreferences.getInstance();
-    expect(preferences.getBool('show_task_drag_handle'), isFalse);
+    expect(preferences.getBool('show_drag_handles'), isFalse);
+    expect(container.read(settingsControllerProvider).showDragHandles, isFalse);
+  });
+
+  test('legacy task and category toggles migrate to one preference', () async {
+    SharedPreferences.setMockInitialValues({
+      'show_task_drag_handle': false,
+      'show_category_drag_handle': true,
+    });
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    container.read(settingsControllerProvider);
+    await pumpEventQueue();
+
+    expect(container.read(settingsControllerProvider).showDragHandles, isFalse);
+
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getBool('show_drag_handles'), isFalse);
+    expect(preferences.containsKey('show_task_drag_handle'), isFalse);
+    expect(preferences.containsKey('show_category_drag_handle'), isFalse);
+  });
+
+  test('legacy text scale migrates to the nearest font preset', () async {
+    SharedPreferences.setMockInitialValues({'text_scale': 1.4});
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    container.read(settingsControllerProvider);
+    await pumpEventQueue();
+
     expect(
-      container.read(settingsControllerProvider).showTaskDragHandle,
-      isFalse,
+      container.read(settingsControllerProvider).fontSizePreset,
+      FontSizePreset.extraLarge,
     );
+  });
+
+  test('font preset persists and removes the legacy scale', () async {
+    SharedPreferences.setMockInitialValues({'text_scale': 0.8});
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    final controller = container.read(settingsControllerProvider.notifier);
+    await pumpEventQueue();
+
+    await controller.setFontSizePreset(FontSizePreset.larger);
+
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getString('font_size_preset'), 'larger');
+    expect(preferences.containsKey('text_scale'), isFalse);
+    expect(
+      container.read(settingsControllerProvider).fontSizePreset,
+      FontSizePreset.larger,
+    );
+  });
+
+  test('GitHub token persists and can be cleared', () async {
+    SharedPreferences.setMockInitialValues({});
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    final controller = container.read(settingsControllerProvider.notifier);
+    await pumpEventQueue();
+
+    await controller.setGithubToken('  github_pat_test  ');
+    var preferences = await SharedPreferences.getInstance();
+    expect(preferences.getString('github_token'), 'github_pat_test');
+    expect(
+      container.read(settingsControllerProvider).githubToken,
+      'github_pat_test',
+    );
+
+    await controller.setGithubToken('');
+    preferences = await SharedPreferences.getInstance();
+    expect(preferences.containsKey('github_token'), isFalse);
+    expect(container.read(settingsControllerProvider).githubToken, isEmpty);
   });
 
   test('defaults to following the system language', () async {

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=DDL out!
+Name[zh_CN]=DDL out!
+Comment=Local-first deadline board
+Comment[zh_CN]=本地优先的截止事项看板
+Exec=ddl-out
+TryExec=ddl-out
+Icon=com.flysparkle.ddl_out
+Terminal=false
+Categories=Office;Utility;
+StartupNotify=true
+StartupWMClass=com.flysparkle.ddl_out

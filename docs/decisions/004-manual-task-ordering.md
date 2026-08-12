@@ -17,8 +17,9 @@ each category while keeping that order across restarts, backups, and peer sync.
 - Changing completion state does not change `positionKey`.
 - Dragging a task writes a new category and/or position.
 - Each category header exposes an explicit sort action that rewrites that
-  category to:
-  incomplete tasks by deadline, followed by completed tasks by deadline.
+  category to incomplete tasks by deadline, followed by completed tasks by
+  deadline. Within either group, tasks without a deadline sort after tasks
+  with a deadline.
 - Task position participates in database migration, JSON backups, and sync
   field operations.
 

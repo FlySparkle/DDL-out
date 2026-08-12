@@ -9,7 +9,7 @@ final class DriftTaskRepository implements TaskRepository {
   @override
   Future<int> create({
     required String name,
-    required DateTime deadlineUtc,
+    required DateTime? deadlineUtc,
     required int? categoryId,
     String details = '',
     String detailImagesJson = '[]',
@@ -25,7 +25,7 @@ final class DriftTaskRepository implements TaskRepository {
   Future<void> update({
     required Task task,
     required String name,
-    required DateTime deadlineUtc,
+    required DateTime? deadlineUtc,
     required int? categoryId,
     String? details,
     String? detailImagesJson,

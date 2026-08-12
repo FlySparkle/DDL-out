@@ -61,7 +61,7 @@ void main() {
     expect(task.details, '附上界面截图');
     expect(task.detailImagesJson, contains('"id":"shot"'));
     expect(task.categoryId, categoryId);
-    expect(task.deadlineUtc.toUtc(), DateTime.utc(2026, 8, 1, 12));
+    expect(task.deadlineUtc!.toUtc(), DateTime.utc(2026, 8, 1, 12));
   });
 
   test('future schema version is rejected', () {
@@ -76,6 +76,17 @@ void main() {
       () => BackupService(target, appVersionReader).parseBackup(bytes),
       throwsA(isA<BackupException>()),
     );
+  });
+
+  test('backup round trip preserves a task without a deadline', () async {
+    await source.createTask(name: '以后再做', deadlineUtc: null, categoryId: null);
+    final sourceService = BackupService(source, appVersionReader);
+    final bytes = await sourceService.createBackupBytes();
+    final preview = BackupService(target, appVersionReader).parseBackup(bytes);
+
+    await BackupService(target, appVersionReader).restore(preview);
+
+    expect((await target.readTasks()).single.deadlineUtc, null);
   });
 
   test('dangling category reference is rejected', () {

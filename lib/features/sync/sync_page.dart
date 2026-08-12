@@ -703,11 +703,14 @@ class _ConflictCard extends ConsumerWidget {
           ? l10n.completed
           : l10n.markIncomplete;
     }
-    if (field == SyncField.deadlineUtc && value is String) {
-      final date = DateTime.tryParse(value)?.toLocal();
-      if (date != null) {
-        return '${MaterialLocalizations.of(context).formatMediumDate(date)} '
-            '${MaterialLocalizations.of(context).formatTimeOfDay(TimeOfDay.fromDateTime(date))}';
+    if (field == SyncField.deadlineUtc) {
+      if (value == null) return l10n.noDeadline;
+      if (value is String) {
+        final date = DateTime.tryParse(value)?.toLocal();
+        if (date != null) {
+          return '${MaterialLocalizations.of(context).formatMediumDate(date)} '
+              '${MaterialLocalizations.of(context).formatTimeOfDay(TimeOfDay.fromDateTime(date))}';
+        }
       }
     }
     if (field == SyncField.categorySyncId && value == null) {

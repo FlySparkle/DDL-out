@@ -120,6 +120,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get absoluteTime => '绝对时间';
 
   @override
+  String get noDeadline => '不限时';
+
+  @override
+  String get noDeadlineSubtitle => '这个事项不会显示倒计时，按截止时间排序时排在有截止时间的事项之后。';
+
+  @override
   String get days => '日';
 
   @override
@@ -243,18 +249,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get useSystemFontSubtitle => '关闭后使用内嵌的思源黑体';
 
   @override
-  String get showTaskDragHandle => '显示事项拖拽标签头';
+  String get showDragHandles => '显示拖拽标签头';
 
   @override
-  String get showTaskDragHandleSubtitle => '开启时仅可拖动左侧标签头；关闭后长按事项条即可拖动。';
+  String get showDragHandlesSubtitle => '开启时从事项和分类左侧标签头拖动；关闭后长按事项条或分类卡片即可拖动。';
 
   @override
   String get fontSize => '字号';
 
   @override
-  String fontSizeValue(int percent) {
-    return '$percent%';
-  }
+  String get fontSizeSmaller => '更小';
+
+  @override
+  String get fontSizeStandard => '标准';
+
+  @override
+  String get fontSizeLarger => '更大';
+
+  @override
+  String get fontSizeExtraLarge => '超大';
 
   @override
   String get navigationMode => '边栏模式';
@@ -487,6 +500,34 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get checkForUpdatesSubtitle => '检查 GitHub 上是否有新版本';
+
+  @override
+  String get githubToken => 'GitHub Token（可选）';
+
+  @override
+  String get githubTokenSubtitle =>
+      '仅保存在本机应用设置中，并只用于 GitHub Release API 请求；可减少匿名请求的频率限制。';
+
+  @override
+  String get showGithubToken => '显示 Token';
+
+  @override
+  String get hideGithubToken => '隐藏 Token';
+
+  @override
+  String get clearGithubToken => '清除';
+
+  @override
+  String get saveGithubToken => '保存 Token';
+
+  @override
+  String get invalidGithubToken => 'Token 不能包含空格或换行';
+
+  @override
+  String get githubTokenSaved => 'GitHub Token 已保存';
+
+  @override
+  String get githubTokenCleared => 'GitHub Token 已清除';
 
   @override
   String get updateAvailableTitle => '发现新版本';
