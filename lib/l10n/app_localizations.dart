@@ -322,6 +322,18 @@ abstract class AppLocalizations {
   /// **'绝对时间'**
   String get absoluteTime;
 
+  /// No description provided for @noDeadline.
+  ///
+  /// In zh, this message translates to:
+  /// **'不限时'**
+  String get noDeadline;
+
+  /// No description provided for @noDeadlineSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'这个事项不会显示倒计时，按截止时间排序时排在有截止时间的事项之后。'**
+  String get noDeadlineSubtitle;
+
   /// No description provided for @days.
   ///
   /// In zh, this message translates to:
@@ -568,17 +580,17 @@ abstract class AppLocalizations {
   /// **'关闭后使用内嵌的思源黑体'**
   String get useSystemFontSubtitle;
 
-  /// No description provided for @showTaskDragHandle.
+  /// No description provided for @showDragHandles.
   ///
   /// In zh, this message translates to:
-  /// **'显示事项拖拽标签头'**
-  String get showTaskDragHandle;
+  /// **'显示拖拽标签头'**
+  String get showDragHandles;
 
-  /// No description provided for @showTaskDragHandleSubtitle.
+  /// No description provided for @showDragHandlesSubtitle.
   ///
   /// In zh, this message translates to:
-  /// **'开启时仅可拖动左侧标签头；关闭后长按事项条即可拖动。'**
-  String get showTaskDragHandleSubtitle;
+  /// **'开启时从事项和分类左侧标签头拖动；关闭后长按事项条或分类卡片即可拖动。'**
+  String get showDragHandlesSubtitle;
 
   /// No description provided for @fontSize.
   ///
@@ -586,11 +598,29 @@ abstract class AppLocalizations {
   /// **'字号'**
   String get fontSize;
 
-  /// No description provided for @fontSizeValue.
+  /// No description provided for @fontSizeSmaller.
   ///
   /// In zh, this message translates to:
-  /// **'{percent}%'**
-  String fontSizeValue(int percent);
+  /// **'更小'**
+  String get fontSizeSmaller;
+
+  /// No description provided for @fontSizeStandard.
+  ///
+  /// In zh, this message translates to:
+  /// **'标准'**
+  String get fontSizeStandard;
+
+  /// No description provided for @fontSizeLarger.
+  ///
+  /// In zh, this message translates to:
+  /// **'更大'**
+  String get fontSizeLarger;
+
+  /// No description provided for @fontSizeExtraLarge.
+  ///
+  /// In zh, this message translates to:
+  /// **'超大'**
+  String get fontSizeExtraLarge;
 
   /// No description provided for @navigationMode.
   ///
@@ -998,6 +1028,60 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'检查 GitHub 上是否有新版本'**
   String get checkForUpdatesSubtitle;
+
+  /// No description provided for @githubToken.
+  ///
+  /// In zh, this message translates to:
+  /// **'GitHub Token（可选）'**
+  String get githubToken;
+
+  /// No description provided for @githubTokenSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'仅保存在本机应用设置中，并只用于 GitHub Release API 请求；可减少匿名请求的频率限制。'**
+  String get githubTokenSubtitle;
+
+  /// No description provided for @showGithubToken.
+  ///
+  /// In zh, this message translates to:
+  /// **'显示 Token'**
+  String get showGithubToken;
+
+  /// No description provided for @hideGithubToken.
+  ///
+  /// In zh, this message translates to:
+  /// **'隐藏 Token'**
+  String get hideGithubToken;
+
+  /// No description provided for @clearGithubToken.
+  ///
+  /// In zh, this message translates to:
+  /// **'清除'**
+  String get clearGithubToken;
+
+  /// No description provided for @saveGithubToken.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存 Token'**
+  String get saveGithubToken;
+
+  /// No description provided for @invalidGithubToken.
+  ///
+  /// In zh, this message translates to:
+  /// **'Token 不能包含空格或换行'**
+  String get invalidGithubToken;
+
+  /// No description provided for @githubTokenSaved.
+  ///
+  /// In zh, this message translates to:
+  /// **'GitHub Token 已保存'**
+  String get githubTokenSaved;
+
+  /// No description provided for @githubTokenCleared.
+  ///
+  /// In zh, this message translates to:
+  /// **'GitHub Token 已清除'**
+  String get githubTokenCleared;
 
   /// No description provided for @updateAvailableTitle.
   ///

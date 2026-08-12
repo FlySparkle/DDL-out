@@ -645,9 +645,9 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
   late final GeneratedColumn<DateTime> deadlineUtc = GeneratedColumn<DateTime>(
     'deadline_utc',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _categoryIdMeta = const VerificationMeta(
     'categoryId',
@@ -802,8 +802,6 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
           _deadlineUtcMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_deadlineUtcMeta);
     }
     if (data.containsKey('category_id')) {
       context.handle(
@@ -901,7 +899,7 @@ class $TasksTable extends Tasks with TableInfo<$TasksTable, Task> {
       deadlineUtc: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}deadline_utc'],
-      )!,
+      ),
       categoryId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}category_id'],
@@ -945,7 +943,7 @@ class Task extends DataClass implements Insertable<Task> {
   final String name;
   final String details;
   final String detailImagesJson;
-  final DateTime deadlineUtc;
+  final DateTime? deadlineUtc;
   final int? categoryId;
   final String? positionKey;
   final bool isCompleted;
@@ -959,7 +957,7 @@ class Task extends DataClass implements Insertable<Task> {
     required this.name,
     required this.details,
     required this.detailImagesJson,
-    required this.deadlineUtc,
+    this.deadlineUtc,
     this.categoryId,
     this.positionKey,
     required this.isCompleted,
@@ -978,7 +976,9 @@ class Task extends DataClass implements Insertable<Task> {
     map['name'] = Variable<String>(name);
     map['details'] = Variable<String>(details);
     map['detail_images_json'] = Variable<String>(detailImagesJson);
-    map['deadline_utc'] = Variable<DateTime>(deadlineUtc);
+    if (!nullToAbsent || deadlineUtc != null) {
+      map['deadline_utc'] = Variable<DateTime>(deadlineUtc);
+    }
     if (!nullToAbsent || categoryId != null) {
       map['category_id'] = Variable<int>(categoryId);
     }
@@ -1006,7 +1006,9 @@ class Task extends DataClass implements Insertable<Task> {
       name: Value(name),
       details: Value(details),
       detailImagesJson: Value(detailImagesJson),
-      deadlineUtc: Value(deadlineUtc),
+      deadlineUtc: deadlineUtc == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deadlineUtc),
       categoryId: categoryId == null && nullToAbsent
           ? const Value.absent()
           : Value(categoryId),
@@ -1036,7 +1038,7 @@ class Task extends DataClass implements Insertable<Task> {
       name: serializer.fromJson<String>(json['name']),
       details: serializer.fromJson<String>(json['details']),
       detailImagesJson: serializer.fromJson<String>(json['detailImagesJson']),
-      deadlineUtc: serializer.fromJson<DateTime>(json['deadlineUtc']),
+      deadlineUtc: serializer.fromJson<DateTime?>(json['deadlineUtc']),
       categoryId: serializer.fromJson<int?>(json['categoryId']),
       positionKey: serializer.fromJson<String?>(json['positionKey']),
       isCompleted: serializer.fromJson<bool>(json['isCompleted']),
@@ -1055,7 +1057,7 @@ class Task extends DataClass implements Insertable<Task> {
       'name': serializer.toJson<String>(name),
       'details': serializer.toJson<String>(details),
       'detailImagesJson': serializer.toJson<String>(detailImagesJson),
-      'deadlineUtc': serializer.toJson<DateTime>(deadlineUtc),
+      'deadlineUtc': serializer.toJson<DateTime?>(deadlineUtc),
       'categoryId': serializer.toJson<int?>(categoryId),
       'positionKey': serializer.toJson<String?>(positionKey),
       'isCompleted': serializer.toJson<bool>(isCompleted),
@@ -1072,7 +1074,7 @@ class Task extends DataClass implements Insertable<Task> {
     String? name,
     String? details,
     String? detailImagesJson,
-    DateTime? deadlineUtc,
+    Value<DateTime?> deadlineUtc = const Value.absent(),
     Value<int?> categoryId = const Value.absent(),
     Value<String?> positionKey = const Value.absent(),
     bool? isCompleted,
@@ -1086,7 +1088,7 @@ class Task extends DataClass implements Insertable<Task> {
     name: name ?? this.name,
     details: details ?? this.details,
     detailImagesJson: detailImagesJson ?? this.detailImagesJson,
-    deadlineUtc: deadlineUtc ?? this.deadlineUtc,
+    deadlineUtc: deadlineUtc.present ? deadlineUtc.value : this.deadlineUtc,
     categoryId: categoryId.present ? categoryId.value : this.categoryId,
     positionKey: positionKey.present ? positionKey.value : this.positionKey,
     isCompleted: isCompleted ?? this.isCompleted,
@@ -1194,7 +1196,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
   final Value<String> name;
   final Value<String> details;
   final Value<String> detailImagesJson;
-  final Value<DateTime> deadlineUtc;
+  final Value<DateTime?> deadlineUtc;
   final Value<int?> categoryId;
   final Value<String?> positionKey;
   final Value<bool> isCompleted;
@@ -1223,7 +1225,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     required String name,
     this.details = const Value.absent(),
     this.detailImagesJson = const Value.absent(),
-    required DateTime deadlineUtc,
+    this.deadlineUtc = const Value.absent(),
     this.categoryId = const Value.absent(),
     this.positionKey = const Value.absent(),
     this.isCompleted = const Value.absent(),
@@ -1232,7 +1234,6 @@ class TasksCompanion extends UpdateCompanion<Task> {
     this.completedAtUtc = const Value.absent(),
     this.deletedAtUtc = const Value.absent(),
   }) : name = Value(name),
-       deadlineUtc = Value(deadlineUtc),
        createdAtUtc = Value(createdAtUtc),
        updatedAtUtc = Value(updatedAtUtc);
   static Insertable<Task> custom({
@@ -1273,7 +1274,7 @@ class TasksCompanion extends UpdateCompanion<Task> {
     Value<String>? name,
     Value<String>? details,
     Value<String>? detailImagesJson,
-    Value<DateTime>? deadlineUtc,
+    Value<DateTime?>? deadlineUtc,
     Value<int?>? categoryId,
     Value<String?>? positionKey,
     Value<bool>? isCompleted,
@@ -4578,7 +4579,7 @@ typedef $$TasksTableCreateCompanionBuilder =
       required String name,
       Value<String> details,
       Value<String> detailImagesJson,
-      required DateTime deadlineUtc,
+      Value<DateTime?> deadlineUtc,
       Value<int?> categoryId,
       Value<String?> positionKey,
       Value<bool> isCompleted,
@@ -4594,7 +4595,7 @@ typedef $$TasksTableUpdateCompanionBuilder =
       Value<String> name,
       Value<String> details,
       Value<String> detailImagesJson,
-      Value<DateTime> deadlineUtc,
+      Value<DateTime?> deadlineUtc,
       Value<int?> categoryId,
       Value<String?> positionKey,
       Value<bool> isCompleted,
@@ -4929,7 +4930,7 @@ class $$TasksTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String> details = const Value.absent(),
                 Value<String> detailImagesJson = const Value.absent(),
-                Value<DateTime> deadlineUtc = const Value.absent(),
+                Value<DateTime?> deadlineUtc = const Value.absent(),
                 Value<int?> categoryId = const Value.absent(),
                 Value<String?> positionKey = const Value.absent(),
                 Value<bool> isCompleted = const Value.absent(),
@@ -4959,7 +4960,7 @@ class $$TasksTableTableManager
                 required String name,
                 Value<String> details = const Value.absent(),
                 Value<String> detailImagesJson = const Value.absent(),
-                required DateTime deadlineUtc,
+                Value<DateTime?> deadlineUtc = const Value.absent(),
                 Value<int?> categoryId = const Value.absent(),
                 Value<String?> positionKey = const Value.absent(),
                 Value<bool> isCompleted = const Value.absent(),

@@ -97,10 +97,10 @@ class AppearanceSettingsSection extends ConsumerWidget {
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               secondary: const Icon(Icons.drag_indicator),
-              title: Text(l10n.showTaskDragHandle),
-              subtitle: Text(l10n.showTaskDragHandleSubtitle),
-              value: settings.showTaskDragHandle,
-              onChanged: controller.setShowTaskDragHandle,
+              title: Text(l10n.showDragHandles),
+              subtitle: Text(l10n.showDragHandlesSubtitle),
+              value: settings.showDragHandles,
+              onChanged: controller.setShowDragHandles,
             ),
           ],
         ),
@@ -109,16 +109,32 @@ class AppearanceSettingsSection extends ConsumerWidget {
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.format_size),
           title: Text(l10n.fontSize),
-          subtitle: Slider(
-            value: settings.textScale,
-            min: 0.8,
-            max: 1.4,
-            divisions: 6,
-            label: l10n.fontSizeValue((settings.textScale * 100).round()),
-            onChanged: controller.setTextScale,
-          ),
-          trailing: Text(
-            l10n.fontSizeValue((settings.textScale * 100).round()),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Row(
+              key: const ValueKey('font-size-preset-row'),
+              children: [
+                for (final (index, preset)
+                    in FontSizePreset.values.indexed) ...[
+                  if (index > 0) const SizedBox(width: 8),
+                  Expanded(
+                    child: ChoiceChip(
+                      label: SizedBox(
+                        width: double.infinity,
+                        child: Text(
+                          _fontSizeLabel(l10n, preset),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      selected: settings.fontSizePreset == preset,
+                      onSelected: (_) => controller.setFontSizePreset(preset),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -177,5 +193,14 @@ class AppearanceSettingsSection extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  String _fontSizeLabel(AppLocalizations l10n, FontSizePreset preset) {
+    return switch (preset) {
+      FontSizePreset.smaller => l10n.fontSizeSmaller,
+      FontSizePreset.standard => l10n.fontSizeStandard,
+      FontSizePreset.larger => l10n.fontSizeLarger,
+      FontSizePreset.extraLarge => l10n.fontSizeExtraLarge,
+    };
   }
 }

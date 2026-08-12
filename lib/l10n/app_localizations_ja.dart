@@ -120,6 +120,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get absoluteTime => '日時指定';
 
   @override
+  String get noDeadline => '期限なし';
+
+  @override
+  String get noDeadlineSubtitle => 'このタスクにはカウントダウンがなく、期限順では期限付きタスクの後に並びます。';
+
+  @override
   String get days => '日';
 
   @override
@@ -243,19 +249,26 @@ class AppLocalizationsJa extends AppLocalizations {
   String get useSystemFontSubtitle => 'オフにすると内蔵の Noto Sans SC を使用します';
 
   @override
-  String get showTaskDragHandle => 'タスクのドラッグハンドルを表示';
+  String get showDragHandles => 'ドラッグハンドルを表示';
 
   @override
-  String get showTaskDragHandleSubtitle =>
-      'オンでは左側のハンドルのみ、オフではタスク行を長押ししてドラッグします。';
+  String get showDragHandlesSubtitle =>
+      'オンではタスクとカテゴリーの左側ハンドルから、オフではタスク行またはカテゴリカードを長押ししてドラッグします。';
 
   @override
   String get fontSize => '文字サイズ';
 
   @override
-  String fontSizeValue(int percent) {
-    return '$percent%';
-  }
+  String get fontSizeSmaller => '小さめ';
+
+  @override
+  String get fontSizeStandard => '標準';
+
+  @override
+  String get fontSizeLarger => '大きめ';
+
+  @override
+  String get fontSizeExtraLarge => '特大';
 
   @override
   String get navigationMode => 'サイドバーのモード';
@@ -489,6 +502,34 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get checkForUpdatesSubtitle => 'GitHub で新しいリリースを確認';
+
+  @override
+  String get githubToken => 'GitHub Token（任意）';
+
+  @override
+  String get githubTokenSubtitle =>
+      'このアプリのローカル設定だけに保存し、GitHub Release API のリクエストだけに使用します。匿名リクエストの制限を軽減できます。';
+
+  @override
+  String get showGithubToken => 'Token を表示';
+
+  @override
+  String get hideGithubToken => 'Token を隠す';
+
+  @override
+  String get clearGithubToken => '消去';
+
+  @override
+  String get saveGithubToken => 'Token を保存';
+
+  @override
+  String get invalidGithubToken => 'Token に空白や改行は使用できません';
+
+  @override
+  String get githubTokenSaved => 'GitHub Token を保存しました';
+
+  @override
+  String get githubTokenCleared => 'GitHub Token を消去しました';
 
   @override
   String get updateAvailableTitle => 'アップデートがあります';

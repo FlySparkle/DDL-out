@@ -97,7 +97,7 @@ void main() {
       for (final database in [computer, phone]) {
         final task = (await database.readTasks()).single;
         expect(task.name, '电脑改名');
-        expect(task.deadlineUtc.toUtc(), changedDeadline);
+        expect(task.deadlineUtc!.toUtc(), changedDeadline);
         expect(await database.openConflictCount(), 0);
       }
     });
@@ -143,6 +143,26 @@ void main() {
       final remote = (await phone.readTasks()).single;
       expect(remote.details, '同步详情');
       expect(remote.detailImagesJson, contains('sync-image'));
+      expect(
+        await computer.computeSyncStateDigest(),
+        await phone.computeSyncStateDigest(),
+      );
+    });
+
+    test('removing a deadline syncs to the paired device', () async {
+      await _seedAndPair(computer, phone);
+      final task = (await computer.readTasks()).single;
+
+      await computer.updateTask(
+        task: task,
+        name: task.name,
+        deadlineUtc: null,
+        categoryId: task.categoryId,
+      );
+      await _exchange(computer, phone);
+
+      expect((await computer.readTasks()).single.deadlineUtc, null);
+      expect((await phone.readTasks()).single.deadlineUtc, null);
       expect(
         await computer.computeSyncStateDigest(),
         await phone.computeSyncStateDigest(),

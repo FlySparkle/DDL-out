@@ -16,12 +16,16 @@ class SettingsController extends Notifier<AppSettingsState> {
   static const _languageKey = 'app_language';
   static const _dynamicColorKey = 'dynamic_color';
   static const _useSystemFontKey = 'use_system_font';
-  static const _showTaskDragHandleKey = 'show_task_drag_handle';
+  static const _showDragHandlesKey = 'show_drag_handles';
+  static const _legacyShowTaskDragHandleKey = 'show_task_drag_handle';
+  static const _legacyShowCategoryDragHandleKey = 'show_category_drag_handle';
   static const _legacyFontFamilyKey = 'font_family';
-  static const _textScaleKey = 'text_scale';
+  static const _fontSizePresetKey = 'font_size_preset';
+  static const _legacyTextScaleKey = 'text_scale';
   static const _navigationModeKey = 'navigation_mode';
   static const _sidebarAlignmentKey = 'sidebar_alignment';
   static const _checkForUpdatesOnStartupKey = 'check_updates_on_startup';
+  static const _githubTokenKey = 'github_token';
   static const _largeSyncTransferKey = 'large_sync_transfer';
   static const _legacyAdaptiveDesktopSidebarKey = 'adaptive_desktop_sidebar';
   static const _collapsedKey = 'collapsed_categories';
@@ -41,6 +45,15 @@ class SettingsController extends Notifier<AppSettingsState> {
   Future<void> _load() async {
     final preferences = await SharedPreferences.getInstance();
     _preferences = preferences;
+    final showDragHandles = _readShowDragHandles(preferences);
+    if (preferences.containsKey(_legacyShowTaskDragHandleKey) ||
+        preferences.containsKey(_legacyShowCategoryDragHandleKey)) {
+      await preferences.setBool(_showDragHandlesKey, showDragHandles);
+      await Future.wait([
+        preferences.remove(_legacyShowTaskDragHandleKey),
+        preferences.remove(_legacyShowCategoryDragHandleKey),
+      ]);
+    }
     if (!ref.mounted) return;
 
     state = AppSettingsState(
@@ -49,12 +62,13 @@ class SettingsController extends Notifier<AppSettingsState> {
       language: _readLanguage(preferences),
       dynamicColorEnabled: preferences.getBool(_dynamicColorKey) ?? true,
       useSystemFont: _readUseSystemFont(preferences),
-      showTaskDragHandle: preferences.getBool(_showTaskDragHandleKey) ?? true,
-      textScale: (preferences.getDouble(_textScaleKey) ?? 1).clamp(0.8, 1.4),
+      showDragHandles: showDragHandles,
+      fontSizePreset: _readFontSizePreset(preferences),
       sidebarMode: _readSidebarMode(preferences),
       sidebarAlignment: _readSidebarAlignment(preferences),
       checkForUpdatesOnStartup:
           preferences.getBool(_checkForUpdatesOnStartupKey) ?? true,
+      githubToken: preferences.getString(_githubTokenKey)?.trim() ?? '',
       largeSyncTransferEnabled:
           preferences.getBool(_largeSyncTransferKey) ?? false,
       collapsedCategoryIds:
@@ -62,9 +76,13 @@ class SettingsController extends Notifier<AppSettingsState> {
               .map(int.tryParse)
               .whereType<int>()
               .toSet(),
-      deadlineMode: preferences.getString(_deadlineModeKey) == 'absolute'
-          ? DeadlineMode.absolute
-          : DeadlineMode.relative,
+      deadlineMode:
+          DeadlineMode.values
+              .where(
+                (mode) => mode.name == preferences.getString(_deadlineModeKey),
+              )
+              .firstOrNull ??
+          DeadlineMode.relative,
       relativeDays: preferences.getInt(_relativeDaysKey) ?? 1,
       relativeHours: preferences.getInt(_relativeHoursKey) ?? 0,
       relativeMinutes: preferences.getInt(_relativeMinutesKey) ?? 0,
@@ -90,6 +108,30 @@ class SettingsController extends Notifier<AppSettingsState> {
     if (value != null) return value;
     final legacy = preferences.getString(_legacyFontFamilyKey);
     return legacy == null || legacy == 'system';
+  }
+
+  static bool _readShowDragHandles(SharedPreferences preferences) {
+    return preferences.getBool(_showDragHandlesKey) ??
+        preferences.getBool(_legacyShowTaskDragHandleKey) ??
+        preferences.getBool(_legacyShowCategoryDragHandleKey) ??
+        true;
+  }
+
+  static FontSizePreset _readFontSizePreset(SharedPreferences preferences) {
+    final stored = preferences.getString(_fontSizePresetKey);
+    final preset = FontSizePreset.values
+        .where((candidate) => candidate.storageValue == stored)
+        .firstOrNull;
+    if (preset != null) return preset;
+
+    final legacyScale = preferences.getDouble(_legacyTextScaleKey) ?? 1;
+    return FontSizePreset.values.reduce(
+      (closest, candidate) =>
+          (candidate.scale - legacyScale).abs() <
+              (closest.scale - legacyScale).abs()
+          ? candidate
+          : closest,
+    );
   }
 
   static SidebarMode _readSidebarMode(SharedPreferences preferences) {
@@ -137,15 +179,21 @@ class SettingsController extends Notifier<AppSettingsState> {
     await (await _prefs()).setBool(_useSystemFontKey, value);
   }
 
-  Future<void> setShowTaskDragHandle(bool value) async {
-    state = state.copyWith(showTaskDragHandle: value);
-    await (await _prefs()).setBool(_showTaskDragHandleKey, value);
+  Future<void> setShowDragHandles(bool value) async {
+    state = state.copyWith(showDragHandles: value);
+    final preferences = await _prefs();
+    await preferences.setBool(_showDragHandlesKey, value);
+    await Future.wait([
+      preferences.remove(_legacyShowTaskDragHandleKey),
+      preferences.remove(_legacyShowCategoryDragHandleKey),
+    ]);
   }
 
-  Future<void> setTextScale(double value) async {
-    final normalized = value.clamp(0.8, 1.4);
-    state = state.copyWith(textScale: normalized);
-    await (await _prefs()).setDouble(_textScaleKey, normalized);
+  Future<void> setFontSizePreset(FontSizePreset value) async {
+    state = state.copyWith(fontSizePreset: value);
+    final preferences = await _prefs();
+    await preferences.setString(_fontSizePresetKey, value.storageValue);
+    await preferences.remove(_legacyTextScaleKey);
   }
 
   Future<void> setSidebarMode(SidebarMode value) async {
@@ -161,6 +209,17 @@ class SettingsController extends Notifier<AppSettingsState> {
   Future<void> setCheckForUpdatesOnStartup(bool value) async {
     state = state.copyWith(checkForUpdatesOnStartup: value);
     await (await _prefs()).setBool(_checkForUpdatesOnStartupKey, value);
+  }
+
+  Future<void> setGithubToken(String value) async {
+    final normalized = value.trim();
+    state = state.copyWith(githubToken: normalized);
+    final preferences = await _prefs();
+    if (normalized.isEmpty) {
+      await preferences.remove(_githubTokenKey);
+    } else {
+      await preferences.setString(_githubTokenKey, normalized);
+    }
   }
 
   Future<void> setLargeSyncTransferEnabled(bool value) async {

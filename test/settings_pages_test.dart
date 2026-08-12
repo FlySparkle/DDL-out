@@ -107,6 +107,68 @@ void main() {
     expect(preferences.getString('app_language'), 'ja');
   });
 
+  testWidgets('appearance settings use four tappable text-size presets', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(
+      _app(const AppearanceSettingsPage(), _FakeLauncher(true)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Slider), findsNothing);
+    expect(
+      find.widgetWithText(SwitchListTile, 'Show drag handles'),
+      findsOneWidget,
+    );
+    for (final label in ['Smaller', 'Standard', 'Larger', 'Extra large']) {
+      expect(find.widgetWithText(ChoiceChip, label), findsOneWidget);
+    }
+
+    final presetRow = find.byKey(const ValueKey('font-size-preset-row'));
+    await tester.ensureVisible(presetRow);
+    await tester.pumpAndSettle();
+    final rowRect = tester.getRect(presetRow);
+    final chipRects = tester
+        .widgetList<ChoiceChip>(find.byType(ChoiceChip))
+        .map((chip) => tester.getRect(find.byWidget(chip)))
+        .toList(growable: false);
+    expect(chipRects, hasLength(4));
+    expect(chipRects.first.left, closeTo(rowRect.left, 0.1));
+    expect(chipRects.last.right, closeTo(rowRect.right, 0.1));
+    for (final rect in chipRects.skip(1)) {
+      expect(rect.width, closeTo(chipRects.first.width, 0.1));
+    }
+
+    final larger = find.widgetWithText(ChoiceChip, 'Larger');
+    await tester.tap(larger);
+    await tester.pumpAndSettle();
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getString('font_size_preset'), 'larger');
+  });
+
+  testWidgets('system settings save an optional GitHub token', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(
+      _app(const SystemDataSettingsPage(), _FakeLauncher(true)),
+    );
+    await tester.pumpAndSettle();
+
+    final field = find.byKey(const ValueKey('github-token-field'));
+    await tester.ensureVisible(field);
+    await tester.pumpAndSettle();
+    await tester.enterText(field, 'github_pat_test');
+    final save = find.widgetWithText(FilledButton, 'Save token');
+    await tester.ensureVisible(save);
+    await tester.pumpAndSettle();
+    await tester.tap(save);
+    await tester.pumpAndSettle();
+
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getString('github_token'), 'github_pat_test');
+    expect(find.text('GitHub token saved'), findsOneWidget);
+  });
+
   testWidgets('content tiles keep vertical space between hover surfaces', (
     tester,
   ) async {

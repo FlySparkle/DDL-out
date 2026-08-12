@@ -23,7 +23,7 @@ void main() {
 
     final key = SyncPairingKeyCodec.encode(payload);
 
-    expect(key, startsWith('DDL5:'));
+    expect(key, startsWith('DDL6:'));
     expect(SyncPairingKeyCodec.decode(key), payload);
   });
 

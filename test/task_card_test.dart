@@ -80,7 +80,7 @@ void main() {
   testWidgets('hidden handle uses the whole row as a long-press drag target', (
     tester,
   ) async {
-    SharedPreferences.setMockInitialValues({'show_task_drag_handle': false});
+    SharedPreferences.setMockInitialValues({'show_drag_handles': false});
     final now = DateTime(2026, 7, 19, 12);
     final task = Task(
       id: 1,
@@ -223,5 +223,50 @@ void main() {
     expect(find.text('Card title'), findsOneWidget);
     expect(find.text('Card details'), findsNothing);
     expect(find.byKey(const ValueKey('task-details-block')), findsNothing);
+  });
+
+  testWidgets('task without a deadline has no countdown or progress', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final now = DateTime(2026, 7, 19, 12);
+    final task = Task(
+      id: 1,
+      name: 'Someday task',
+      details: '',
+      detailImagesJson: '[]',
+      deadlineUtc: null,
+      categoryId: null,
+      isCompleted: false,
+      createdAtUtc: now.toUtc(),
+      updatedAtUtc: now.toUtc(),
+      completedAtUtc: null,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: Scaffold(
+            body: TaskCard(
+              task: task,
+              snapshot: BoardSnapshot(categories: const [], tasks: [task]),
+              categoryColor: Colors.blue,
+              longestRemaining: const Duration(hours: 2),
+              now: now,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('No deadline'), findsOneWidget);
+    final progress = tester.widget<AnimatedFractionallySizedBox>(
+      find.byKey(const ValueKey('deadline-progress')),
+    );
+    expect(progress.widthFactor, 0);
   });
 }

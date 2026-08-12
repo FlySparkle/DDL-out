@@ -1,6 +1,6 @@
 # Privacy Policy
 
-Last updated: 2026-07-15
+Last updated: 2026-08-12
 
 DDL out! (the “App”) is a local-first desktop and mobile application. The Chinese version of this policy is authoritative; this translation is provided for convenience.
 
@@ -15,6 +15,8 @@ The App includes no analytics, advertising, or telemetry service and creates no 
 “Check for updates on startup” is enabled by default and can be disabled under “System & data.” When enabled, the App requests the GitHub Releases API once after each process launch to compare public version numbers. A similar request is made when you manually check for updates on the About page.
 
 An update request contains no task or backup data. GitHub nevertheless receives ordinary HTTPS connection information such as your IP address, request time, and the `DDL-out update checker` User-Agent. GitHub handles this information under the [GitHub General Privacy Statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement).
+
+You may optionally save a GitHub token under “System & data” to reduce anonymous API rate limiting. The token is stored in the App's local preferences and is not included in the task database or JSON backups. During an update check it is sent to GitHub in the HTTPS `Authorization` request header. You can clear it from the same settings page at any time.
 
 ## External links
 

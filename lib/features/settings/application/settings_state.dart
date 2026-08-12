@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
 
-enum DeadlineMode { relative, absolute }
+enum DeadlineMode { relative, absolute, none }
 
 enum SidebarMode { floating, fixed }
+
+enum FontSizePreset {
+  smaller('smaller', 0.85),
+  standard('standard', 1),
+  larger('larger', 1.15),
+  extraLarge('extra-large', 1.3);
+
+  const FontSizePreset(this.storageValue, this.scale);
+
+  final String storageValue;
+  final double scale;
+}
 
 enum AppLanguage {
   system(null),
@@ -37,11 +49,12 @@ class AppSettingsState {
     this.language = AppLanguage.system,
     this.dynamicColorEnabled = true,
     this.useSystemFont = true,
-    this.showTaskDragHandle = true,
-    this.textScale = 1,
+    this.showDragHandles = true,
+    this.fontSizePreset = FontSizePreset.standard,
     this.sidebarMode = SidebarMode.floating,
     this.sidebarAlignment = SidebarAlignment.alignBetween,
     this.checkForUpdatesOnStartup = true,
+    this.githubToken = '',
     this.largeSyncTransferEnabled = false,
     this.collapsedCategoryIds = const <int>{},
     this.deadlineMode = DeadlineMode.relative,
@@ -55,11 +68,12 @@ class AppSettingsState {
   final AppLanguage language;
   final bool dynamicColorEnabled;
   final bool useSystemFont;
-  final bool showTaskDragHandle;
-  final double textScale;
+  final bool showDragHandles;
+  final FontSizePreset fontSizePreset;
   final SidebarMode sidebarMode;
   final SidebarAlignment sidebarAlignment;
   final bool checkForUpdatesOnStartup;
+  final String githubToken;
   final bool largeSyncTransferEnabled;
   final Set<int> collapsedCategoryIds;
   final DeadlineMode deadlineMode;
@@ -67,7 +81,7 @@ class AppSettingsState {
   final int relativeHours;
   final int relativeMinutes;
 
-  TextScaler get textScaler => TextScaler.linear(textScale);
+  TextScaler get textScaler => TextScaler.linear(fontSizePreset.scale);
 
   AppSettingsState copyWith({
     bool? hydrated,
@@ -75,11 +89,12 @@ class AppSettingsState {
     AppLanguage? language,
     bool? dynamicColorEnabled,
     bool? useSystemFont,
-    bool? showTaskDragHandle,
-    double? textScale,
+    bool? showDragHandles,
+    FontSizePreset? fontSizePreset,
     SidebarMode? sidebarMode,
     SidebarAlignment? sidebarAlignment,
     bool? checkForUpdatesOnStartup,
+    String? githubToken,
     bool? largeSyncTransferEnabled,
     Set<int>? collapsedCategoryIds,
     DeadlineMode? deadlineMode,
@@ -93,12 +108,13 @@ class AppSettingsState {
       language: language ?? this.language,
       dynamicColorEnabled: dynamicColorEnabled ?? this.dynamicColorEnabled,
       useSystemFont: useSystemFont ?? this.useSystemFont,
-      showTaskDragHandle: showTaskDragHandle ?? this.showTaskDragHandle,
-      textScale: textScale ?? this.textScale,
+      showDragHandles: showDragHandles ?? this.showDragHandles,
+      fontSizePreset: fontSizePreset ?? this.fontSizePreset,
       sidebarMode: sidebarMode ?? this.sidebarMode,
       sidebarAlignment: sidebarAlignment ?? this.sidebarAlignment,
       checkForUpdatesOnStartup:
           checkForUpdatesOnStartup ?? this.checkForUpdatesOnStartup,
+      githubToken: githubToken ?? this.githubToken,
       largeSyncTransferEnabled:
           largeSyncTransferEnabled ?? this.largeSyncTransferEnabled,
       collapsedCategoryIds: collapsedCategoryIds ?? this.collapsedCategoryIds,

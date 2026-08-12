@@ -31,7 +31,7 @@ class Tasks extends Table {
   TextColumn get name => text().withLength(min: 1, max: 200)();
   TextColumn get details => text().withDefault(const Constant(''))();
   TextColumn get detailImagesJson => text().withDefault(const Constant('[]'))();
-  DateTimeColumn get deadlineUtc => dateTime()();
+  DateTimeColumn get deadlineUtc => dateTime().nullable()();
   IntColumn get categoryId => integer().nullable().references(
     Categories,
     #id,
@@ -152,7 +152,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -197,6 +197,9 @@ class AppDatabase extends _$AppDatabase {
             [_positionForIndex(index), row.read<int>('id')],
           );
         }
+      }
+      if (from < 6) {
+        await migrator.alterTable(TableMigration(tasks));
       }
     },
     beforeOpen: (_) async {
@@ -270,7 +273,7 @@ class AppDatabase extends _$AppDatabase {
 
   Future<int> createTask({
     required String name,
-    required DateTime deadlineUtc,
+    required DateTime? deadlineUtc,
     required int? categoryId,
     String details = '',
     String detailImagesJson = '[]',
@@ -287,7 +290,7 @@ class AppDatabase extends _$AppDatabase {
   Future<void> updateTask({
     required Task task,
     required String name,
-    required DateTime deadlineUtc,
+    required DateTime? deadlineUtc,
     required int? categoryId,
     String? details,
     String? detailImagesJson,

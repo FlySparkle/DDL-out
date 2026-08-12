@@ -79,12 +79,16 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
         widget.task?.categoryId ??
         widget.initialCategoryId ??
         _uncategorizedValue;
-    _mode = widget.task == null ? settings.deadlineMode : DeadlineMode.absolute;
+    _mode = widget.task == null
+        ? settings.deadlineMode
+        : widget.task!.deadlineUtc == null
+        ? DeadlineMode.none
+        : DeadlineMode.absolute;
     _relativeDirty = widget.task == null && _mode == DeadlineMode.relative;
 
     final now = DateTime.now();
     final initialAbsolute =
-        widget.task?.deadlineUtc.toLocal() ??
+        widget.task?.deadlineUtc?.toLocal() ??
         now.add(
           Duration(
             days: settings.relativeDays,
@@ -99,7 +103,7 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
       initialAbsolute.hour,
       initialAbsolute.minute,
     );
-    final remaining = widget.task == null
+    final remaining = widget.task == null || widget.task!.deadlineUtc == null
         ? NormalizedDuration(
             days: settings.relativeDays,
             hours: settings.relativeHours,
@@ -219,6 +223,11 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
                   label: Text(l10n.absoluteTime),
                   icon: const Icon(Icons.event_outlined),
                 ),
+                ButtonSegment(
+                  value: DeadlineMode.none,
+                  label: Text(l10n.noDeadline),
+                  icon: const Icon(Icons.all_inclusive),
+                ),
               ],
               selected: {_mode},
               onSelectionChanged: (selection) => _switchMode(selection.single),
@@ -226,9 +235,11 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
             const SizedBox(height: 16),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 180),
-              child: _mode == DeadlineMode.relative
-                  ? _relativeFields(l10n)
-                  : _absoluteFields(),
+              child: switch (_mode) {
+                DeadlineMode.relative => _relativeFields(l10n),
+                DeadlineMode.absolute => _absoluteFields(),
+                DeadlineMode.none => _noDeadlineFields(l10n),
+              },
             ),
           ],
         ),
@@ -302,18 +313,31 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
     );
   }
 
+  Widget _noDeadlineFields(AppLocalizations l10n) {
+    return Container(
+      key: const ValueKey('no-deadline'),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(l10n.noDeadlineSubtitle),
+    );
+  }
+
   void _switchMode(DeadlineMode next) {
     if (_mode == next) return;
     setState(() {
       if (next == DeadlineMode.absolute) {
-        if (_relativeDirty) {
+        if (_mode == DeadlineMode.relative && _relativeDirty) {
           final value = _normalizeRelative();
           _absoluteLocal = DateTime.now().add(
             Duration(minutes: value.totalMinutes),
           );
           _relativeDirty = false;
         }
-      } else {
+      } else if (next == DeadlineMode.relative &&
+          _mode == DeadlineMode.absolute) {
         _setRelative(_durationFromAbsolute(_absoluteLocal));
         _relativeDirty = false;
       }
@@ -384,15 +408,17 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
     final normalized = _normalizeRelative();
-    final deadline = DeadlineService.resolveUtc(
-      _mode == DeadlineMode.relative && _relativeDirty
-          ? RelativeDeadline(
-              days: normalized.days,
-              hours: normalized.hours,
-              minutes: normalized.minutes,
-            )
-          : AbsoluteDeadline(_absoluteLocal),
-    );
+    final deadline = _mode == DeadlineMode.none
+        ? null
+        : DeadlineService.resolveUtc(
+            _mode == DeadlineMode.relative && _relativeDirty
+                ? RelativeDeadline(
+                    days: normalized.days,
+                    hours: normalized.hours,
+                    minutes: normalized.minutes,
+                  )
+                : AbsoluteDeadline(_absoluteLocal),
+          );
     final categoryId = _categoryValue == _uncategorizedValue
         ? null
         : _categoryValue;

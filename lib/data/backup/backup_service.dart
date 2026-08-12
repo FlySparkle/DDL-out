@@ -11,7 +11,7 @@ import '../repositories/board_providers.dart';
 import '../task_details/task_detail_document.dart';
 import '../task_details/task_detail_image.dart';
 
-const backupSchemaVersion = 5;
+const backupSchemaVersion = 6;
 const _backupPositionGap = 1000000000000;
 
 class BackupException implements Exception {
@@ -78,7 +78,7 @@ class BackupService {
               'name': task.name,
               'details': task.details,
               'detailImages': jsonDecode(task.detailImagesJson),
-              'deadlineUtc': task.deadlineUtc.toUtc().toIso8601String(),
+              'deadlineUtc': task.deadlineUtc?.toUtc().toIso8601String(),
               'categoryId': task.categoryId,
               'positionKey': task.positionKey,
               'isCompleted': task.isCompleted,
@@ -159,7 +159,7 @@ class BackupService {
             if (version < 5) 'positionKey': legacyPositions[row['id'] as int],
           },
       ];
-      _validate(categoryRows, taskRows);
+      _validate(categoryRows, taskRows, allowNoDeadline: version >= 6);
       return BackupPreview(
         categories: categoryRows,
         tasks: taskRows,
@@ -214,8 +214,9 @@ class BackupService {
 
   void _validate(
     List<Map<String, Object?>> categoryRows,
-    List<Map<String, Object?>> taskRows,
-  ) {
+    List<Map<String, Object?>> taskRows, {
+    required bool allowNoDeadline,
+  }) {
     final categoryIds = <int>{};
     final categoryOrders = <int>{};
     for (final row in categoryRows) {
@@ -275,7 +276,16 @@ class BackupService {
               .add(positionKey)) {
         throw const BackupException('事项顺序无效');
       }
-      _utc(row, 'deadlineUtc');
+      if (!row.containsKey('deadlineUtc')) {
+        throw const BackupException('事项缺少截止时间字段');
+      }
+      if (row['deadlineUtc'] == null) {
+        if (!allowNoDeadline) {
+          throw const BackupException('旧版备份的事项必须包含截止时间');
+        }
+      } else {
+        _utc(row, 'deadlineUtc');
+      }
       _utc(row, 'createdAtUtc');
       _utc(row, 'updatedAtUtc');
       if (row['completedAtUtc'] != null) {
@@ -325,7 +335,9 @@ class BackupService {
         name: _name(row, 200),
         details: Value(row['details']! as String),
         detailImagesJson: Value(jsonEncode(row['detailImages']! as List)),
-        deadlineUtc: _utc(row, 'deadlineUtc'),
+        deadlineUtc: Value(
+          row['deadlineUtc'] == null ? null : _utc(row, 'deadlineUtc'),
+        ),
         categoryId: Value(row['categoryId'] as int?),
         positionKey: Value(row['positionKey']! as String),
         isCompleted: Value(row['isCompleted']! as bool),

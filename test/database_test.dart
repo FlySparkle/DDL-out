@@ -134,4 +134,30 @@ void main() {
       ]);
     },
   );
+
+  test('deadline sort places tasks without deadlines last', () async {
+    await database.createTask(
+      name: 'Later',
+      deadlineUtc: DateTime.utc(2026, 8, 2),
+      categoryId: null,
+    );
+    await database.createTask(
+      name: 'Someday',
+      deadlineUtc: null,
+      categoryId: null,
+    );
+    await database.createTask(
+      name: 'Sooner',
+      deadlineUtc: DateTime.utc(2026, 8, 1),
+      categoryId: null,
+    );
+
+    await database.sortTasksByDeadline(null);
+
+    expect((await database.watchBoard().first).tasks.map((task) => task.name), [
+      'Sooner',
+      'Later',
+      'Someday',
+    ]);
+  });
 }

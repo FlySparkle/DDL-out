@@ -1,6 +1,6 @@
 # 隐私政策
 
-最后更新：2026-07-15
+最后更新：2026-08-12
 
 DDL out!（以下简称“本应用”）是一款本地优先的桌面与移动端应用。本政策的中文版本为解释基准；其他语言版本仅为方便阅读而提供。
 
@@ -15,6 +15,8 @@ DDL out!（以下简称“本应用”）是一款本地优先的桌面与移动
 “启动时自动检查更新”默认开启，您可以在“系统与数据”中关闭。启用时，本应用会在每次进程启动后请求 GitHub Releases API，以比较公开版本号。您在“关于”页面手动检查更新时，也会发出同类请求。
 
 更新请求不会包含事项或备份数据，但 GitHub 会像处理普通 HTTPS 请求一样接收 IP 地址、请求时间和 `DDL-out update checker` User-Agent 等标准连接信息。相关处理受 [GitHub 隐私声明](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement)约束。
+
+您可以选择在“系统与数据”中保存 GitHub Token，以减少匿名 API 请求的频率限制。Token 保存在本机应用偏好设置中，不会进入事项数据库或 JSON 备份；检查更新时会作为 HTTPS `Authorization` 请求头发送给 GitHub。您可以随时在同一设置页清除它。
 
 ## 外部链接
 

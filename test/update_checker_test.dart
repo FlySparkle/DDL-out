@@ -1,5 +1,6 @@
 import 'package:ddl_out/core/update/update_checker.dart';
 import 'package:ddl_out/core/version/app_version.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -62,6 +63,30 @@ void main() {
     expect(release.version, 'v1.2.0');
     expect(release.assets, hasLength(1));
     expect(release.assets.single.size, 42);
+  });
+
+  test('release reader receives the optional GitHub access token', () {
+    final container = ProviderContainer(
+      overrides: [
+        githubAccessTokenProvider.overrideWithValue('github_pat_test'),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final reader =
+        container.read(latestReleaseReaderProvider)
+            as GitHubLatestReleaseReader;
+    expect(reader.token, 'github_pat_test');
+  });
+
+  test('GitHub access token is sent as a bearer authorization header', () {
+    expect(
+      githubReleaseRequestHeaders(
+        token: '  github_pat_test  ',
+      )['authorization'],
+      'Bearer github_pat_test',
+    );
+    expect(githubReleaseRequestHeaders().containsKey('authorization'), isFalse);
   });
 }
 

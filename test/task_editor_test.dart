@@ -98,6 +98,60 @@ void main() {
     expect(find.text('Today'), findsOneWidget);
     expect(find.text('Tomorrow'), findsOneWidget);
     expect(find.text('This weekend'), findsOneWidget);
+    final modeControl = find.byKey(const ValueKey('deadline-mode'));
+    expect(
+      find.descendant(of: modeControl, matching: find.text('No deadline')),
+      findsOneWidget,
+    );
+    expect(
+      tester.getCenter(find.text('Date and time')).dx,
+      lessThan(tester.getCenter(find.text('No deadline')).dx),
+    );
+  });
+
+  testWidgets('no-deadline mode persists a null deadline', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final repository = _RecordingTaskRepository();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [taskRepositoryProvider.overrideWithValue(repository)],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
+          home: const Scaffold(
+            body: TaskEditor(
+              snapshot: BoardSnapshot(categories: [], tasks: []),
+              initialCategoryId: null,
+              task: null,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Task name'),
+      'Someday',
+    );
+    final noDeadline = find.descendant(
+      of: find.byKey(const ValueKey('deadline-mode')),
+      matching: find.text('No deadline'),
+    );
+    await tester.ensureVisible(noDeadline);
+    await tester.pumpAndSettle();
+    await tester.tap(noDeadline);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('no-deadline')), findsOneWidget);
+    final save = find.widgetWithText(FilledButton, 'Save');
+    await tester.ensureVisible(save);
+    await tester.pumpAndSettle();
+    await tester.tap(save);
+    await tester.pumpAndSettle();
+
+    expect(repository.createCalled, isTrue);
+    expect(repository.createdDeadline, isNull);
   });
 
   testWidgets('details accepts a pasted image and persists it with the task', (
@@ -188,6 +242,40 @@ void main() {
     expect((document.blocks[2] as TaskDetailTextBlock).text, 'After');
   });
 
+  testWidgets('details editor follows the configured input fill color', (
+    tester,
+  ) async {
+    const fillColor = Color(0xFFEEE2D2);
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: ThemeData(
+            inputDecorationTheme: const InputDecorationTheme(
+              fillColor: fillColor,
+            ),
+          ),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: TaskDetailContentEditor(
+              initialDocument: TaskDetailDocumentCodec.decode(
+                details: '',
+                images: const [],
+              ),
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final container = tester.widget<Container>(
+      find.byKey(const ValueKey('task-detail-content-editor')),
+    );
+    expect((container.decoration! as BoxDecoration).color, fillColor);
+  });
+
   testWidgets('removing an embedded image drops its persisted bytes', (
     tester,
   ) async {
@@ -265,6 +353,8 @@ void main() {
 
 class _RecordingTaskRepository implements TaskRepository {
   DateTime? updatedDeadline;
+  DateTime? createdDeadline;
+  bool createCalled = false;
   String? createdDetails;
   String? createdDetailImagesJson;
 
@@ -277,11 +367,13 @@ class _RecordingTaskRepository implements TaskRepository {
   @override
   Future<int> create({
     required String name,
-    required DateTime deadlineUtc,
+    required DateTime? deadlineUtc,
     required int? categoryId,
     String details = '',
     String detailImagesJson = '[]',
   }) async {
+    createCalled = true;
+    createdDeadline = deadlineUtc;
     createdDetails = details;
     createdDetailImagesJson = detailImagesJson;
     return 1;
@@ -309,7 +401,7 @@ class _RecordingTaskRepository implements TaskRepository {
   Future<void> update({
     required Task task,
     required String name,
-    required DateTime deadlineUtc,
+    required DateTime? deadlineUtc,
     required int? categoryId,
     String? details,
     String? detailImagesJson,
