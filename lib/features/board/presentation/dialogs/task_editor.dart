@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/time/deadline_service.dart';
+import '../../../../core/alarms/system_alarm_service.dart';
 import '../../../../data/database/app_database.dart';
 import '../../../../data/repositories/board_providers.dart';
 import '../../../../data/task_details/task_detail_document.dart';
@@ -19,6 +20,7 @@ import '../widgets/task_markdown_preview.dart';
 import 'adaptive_editor.dart';
 import 'confirmation_dialog.dart';
 import 'editor_frame.dart';
+import 'system_alarm_dialog.dart';
 
 Future<void> showTaskEditor(
   BuildContext context, {
@@ -269,6 +271,14 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
                 DeadlineMode.none => _noDeadlineFields(l10n),
               },
             ),
+            if (SystemAlarmService.supported) ...[
+              const SizedBox(height: 16),
+              FilledButton.tonalIcon(
+                icon: const Icon(Icons.alarm_add_outlined),
+                label: Text(l10n.addSystemAlarm),
+                onPressed: _saving ? null : _showAlarm,
+              ),
+            ],
           ],
         ),
       ),
@@ -283,6 +293,26 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
         onPressed: _saving ? null : _save,
         child: Text(l10n.save),
       ),
+    );
+  }
+
+  Future<void> _showAlarm() async {
+    final document = _detailEditorKey.currentState?.document ?? _detailDocument;
+    final time = switch (_mode) {
+      DeadlineMode.relative when _relativeDirty => DateTime.now().add(
+        Duration(minutes: _normalizeRelative().totalMinutes),
+      ),
+      DeadlineMode.none => DateTime.now().add(const Duration(minutes: 3)),
+      _ => _absoluteLocal,
+    };
+    await showSystemAlarmDialog(
+      context,
+      title: _nameController.text,
+      notes: document.blocks
+          .whereType<TaskDetailTextBlock>()
+          .map((block) => block.text)
+          .join('\n'),
+      time: time,
     );
   }
 

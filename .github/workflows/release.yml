@@ -1,6 +1,12 @@
 name: Release
 
 on:
+  workflow_dispatch:
+    inputs:
+      skip_checks:
+        description: 'Build Windows and Android only; skip tests and validation'
+        type: boolean
+        default: true
   push:
     tags:
       - "v*"
@@ -18,10 +24,11 @@ env:
 
 jobs:
   verify:
-    name: Verify release source
+    name: Prepare metadata and optional release checks
     runs-on: ubuntu-latest
     outputs:
       git_commit: ${{ steps.build_metadata.outputs.git_commit }}
+      version: ${{ steps.build_metadata.outputs.version }}
     defaults:
       run:
         working-directory: ${{ env.PROJECT_DIR }}
@@ -30,26 +37,39 @@ jobs:
       - name: Resolve build metadata
         id: build_metadata
         shell: bash
-        run: echo "git_commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "git_commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          version=$(awk '/^version:/ {print $2; exit}' pubspec.yaml)
+          echo "version=v${version%%+*}" >> "$GITHUB_OUTPUT"
       - name: Verify tag matches application version
+        if: github.event_name == 'push'
         shell: bash
         run: |
           version=$(awk '/^version:/ {print $2; exit}' pubspec.yaml)
           version=${version%%+*}
           test "$GITHUB_REF_NAME" = "v$version"
       - uses: subosito/flutter-action@v2
+        if: github.event_name != 'workflow_dispatch' || !inputs.skip_checks
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
       - run: flutter pub get --enforce-lockfile
+        if: github.event_name != 'workflow_dispatch' || !inputs.skip_checks
       - run: dart run build_runner build --force-jit
+        if: github.event_name != 'workflow_dispatch' || !inputs.skip_checks
       - run: flutter gen-l10n
+        if: github.event_name != 'workflow_dispatch' || !inputs.skip_checks
       - name: Verify generated sources are committed
+        if: github.event_name != 'workflow_dispatch' || !inputs.skip_checks
         run: git diff --exit-code
       - run: dart format --output=none --set-exit-if-changed .
+        if: github.event_name != 'workflow_dispatch' || !inputs.skip_checks
       - run: flutter analyze
+        if: github.event_name != 'workflow_dispatch' || !inputs.skip_checks
       - run: flutter test
+        if: github.event_name != 'workflow_dispatch' || !inputs.skip_checks
+
 
   check-secrets:
     name: Check signing secrets
@@ -92,7 +112,7 @@ jobs:
       - run: flutter pub get --enforce-lockfile
       - run: flutter build windows --release --dart-define=GIT_COMMIT=${{ needs.verify.outputs.git_commit }}
       - shell: pwsh
-        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath "DDL_out_$env:GITHUB_REF_NAME-windows-x64-portable.zip" -CompressionLevel Optimal
+        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath "DDL_out_${{ needs.verify.outputs.version }}-windows-x64-portable.zip" -CompressionLevel Optimal
       - uses: actions/upload-artifact@v4
         with:
           name: windows-release
@@ -149,7 +169,7 @@ jobs:
       - run: flutter build apk --release --target-platform ${{ matrix.target }} --dart-define=GIT_COMMIT=${{ needs.verify.outputs.git_commit }}
       - name: Name release asset
         shell: bash
-        run: mv build/app/outputs/flutter-apk/app-release.apk "DDL_out_$GITHUB_REF_NAME-android-${{ matrix.abi }}.apk"
+        run: mv build/app/outputs/flutter-apk/app-release.apk "DDL_out_${{ needs.verify.outputs.version }}-android-${{ matrix.abi }}.apk"
       - uses: actions/upload-artifact@v4
         with:
           name: android-${{ matrix.abi }}-release
@@ -157,6 +177,7 @@ jobs:
           if-no-files-found: error
 
   linux:
+    if: github.event_name != 'workflow_dispatch'
     name: Package Linux release
     needs: verify
     runs-on: ubuntu-latest
@@ -206,6 +227,7 @@ jobs:
           if-no-files-found: error
 
   macos:
+    if: github.event_name != 'workflow_dispatch'
     name: Package macOS DMG release
     needs: verify
     runs-on: macos-latest
@@ -236,6 +258,7 @@ jobs:
           if-no-files-found: error
 
   ios:
+    if: github.event_name != 'workflow_dispatch'
     name: Package iOS IPA release
     needs: [verify, check-secrets]
     runs-on: macos-latest
@@ -363,7 +386,7 @@ jobs:
       - run: flutter pub get --enforce-lockfile
       - run: flutter build windows --release --dart-define=GIT_COMMIT=${{ needs.verify.outputs.git_commit }}
       - shell: pwsh
-        run: Compress-Archive -Path build/windows/arm64/runner/Release/* -DestinationPath "DDL_out_$env:GITHUB_REF_NAME-windows-arm64-portable.zip" -CompressionLevel Optimal
+        run: Compress-Archive -Path build/windows/arm64/runner/Release/* -DestinationPath "DDL_out_${{ needs.verify.outputs.version }}-windows-arm64-portable.zip" -CompressionLevel Optimal
       - uses: actions/upload-artifact@v4
         with:
           name: windows-arm64-release
@@ -371,6 +394,7 @@ jobs:
           if-no-files-found: error
 
   publish:
+    if: github.event_name != 'workflow_dispatch'
     name: Create GitHub release
     needs: [windows, windows-arm64, android, linux, macos, ios]
     runs-on: ubuntu-latest

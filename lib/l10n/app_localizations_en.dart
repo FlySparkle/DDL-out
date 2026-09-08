@@ -9,6 +9,92 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get addSystemAlarm => 'Add to system alarms';
+
+  @override
+  String get alarmTitle => 'Alarm title';
+
+  @override
+  String get alarmNotes => 'Alarm details';
+
+  @override
+  String get alarmAndroidInfo =>
+      'Creates alarms in your phone’s Clock app for the next occurrence of each time today or tomorrow. Later task edits or deletion do not update exported alarms.';
+
+  @override
+  String get alarmWindowsInfo =>
+      'Creates scheduled Windows notifications, not entries in Clock. Reminders can appear while this app is closed, but may be missed if the PC is off. Later task edits are not synced.';
+
+  @override
+  String get multipleAlarms => 'Multiple alarms';
+
+  @override
+  String get alarmRelativeTo => 'Relative to this alarm:';
+
+  @override
+  String get alarmBefore => 'Before';
+
+  @override
+  String get alarmAfter => 'After';
+
+  @override
+  String get alarmInterval => 'Every';
+
+  @override
+  String get alarmRepeat => 'Add';
+
+  @override
+  String get alarmTimes => 'times';
+
+  @override
+  String get alarmConfirm => 'Add alarms';
+
+  @override
+  String get alarmDone => 'Done';
+
+  @override
+  String get alarmInvalidNumber => 'Enter an integer in range';
+
+  @override
+  String get alarmPastTime =>
+      'Every alarm must be in the future. Adjust the time, interval or repeat count.';
+
+  @override
+  String get alarmClockDateUnsupported =>
+      'The system Clock interface cannot set arbitrary dates. Each alarm must match the next occurrence of its time today or tomorrow.';
+
+  @override
+  String get alarmClockUnavailable =>
+      'No compatible Clock app was found, or it could not accept the request.';
+
+  @override
+  String get alarmNotificationsDisabled =>
+      'Allow notifications for DDL out! in Windows Settings, then try again.';
+
+  @override
+  String get alarmFailed => 'Could not add the alarms. Please try again later.';
+
+  @override
+  String alarmPreview(int count) {
+    return '$count alarms to add, including the original';
+  }
+
+  @override
+  String alarmClockSubmitted(int count) {
+    return 'Submitted $count requests to Clock. Please confirm the created alarms in your Clock app.';
+  }
+
+  @override
+  String alarmScheduled(int count) {
+    return 'Scheduled $count Windows reminders.';
+  }
+
+  @override
+  String alarmPartial(int count) {
+    return '$count requests were submitted or reminders remain. Check the system before adding again to avoid duplicates.';
+  }
+
+  @override
   String get exitMarkdownFullscreen => 'Exit full screen';
 
   @override

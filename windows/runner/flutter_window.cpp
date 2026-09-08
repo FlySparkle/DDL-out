@@ -1,4 +1,5 @@
 #include "flutter_window.h"
+#include "system_alarm_channel.h"
 
 #include <flutter/standard_method_codec.h>
 
@@ -144,10 +145,12 @@ bool FlutterWindow::OnCreate() {
     return false;
   }
   RegisterPlugins(flutter_controller_->engine());
+  RegisterSystemAlarmPlugin(flutter_controller_->engine()->GetRegistrarForPlugin("SystemAlarmPlugin"));
   DesktopMultiWindowSetWindowCreatedCallback([](void* controller) {
     auto* flutter_view_controller =
         reinterpret_cast<flutter::FlutterViewController*>(controller);
     RegisterPlugins(flutter_view_controller->engine());
+    RegisterSystemAlarmPlugin(flutter_view_controller->engine()->GetRegistrarForPlugin("SystemAlarmPlugin"));
   });
   update_channel_ =
       std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(

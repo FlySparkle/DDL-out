@@ -9,6 +9,90 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
+  String get addSystemAlarm => 'システムアラームに追加';
+
+  @override
+  String get alarmTitle => 'アラーム名';
+
+  @override
+  String get alarmNotes => 'アラームの内容';
+
+  @override
+  String get alarmAndroidInfo =>
+      '端末の時計アプリにアラームを作成します。今日または明日の次に到来する時刻に限ります。作成後のタスク変更・削除はアラームに反映されません。';
+
+  @override
+  String get alarmWindowsInfo =>
+      'Windows の予約通知を作成します。「時計」の一覧には追加されません。アプリを閉じても通知できますが、PC の電源が切れていると届かない場合があります。タスクの変更は反映されません。';
+
+  @override
+  String get multipleAlarms => '複数アラーム';
+
+  @override
+  String get alarmRelativeTo => 'このアラームの';
+
+  @override
+  String get alarmBefore => '前';
+
+  @override
+  String get alarmAfter => '後';
+
+  @override
+  String get alarmInterval => '間隔';
+
+  @override
+  String get alarmRepeat => '追加回数';
+
+  @override
+  String get alarmTimes => '回';
+
+  @override
+  String get alarmConfirm => '追加する';
+
+  @override
+  String get alarmDone => '完了';
+
+  @override
+  String get alarmInvalidNumber => '範囲内の整数を入力';
+
+  @override
+  String get alarmPastTime => 'すべてのアラームを現在より後にしてください。時刻・間隔・回数を調整してください。';
+
+  @override
+  String get alarmClockDateUnsupported =>
+      '時計アプリの連携では任意の日付を指定できません。各時刻が今日または明日の次の到来時刻になるよう調整してください。';
+
+  @override
+  String get alarmClockUnavailable => '対応する時計アプリがないか、リクエストを受け付けられませんでした。';
+
+  @override
+  String get alarmNotificationsDisabled =>
+      'Windows の設定で DDL out! の通知を許可してから、再度追加してください。';
+
+  @override
+  String get alarmFailed => 'アラームを追加できませんでした。後でもう一度お試しください。';
+
+  @override
+  String alarmPreview(int count) {
+    return '元のアラームを含めて $count 件を追加';
+  }
+
+  @override
+  String alarmClockSubmitted(int count) {
+    return '時計に $count 件を送信しました。実際の作成結果は時計アプリでご確認ください。';
+  }
+
+  @override
+  String alarmScheduled(int count) {
+    return 'Windows の通知を $count 件予約しました。';
+  }
+
+  @override
+  String alarmPartial(int count) {
+    return '$count 件のリクエストまたは通知が残っています。重複を避けるためシステム側をご確認ください。';
+  }
+
+  @override
   String get exitMarkdownFullscreen => '全画面表示を終了';
 
   @override

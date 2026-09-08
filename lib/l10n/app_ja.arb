@@ -1,4 +1,56 @@
 {
+  "addSystemAlarm": "システムアラームに追加",
+  "alarmTitle": "アラーム名",
+  "alarmNotes": "アラームの内容",
+  "alarmAndroidInfo": "端末の時計アプリにアラームを作成します。今日または明日の次に到来する時刻に限ります。作成後のタスク変更・削除はアラームに反映されません。",
+  "alarmWindowsInfo": "Windows の予約通知を作成します。「時計」の一覧には追加されません。アプリを閉じても通知できますが、PC の電源が切れていると届かない場合があります。タスクの変更は反映されません。",
+  "multipleAlarms": "複数アラーム",
+  "alarmRelativeTo": "このアラームの",
+  "alarmBefore": "前",
+  "alarmAfter": "後",
+  "alarmInterval": "間隔",
+  "alarmRepeat": "追加回数",
+  "alarmTimes": "回",
+  "alarmConfirm": "追加する",
+  "alarmDone": "完了",
+  "alarmInvalidNumber": "範囲内の整数を入力",
+  "alarmPastTime": "すべてのアラームを現在より後にしてください。時刻・間隔・回数を調整してください。",
+  "alarmClockDateUnsupported": "時計アプリの連携では任意の日付を指定できません。各時刻が今日または明日の次の到来時刻になるよう調整してください。",
+  "alarmClockUnavailable": "対応する時計アプリがないか、リクエストを受け付けられませんでした。",
+  "alarmNotificationsDisabled": "Windows の設定で DDL out! の通知を許可してから、再度追加してください。",
+  "alarmFailed": "アラームを追加できませんでした。後でもう一度お試しください。",
+  "alarmPreview": "元のアラームを含めて {count} 件を追加",
+  "@alarmPreview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmClockSubmitted": "時計に {count} 件を送信しました。実際の作成結果は時計アプリでご確認ください。",
+  "@alarmClockSubmitted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmScheduled": "Windows の通知を {count} 件予約しました。",
+  "@alarmScheduled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmPartial": "{count} 件のリクエストまたは通知が残っています。重複を避けるためシステム側をご確認ください。",
+  "@alarmPartial": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "exitMarkdownFullscreen": "全画面表示を終了",
   "renderMarkdown": "Markdown を表示",
   "markdownFullscreen": "全画面",

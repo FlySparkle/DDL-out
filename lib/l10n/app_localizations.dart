@@ -100,6 +100,150 @@ abstract class AppLocalizations {
     Locale('ja'),
   ];
 
+  /// No description provided for @addSystemAlarm.
+  ///
+  /// In zh, this message translates to:
+  /// **'加入系统闹钟'**
+  String get addSystemAlarm;
+
+  /// No description provided for @alarmTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'闹钟标题'**
+  String get alarmTitle;
+
+  /// No description provided for @alarmNotes.
+  ///
+  /// In zh, this message translates to:
+  /// **'闹钟内容'**
+  String get alarmNotes;
+
+  /// No description provided for @alarmAndroidInfo.
+  ///
+  /// In zh, this message translates to:
+  /// **'交给手机时钟创建闹钟。仅支持今天或明天该时刻的下一次响铃；创建后，事项的修改或删除不会同步到闹钟。'**
+  String get alarmAndroidInfo;
+
+  /// No description provided for @alarmWindowsInfo.
+  ///
+  /// In zh, this message translates to:
+  /// **'创建 Windows 系统定时提醒，不会加入“时钟”列表。关闭本应用后仍可提醒，但关机可能错过。事项后续改动不会同步。'**
+  String get alarmWindowsInfo;
+
+  /// No description provided for @multipleAlarms.
+  ///
+  /// In zh, this message translates to:
+  /// **'多重闹钟'**
+  String get multipleAlarms;
+
+  /// No description provided for @alarmRelativeTo.
+  ///
+  /// In zh, this message translates to:
+  /// **'在该闹钟'**
+  String get alarmRelativeTo;
+
+  /// No description provided for @alarmBefore.
+  ///
+  /// In zh, this message translates to:
+  /// **'前'**
+  String get alarmBefore;
+
+  /// No description provided for @alarmAfter.
+  ///
+  /// In zh, this message translates to:
+  /// **'后'**
+  String get alarmAfter;
+
+  /// No description provided for @alarmInterval.
+  ///
+  /// In zh, this message translates to:
+  /// **'间隔'**
+  String get alarmInterval;
+
+  /// No description provided for @alarmRepeat.
+  ///
+  /// In zh, this message translates to:
+  /// **'重复设置'**
+  String get alarmRepeat;
+
+  /// No description provided for @alarmTimes.
+  ///
+  /// In zh, this message translates to:
+  /// **'次'**
+  String get alarmTimes;
+
+  /// No description provided for @alarmConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'确认加入'**
+  String get alarmConfirm;
+
+  /// No description provided for @alarmDone.
+  ///
+  /// In zh, this message translates to:
+  /// **'完成'**
+  String get alarmDone;
+
+  /// No description provided for @alarmInvalidNumber.
+  ///
+  /// In zh, this message translates to:
+  /// **'请输入范围内整数'**
+  String get alarmInvalidNumber;
+
+  /// No description provided for @alarmPastTime.
+  ///
+  /// In zh, this message translates to:
+  /// **'所有闹钟都必须晚于现在，请调整时间或多重闹钟的间隔与次数。'**
+  String get alarmPastTime;
+
+  /// No description provided for @alarmClockDateUnsupported.
+  ///
+  /// In zh, this message translates to:
+  /// **'系统时钟接口不能指定任意日期。请将所有闹钟调整为今天或明天该时刻的下一次响铃，避免提前响铃。'**
+  String get alarmClockDateUnsupported;
+
+  /// No description provided for @alarmClockUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'未找到可用的系统时钟，或时钟拒绝接收请求。'**
+  String get alarmClockUnavailable;
+
+  /// No description provided for @alarmNotificationsDisabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'请先在 Windows 设置中允许 DDL out! 发送通知，再重新添加。'**
+  String get alarmNotificationsDisabled;
+
+  /// No description provided for @alarmFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'无法加入系统闹钟，请稍后重试。'**
+  String get alarmFailed;
+
+  /// No description provided for @alarmPreview.
+  ///
+  /// In zh, this message translates to:
+  /// **'即将加入 {count} 个闹钟（含原闹钟）'**
+  String alarmPreview(int count);
+
+  /// No description provided for @alarmClockSubmitted.
+  ///
+  /// In zh, this message translates to:
+  /// **'已向系统时钟提交 {count} 个闹钟请求，请在时钟中确认实际创建结果。'**
+  String alarmClockSubmitted(int count);
+
+  /// No description provided for @alarmScheduled.
+  ///
+  /// In zh, this message translates to:
+  /// **'已添加 {count} 个 Windows 系统提醒。'**
+  String alarmScheduled(int count);
+
+  /// No description provided for @alarmPartial.
+  ///
+  /// In zh, this message translates to:
+  /// **'已有 {count} 条请求提交或提醒保留，请先到系统中查看，避免重复添加。'**
+  String alarmPartial(int count);
+
   /// No description provided for @exitMarkdownFullscreen.
   ///
   /// In zh, this message translates to:

@@ -1,4 +1,56 @@
 {
+  "addSystemAlarm": "Add to system alarms",
+  "alarmTitle": "Alarm title",
+  "alarmNotes": "Alarm details",
+  "alarmAndroidInfo": "Creates alarms in your phone’s Clock app for the next occurrence of each time today or tomorrow. Later task edits or deletion do not update exported alarms.",
+  "alarmWindowsInfo": "Creates scheduled Windows notifications, not entries in Clock. Reminders can appear while this app is closed, but may be missed if the PC is off. Later task edits are not synced.",
+  "multipleAlarms": "Multiple alarms",
+  "alarmRelativeTo": "Relative to this alarm:",
+  "alarmBefore": "Before",
+  "alarmAfter": "After",
+  "alarmInterval": "Every",
+  "alarmRepeat": "Add",
+  "alarmTimes": "times",
+  "alarmConfirm": "Add alarms",
+  "alarmDone": "Done",
+  "alarmInvalidNumber": "Enter an integer in range",
+  "alarmPastTime": "Every alarm must be in the future. Adjust the time, interval or repeat count.",
+  "alarmClockDateUnsupported": "The system Clock interface cannot set arbitrary dates. Each alarm must match the next occurrence of its time today or tomorrow.",
+  "alarmClockUnavailable": "No compatible Clock app was found, or it could not accept the request.",
+  "alarmNotificationsDisabled": "Allow notifications for DDL out! in Windows Settings, then try again.",
+  "alarmFailed": "Could not add the alarms. Please try again later.",
+  "alarmPreview": "{count} alarms to add, including the original",
+  "@alarmPreview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmClockSubmitted": "Submitted {count} requests to Clock. Please confirm the created alarms in your Clock app.",
+  "@alarmClockSubmitted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmScheduled": "Scheduled {count} Windows reminders.",
+  "@alarmScheduled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmPartial": "{count} requests were submitted or reminders remain. Check the system before adding again to avoid duplicates.",
+  "@alarmPartial": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "exitMarkdownFullscreen": "Exit full screen",
   "renderMarkdown": "Render Markdown",
   "markdownFullscreen": "Full screen",

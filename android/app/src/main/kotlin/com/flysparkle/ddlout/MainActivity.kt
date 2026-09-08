@@ -11,8 +11,13 @@ import io.flutter.plugin.common.MethodChannel
 import java.io.File
 
 class MainActivity : FlutterActivity() {
+    private var alarmBridge: SystemAlarmBridge? = null
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        alarmBridge = SystemAlarmBridge(this)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "ddl_out/system_alarms")
+            .setMethodCallHandler { call, result -> alarmBridge!!.handle(call, result) }
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             "ddl_out/app_update",
@@ -72,5 +77,20 @@ class MainActivity : FlutterActivity() {
             startActivity(intent)
             result.success("installer_opened")
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        alarmBridge?.onResume()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        alarmBridge?.onActivityResult(requestCode)
+    }
+
+    override fun onDestroy() {
+        alarmBridge?.dispose()
+        super.onDestroy()
     }
 }

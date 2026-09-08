@@ -9,6 +9,90 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get addSystemAlarm => '加入系统闹钟';
+
+  @override
+  String get alarmTitle => '闹钟标题';
+
+  @override
+  String get alarmNotes => '闹钟内容';
+
+  @override
+  String get alarmAndroidInfo =>
+      '交给手机时钟创建闹钟。仅支持今天或明天该时刻的下一次响铃；创建后，事项的修改或删除不会同步到闹钟。';
+
+  @override
+  String get alarmWindowsInfo =>
+      '创建 Windows 系统定时提醒，不会加入“时钟”列表。关闭本应用后仍可提醒，但关机可能错过。事项后续改动不会同步。';
+
+  @override
+  String get multipleAlarms => '多重闹钟';
+
+  @override
+  String get alarmRelativeTo => '在该闹钟';
+
+  @override
+  String get alarmBefore => '前';
+
+  @override
+  String get alarmAfter => '后';
+
+  @override
+  String get alarmInterval => '间隔';
+
+  @override
+  String get alarmRepeat => '重复设置';
+
+  @override
+  String get alarmTimes => '次';
+
+  @override
+  String get alarmConfirm => '确认加入';
+
+  @override
+  String get alarmDone => '完成';
+
+  @override
+  String get alarmInvalidNumber => '请输入范围内整数';
+
+  @override
+  String get alarmPastTime => '所有闹钟都必须晚于现在，请调整时间或多重闹钟的间隔与次数。';
+
+  @override
+  String get alarmClockDateUnsupported =>
+      '系统时钟接口不能指定任意日期。请将所有闹钟调整为今天或明天该时刻的下一次响铃，避免提前响铃。';
+
+  @override
+  String get alarmClockUnavailable => '未找到可用的系统时钟，或时钟拒绝接收请求。';
+
+  @override
+  String get alarmNotificationsDisabled =>
+      '请先在 Windows 设置中允许 DDL out! 发送通知，再重新添加。';
+
+  @override
+  String get alarmFailed => '无法加入系统闹钟，请稍后重试。';
+
+  @override
+  String alarmPreview(int count) {
+    return '即将加入 $count 个闹钟（含原闹钟）';
+  }
+
+  @override
+  String alarmClockSubmitted(int count) {
+    return '已向系统时钟提交 $count 个闹钟请求，请在时钟中确认实际创建结果。';
+  }
+
+  @override
+  String alarmScheduled(int count) {
+    return '已添加 $count 个 Windows 系统提醒。';
+  }
+
+  @override
+  String alarmPartial(int count) {
+    return '已有 $count 条请求提交或提醒保留，请先到系统中查看，避免重复添加。';
+  }
+
+  @override
   String get exitMarkdownFullscreen => '退出全屏';
 
   @override
