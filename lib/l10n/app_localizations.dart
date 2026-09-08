@@ -100,6 +100,72 @@ abstract class AppLocalizations {
     Locale('ja'),
   ];
 
+  /// No description provided for @exitMarkdownFullscreen.
+  ///
+  /// In zh, this message translates to:
+  /// **'退出全屏'**
+  String get exitMarkdownFullscreen;
+
+  /// No description provided for @renderMarkdown.
+  ///
+  /// In zh, this message translates to:
+  /// **'渲染 Markdown'**
+  String get renderMarkdown;
+
+  /// No description provided for @markdownFullscreen.
+  ///
+  /// In zh, this message translates to:
+  /// **'全屏'**
+  String get markdownFullscreen;
+
+  /// No description provided for @editMarkdown.
+  ///
+  /// In zh, this message translates to:
+  /// **'返回编辑'**
+  String get editMarkdown;
+
+  /// No description provided for @markdownOutline.
+  ///
+  /// In zh, this message translates to:
+  /// **'大纲'**
+  String get markdownOutline;
+
+  /// No description provided for @markdownNoHeadings.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无标题'**
+  String get markdownNoHeadings;
+
+  /// No description provided for @customDeadlinePreset.
+  ///
+  /// In zh, this message translates to:
+  /// **'自定义时间预设'**
+  String get customDeadlinePreset;
+
+  /// No description provided for @presetName.
+  ///
+  /// In zh, this message translates to:
+  /// **'预设名称'**
+  String get presetName;
+
+  /// No description provided for @presetDurationRequired.
+  ///
+  /// In zh, this message translates to:
+  /// **'请输入大于零的有效时长'**
+  String get presetDurationRequired;
+
+  /// No description provided for @presetSaveFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'预设保存失败，请重试'**
+  String get presetSaveFailed;
+
+  /// No description provided for @markdownImageUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'图片无法显示'**
+  String get markdownImageUnavailable;
+
   /// No description provided for @appTitle.
   ///
   /// In zh, this message translates to:

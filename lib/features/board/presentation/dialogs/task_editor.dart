@@ -14,6 +14,8 @@ import '../../../../core/widgets/destructive_undo_snack_bar.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../settings/application/settings.dart';
 import '../widgets/task_detail_content_editor.dart';
+import '../widgets/deadline_presets.dart';
+import '../widgets/task_markdown_preview.dart';
 import 'adaptive_editor.dart';
 import 'confirmation_dialog.dart';
 import 'editor_frame.dart';
@@ -65,6 +67,7 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
   late bool _relativeDirty;
   late TaskDetailDocument _detailDocument;
   bool _saving = false;
+  bool _preview = false;
 
   @override
   void initState() {
@@ -87,15 +90,7 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
     _relativeDirty = widget.task == null && _mode == DeadlineMode.relative;
 
     final now = DateTime.now();
-    final initialAbsolute =
-        widget.task?.deadlineUtc?.toLocal() ??
-        now.add(
-          Duration(
-            days: settings.relativeDays,
-            hours: settings.relativeHours,
-            minutes: settings.relativeMinutes,
-          ),
-        );
+    final initialAbsolute = widget.task?.deadlineUtc?.toLocal() ?? now;
     _absoluteLocal = DateTime(
       initialAbsolute.year,
       initialAbsolute.month,
@@ -104,11 +99,7 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
       initialAbsolute.minute,
     );
     final remaining = widget.task == null || widget.task!.deadlineUtc == null
-        ? NormalizedDuration(
-            days: settings.relativeDays,
-            hours: settings.relativeHours,
-            minutes: settings.relativeMinutes,
-          )
+        ? const NormalizedDuration(days: 0, hours: 0, minutes: 0)
         : _durationFromAbsolute(_absoluteLocal);
     _daysController = TextEditingController(text: remaining.days.toString());
     _hoursController = TextEditingController(text: remaining.hours.toString());
@@ -154,16 +145,61 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
               },
             ),
             const SizedBox(height: 12),
-            Text(
-              l10n.taskDetailsSection,
-              style: Theme.of(context).textTheme.titleMedium,
+            Row(
+              children: [
+                Text(
+                  l10n.taskDetailsSection,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const Spacer(),
+                if (_preview)
+                  IconButton(
+                    tooltip: l10n.editMarkdown,
+                    icon: const Icon(Icons.edit_outlined),
+                    onPressed: () => setState(() => _preview = false),
+                  ),
+                TextButton.icon(
+                  key: const ValueKey('preview-task-markdown'),
+                  icon: Icon(
+                    _preview ? Icons.fullscreen : Icons.preview_outlined,
+                  ),
+                  label: Text(
+                    _preview ? l10n.markdownFullscreen : l10n.renderMarkdown,
+                  ),
+                  onPressed: () {
+                    if (_preview) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          fullscreenDialog: true,
+                          builder: (_) => TaskMarkdownPage(
+                            title: _nameController.text,
+                            document: _detailDocument,
+                          ),
+                        ),
+                      );
+                    } else {
+                      FocusScope.of(context).unfocus();
+                      setState(() {
+                        _detailDocument =
+                            _detailEditorKey.currentState?.document ??
+                            _detailDocument;
+                        _preview = true;
+                      });
+                    }
+                  },
+                ),
+              ],
             ),
             const SizedBox(height: 8),
-            TaskDetailContentEditor(
-              key: _detailEditorKey,
-              initialDocument: _detailDocument,
-              onChanged: (document) => _detailDocument = document,
+            Offstage(
+              offstage: _preview,
+              child: TaskDetailContentEditor(
+                key: _detailEditorKey,
+                initialDocument: _detailDocument,
+                onChanged: (document) => _detailDocument = document,
+              ),
             ),
+            if (_preview) TaskMarkdownPreview(document: _detailDocument),
             const SizedBox(height: 12),
             DropdownButtonFormField<int>(
               initialValue: _categoryValue,
@@ -184,32 +220,24 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
               },
             ),
             const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                ActionChip(
-                  avatar: const Icon(Icons.timer_outlined, size: 18),
-                  label: Text(l10n.inOneHour),
-                  onPressed: () => _applyQuickDeadline(
-                    DateTime.now().add(const Duration(hours: 1)),
-                  ),
-                ),
-                ActionChip(
-                  label: Text(l10n.today),
-                  onPressed: () => _applyQuickDeadline(_endOfDay(0)),
-                ),
-                ActionChip(
-                  label: Text(l10n.tomorrow),
-                  onPressed: () => _applyQuickDeadline(_endOfDay(1)),
-                ),
-                ActionChip(
-                  label: Text(l10n.thisWeekend),
-                  onPressed: () => _applyQuickDeadline(_endOfThisWeek()),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
+            if (_mode != DeadlineMode.none) ...[
+              DeadlinePresets(
+                mode: _mode,
+                onRelative: (minutes) => setState(() {
+                  final current = _normalizeRelative();
+                  _setRelative(
+                    DeadlineService.normalize(
+                      0,
+                      0,
+                      current.totalMinutes + minutes,
+                    ),
+                  );
+                  _relativeDirty = true;
+                }),
+                onAbsolute: _applyQuickDeadline,
+              ),
+              const SizedBox(height: 12),
+            ],
             SegmentedButton<DeadlineMode>(
               key: const ValueKey('deadline-mode'),
               segments: [
@@ -478,17 +506,6 @@ class _TaskEditorState extends ConsumerState<TaskEditor> {
       _relativeDirty = false;
       _mode = DeadlineMode.absolute;
     });
-  }
-
-  DateTime _endOfDay(int daysFromToday) {
-    final now = DateTime.now().add(Duration(days: daysFromToday));
-    return DateTime(now.year, now.month, now.day, 23, 59);
-  }
-
-  DateTime _endOfThisWeek() {
-    final now = DateTime.now();
-    final daysUntilSunday = DateTime.sunday - now.weekday;
-    return DateTime(now.year, now.month, now.day + daysUntilSunday, 23, 59);
   }
 
   Future<void> _delete() async {

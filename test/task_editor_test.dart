@@ -9,6 +9,7 @@ import 'package:ddl_out/features/board/application/task_image_clipboard.dart';
 import 'package:ddl_out/features/board/presentation/dialogs/task_editor.dart';
 import 'package:ddl_out/features/board/presentation/widgets/task_detail_content_editor.dart';
 import 'package:ddl_out/l10n/app_localizations.dart';
+import 'package:ddl_out/features/settings/application/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,6 +19,124 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  for (final mode in [DeadlineMode.relative, DeadlineMode.absolute]) {
+    testWidgets('new $mode deadline ignores the remembered duration', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({});
+      final repository = _RecordingTaskRepository();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            taskRepositoryProvider.overrideWithValue(repository),
+            settingsControllerProvider.overrideWith(
+              () => _StoredDeadlineSettings(mode),
+            ),
+          ],
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
+            home: const Scaffold(
+              body: TaskEditor(
+                snapshot: BoardSnapshot(categories: [], tasks: []),
+                initialCategoryId: null,
+                task: null,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      if (mode == DeadlineMode.relative) {
+        final numbers = tester
+            .widgetList<TextField>(find.byType(TextField))
+            .where((field) => field.keyboardType == TextInputType.number);
+        expect(numbers.map((field) => field.controller!.text), ['0', '0', '0']);
+      }
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Task name'),
+        'Now',
+      );
+      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.pumpAndSettle();
+      expect(repository.createdDeadline, isNotNull);
+      expect(
+        repository.createdDeadline!
+            .difference(DateTime.now().toUtc())
+            .inSeconds
+            .abs(),
+        lessThan(65),
+      );
+    });
+  }
+
+  testWidgets(
+    'preview and full screen preserve Markdown source and save edits',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final repository = _RecordingTaskRepository();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [taskRepositoryProvider.overrideWithValue(repository)],
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: const Locale('en'),
+            home: const Scaffold(
+              body: TaskEditor(
+                snapshot: BoardSnapshot(categories: [], tasks: []),
+                initialCategoryId: null,
+                task: null,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Task name'),
+        'Reading',
+      );
+      final editor = tester.state<TaskDetailContentEditorState>(
+        find.byType(TaskDetailContentEditor),
+      );
+      const source = '# Topic\n\n**Keep this source**';
+      editor.controller.replaceText(
+        0,
+        0,
+        source,
+        const TextSelection.collapsed(offset: 0),
+      );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('preview-task-markdown')),
+      );
+      await tester.tap(find.byKey(const ValueKey('preview-task-markdown')));
+      await tester.pumpAndSettle();
+      expect(find.text('Full screen'), findsOneWidget);
+      expect(find.byKey(const ValueKey('task-details-field')), findsNothing);
+      await tester.tap(find.text('Full screen'));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('markdown-reader-scroll')),
+        findsOneWidget,
+      );
+      await tester.tap(find.byIcon(Icons.fullscreen_exit));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Back to editing'));
+      await tester.pumpAndSettle();
+      expect(editor.controller.document.toPlainText().trim(), source);
+      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+      await tester.pumpAndSettle();
+      final document = TaskDetailDocumentCodec.decode(
+        details: repository.createdDetails!,
+        images: [],
+      );
+      expect((document.blocks.single as TaskDetailTextBlock).text, source);
+    },
+  );
 
   testWidgets('switching deadline input modes preserves an overdue deadline', (
     tester,
@@ -94,7 +213,23 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('In 1 hour'), findsOneWidget);
+    expect(find.text('+1d'), findsOneWidget);
+    expect(find.text('+1h'), findsOneWidget);
+    expect(find.text('+15m'), findsOneWidget);
+    expect(find.text('Today'), findsNothing);
+    final numbers = tester
+        .widgetList<TextField>(find.byType(TextField))
+        .where((field) => field.keyboardType == TextInputType.number);
+    expect(numbers.map((field) => field.controller!.text), ['0', '0', '0']);
+    await tester.ensureVisible(find.text('+1h'));
+    await tester.tap(find.text('+1h'));
+    await tester.tap(find.text('+15m'));
+    await tester.pumpAndSettle();
+    expect(numbers.map((field) => field.controller!.text), ['0', '1', '15']);
+    await tester.ensureVisible(find.text('Date and time'));
+    await tester.tap(find.text('Date and time'));
+    await tester.pumpAndSettle();
+    expect(find.text('+1h'), findsNothing);
     expect(find.text('Today'), findsOneWidget);
     expect(find.text('Tomorrow'), findsOneWidget);
     expect(find.text('This weekend'), findsOneWidget);
@@ -139,6 +274,8 @@ void main() {
       of: find.byKey(const ValueKey('deadline-mode')),
       matching: find.text('No deadline'),
     );
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
     await tester.ensureVisible(noDeadline);
     await tester.pumpAndSettle();
     await tester.tap(noDeadline);
@@ -417,4 +554,17 @@ class _FakeTaskImageClipboard implements TaskImageClipboard {
 
   @override
   Future<List<TaskDetailImage>> readImages() async => images;
+}
+
+class _StoredDeadlineSettings extends SettingsController {
+  _StoredDeadlineSettings(this.mode);
+  final DeadlineMode mode;
+  @override
+  AppSettingsState build() => AppSettingsState(
+    hydrated: true,
+    deadlineMode: mode,
+    relativeDays: 7,
+    relativeHours: 4,
+    relativeMinutes: 30,
+  );
 }

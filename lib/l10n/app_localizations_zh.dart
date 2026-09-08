@@ -9,6 +9,39 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get exitMarkdownFullscreen => '退出全屏';
+
+  @override
+  String get renderMarkdown => '渲染 Markdown';
+
+  @override
+  String get markdownFullscreen => '全屏';
+
+  @override
+  String get editMarkdown => '返回编辑';
+
+  @override
+  String get markdownOutline => '大纲';
+
+  @override
+  String get markdownNoHeadings => '暂无标题';
+
+  @override
+  String get customDeadlinePreset => '自定义时间预设';
+
+  @override
+  String get presetName => '预设名称';
+
+  @override
+  String get presetDurationRequired => '请输入大于零的有效时长';
+
+  @override
+  String get presetSaveFailed => '预设保存失败，请重试';
+
+  @override
+  String get markdownImageUnavailable => '图片无法显示';
+
+  @override
   String get appTitle => 'DDL out!';
 
   @override

@@ -9,6 +9,40 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get exitMarkdownFullscreen => 'Exit full screen';
+
+  @override
+  String get renderMarkdown => 'Render Markdown';
+
+  @override
+  String get markdownFullscreen => 'Full screen';
+
+  @override
+  String get editMarkdown => 'Back to editing';
+
+  @override
+  String get markdownOutline => 'Outline';
+
+  @override
+  String get markdownNoHeadings => 'No headings';
+
+  @override
+  String get customDeadlinePreset => 'Custom deadline preset';
+
+  @override
+  String get presetName => 'Preset name';
+
+  @override
+  String get presetDurationRequired =>
+      'Enter a valid duration greater than zero';
+
+  @override
+  String get presetSaveFailed => 'Could not save presets. Please try again.';
+
+  @override
+  String get markdownImageUnavailable => 'Image unavailable';
+
+  @override
   String get appTitle => 'DDL out!';
 
   @override

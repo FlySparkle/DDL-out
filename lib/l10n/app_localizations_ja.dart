@@ -9,6 +9,39 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
+  String get exitMarkdownFullscreen => '全画面表示を終了';
+
+  @override
+  String get renderMarkdown => 'Markdown を表示';
+
+  @override
+  String get markdownFullscreen => '全画面';
+
+  @override
+  String get editMarkdown => '編集に戻る';
+
+  @override
+  String get markdownOutline => '目次';
+
+  @override
+  String get markdownNoHeadings => '見出しがありません';
+
+  @override
+  String get customDeadlinePreset => '時間プリセットを追加';
+
+  @override
+  String get presetName => 'プリセット名';
+
+  @override
+  String get presetDurationRequired => '0 より大きい有効な時間を入力してください';
+
+  @override
+  String get presetSaveFailed => 'プリセットを保存できませんでした。再試行してください。';
+
+  @override
+  String get markdownImageUnavailable => '画像を表示できません';
+
+  @override
   String get appTitle => 'DDL out!';
 
   @override
