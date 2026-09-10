@@ -145,13 +145,13 @@ bool FlutterWindow::OnCreate() {
     return false;
   }
   RegisterPlugins(flutter_controller_->engine());
-  RegisterSystemAlarmPlugin(flutter_controller_->engine()->GetRegistrarForPlugin("SystemAlarmPlugin"));
   DesktopMultiWindowSetWindowCreatedCallback([](void* controller) {
     auto* flutter_view_controller =
         reinterpret_cast<flutter::FlutterViewController*>(controller);
     RegisterPlugins(flutter_view_controller->engine());
-    RegisterSystemAlarmPlugin(flutter_view_controller->engine()->GetRegistrarForPlugin("SystemAlarmPlugin"));
   });
+  system_alarm_channel_ =
+      CreateSystemAlarmChannel(flutter_controller_->engine()->messenger());
   update_channel_ =
       std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
           flutter_controller_->engine()->messenger(),
@@ -193,6 +193,7 @@ bool FlutterWindow::OnCreate() {
 
 void FlutterWindow::OnDestroy() {
   if (flutter_controller_) {
+    system_alarm_channel_.reset();
     update_channel_.reset();
     flutter_controller_ = nullptr;
   }

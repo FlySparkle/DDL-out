@@ -147,19 +147,3 @@ CreateSystemAlarmChannel(flutter::BinaryMessenger* messenger) {
   });
   return channel;
 }
-
-namespace {
-class SystemAlarmPlugin : public flutter::Plugin {
- public:
-  explicit SystemAlarmPlugin(flutter::PluginRegistrarWindows* registrar)
-      : channel_(CreateSystemAlarmChannel(registrar->messenger())) {}
- private:
-  std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> channel_;
-};
-}  // namespace
-
-void RegisterSystemAlarmPlugin(FlutterDesktopPluginRegistrarRef registrar_ref) {
-  auto* registrar = flutter::PluginRegistrarManager::GetInstance()
-      ->GetRegistrar<flutter::PluginRegistrarWindows>(registrar_ref);
-  registrar->AddPlugin(std::make_unique<SystemAlarmPlugin>(registrar));
-}
