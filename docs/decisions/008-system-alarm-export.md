@@ -1,42 +1,32 @@
-# ADR 008：从事项编辑器导出系统闹钟
+# ADR 008：事项闹钟与管理列表
 
 ## 状态
 
-2026-09-09，v0.5.4 采纳。
+2026-09-09，v0.5.4 采纳；2026-10-04 按用户要求改为 Windows Task Scheduler。
 
 ## 决策
 
-- 在截止时间输入区下方放置 Material 3 tonal「加入系统闹钟」按钮。独立对话框默认
-  带入尚未保存的事项标题、详情纯文本及截止时间；不限时事项先提供三分钟后的时间。
-  对话框中的修改不更改事项，也不隐式保存事项。
-- 多重闹钟默认关闭，展开后可选择原闹钟之前或之后；默认间隔三分钟、额外三次。
-  间隔范围 1–9999 分钟，额外次数范围 1–99。提交包含原闹钟，共最多一百个。
-  提交前完整展示按时间排序的计划，不允许过去的时间。
-- Android 通过官方 `AlarmClock.ACTION_SET_ALARM` 导出到系统时钟，声明
-  `com.android.alarm.permission.SET_ALARM` 和包可见性查询。逐个启动时钟 Activity，
-  等待返回后继续，避免批量 Intent 同时启动。标准接口没有任意年月日参数，因此
-  Dart 与 Kotlin 均只接受今天或明天对应时刻的下一次响铃，绝不静默改变日期。
-- Android 的 Intent 无标准创建成功回执。界面只报告已提交请求，并提醒用户在时钟
-  中确认；部分失败显示提交数量并阻止直接重复提交。导出记录由系统时钟独立管理。
-- Windows 没有公开的「时钟列表新增闹钟」接口，改用
-  `Windows.UI.Notifications.ScheduledToastNotification`，场景为 alarm，使用系统
-  循环提示音和关闭按钮。通过带 AppUserModelID 的开始菜单快捷方式登记便携应用。
-  原生通道随 Flutter 插件注册，在主窗口和桌面浮窗中均可使用。
-- Windows 先检查通知开关，再排期；批量失败时撤回本批次已添加的通知。独立提醒
-  可在应用关闭时触发，但设备关机等情况下可能错过。两端导出后均不跟随事项修改、
-  完成或删除自动更新，浮窗中明确说明。
-- 不变更数据库及备份格式。闹钟只在用户点击确认后提交；构建过程不创建真实闹钟。
+- 事项编辑器在截止时间区提供 Material 3「加入系统闹钟」按钮，独立浮窗默认带入标题、详情纯文本及截止时间。浮窗中的修改不隐式保存事项。
+- 多重闹钟可选择之前或之后，默认间隔三分钟、额外三次；间隔 1–9999 分钟，额外次数 1–99。提交含原闹钟，最多一百个；展示全部计划并拒绝过去的时间。
+- Windows 仅使用官方 Task Scheduler COM 接口。每个任务使用 GUID，保存在当前用户 SID 对应的 `\DDLout-<SID>` 目录，运行身份为当前已登录用户的交互式令牌，不保存密码、不要求管理员权限。完整 UTC 日期作为一次性触发时间；任务执行当前安装目录的 `ddl_out.exe --ddl-alarm {GUID}`，不使用 Toast 或系统时钟列表。
+- 闹钟入口启动独立 Flutter 进程，复用应用主题及语言，只读取闹钟与显示提示，不启动看板、数据库、同步或更新器。窗口置顶、播放系统提示音，关闭后停音并停用该任务。宿主先清空控制器再析构，避免退出中的原生消息访问已销毁的视图；Flutter 与插件在 COM 反初始化前销毁。
+- 退出主程序不会取消任务。电脑必须开机且用户已登录；锁屏需要解锁查看，关机无法弹窗。请求唤醒与错过后补运行，但实际唤醒取决于设备、电源策略和唤醒计时器。程序目录必须保留；移动、卸载或更新失败后的旧路径需要在管理列表重新添加。
+- Windows 列表直接读取本应用任务，支持停用与确认删除。删除前验证 GUID 与 Author 标记，不操作其他计划任务。批量登记失败撤回本批任务；错误包含操作阶段、HRESULT 及系统消息，不再用泛化提示掩盖失败原因。
+- Android 使用官方 `AlarmClock.ACTION_SET_ALARM`，逐个启动时钟并等待返回。标准接口没有任意年月日参数：下一次本地时刻使用一次性闹钟，其余日期通过 `EXTRA_DAYS` 取本地星期，每周循环。浮窗明确提示可能在事项日期前响铃。
+- Android Intent 没有标准创建成功回执或完整闹钟查询/删除接口。SharedPreferences 保存本应用的提交记录供管理列表展示；记录不代表时钟已成功创建。提供打开系统时钟、确认移除记录；明确移除记录不会删除系统闹钟。
+- 不改变数据库、备份或同步协议；事项修改、完成和删除不自动同步已导出的闹钟。
 
-## 构建
+## 验证与构建
 
-复用 `.github/workflows/release.yml`。增加 `workflow_dispatch` 入口，在指定分支构建
-Windows x64/ARM64 与 Android ARM64/x64，使用既有 Android 签名密钥。手动构建产物
-按 pubspec 中的版本命名，不创建标签或 GitHub Release；其他平台不运行。
-`skip_checks` 输入可跳过测试、静态分析和校验，默认开启；正常标签发布仍保留原校验。
-本次按照用户要求不新增或运行测试、静态分析或校验，只生成资源并构建。
+Flutter 测试覆盖跨年偏移、任意未来日期、星期回退提示、管理操作确认及原生错误展示。`alarm_scheduler_test` 是显式构建的原生测试目标，调用与生产相同的校验及 COM 路径，验证登记、读取、停用、删除、失败回滚和所有权保护；测试任务必须清理。实际弹窗及正常关闭还须在已登录 Windows 会话中验证进程启动、可见窗口和退出码。
+
+`test/native/alarm_popup_test.ps1 -Bundle <独立构建目录>` 验证没有运行中的测试版本时，任务计划程序到点启动可见的置顶闹钟，正常关闭后进程退出码为 0、任务停用并清理测试任务。按钮自身的停音、停用和退出顺序由 Flutter 回归测试覆盖。2026-10-04 本机复现过关闭时 `flutter_windows.dll!FlutterWindowsView::GetEngine` 的 `0xC000041D` 崩溃；修正宿主清理顺序后正常关闭的任务结果为 0。
+
+继续复用 `.github/workflows/release.yml`：开发分支可手动构建，不创建标签或正式 Release；正式标签发布仍需遵守项目发布规则。Android 本地无发布密钥时使用调试签名，仅作为验证包，不能替代正式发布资产。
 
 ## 参考
 
+- [Task Scheduler](https://learn.microsoft.com/zh-cn/windows/win32/taskschd/task-scheduler-start-page)
+- [任务运行身份](https://learn.microsoft.com/en-us/windows/win32/taskschd/security-contexts-for-running-tasks)
+- [WakeToRun](https://learn.microsoft.com/en-us/windows/win32/taskschd/tasksettings-waketorun)
 - [Android AlarmClock](https://developer.android.com/reference/android/provider/AlarmClock)
-- [Windows desktop notification identity](https://learn.microsoft.com/en-us/windows/win32/shell/enable-desktop-toast-with-appusermodelid)
-- [Scheduled Windows notifications](https://learn.microsoft.com/en-us/windows/apps/develop/notifications/app-notifications/app-notifications-scheduled)

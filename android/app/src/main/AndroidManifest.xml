@@ -62,6 +62,9 @@
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
         <intent>
+            <action android:name="android.intent.action.SHOW_ALARMS"/>
+        </intent>
+        <intent>
             <action android:name="android.intent.action.SET_ALARM"/>
         </intent>
         <intent>

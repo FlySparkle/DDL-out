@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/navigation/app_navigation_shell.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/alarms/system_alarm_service.dart';
+import '../alarms/alarm_management_page.dart';
 import 'application/settings.dart';
 import 'presentation/data_settings_section.dart';
 import 'presentation/settings_section_title.dart';
@@ -42,6 +44,18 @@ class SystemDataSettingsPage extends ConsumerWidget {
             onSave: controller.setGithubToken,
           ),
           const DataSettingsSection(),
+          if (SystemAlarmService.supported)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.alarm_outlined),
+              title: Text(l10n.alarmManagerTitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const AlarmManagementPage(),
+                ),
+              ),
+            ),
         ],
       ),
     );

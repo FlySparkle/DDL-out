@@ -27,6 +27,67 @@ class SystemAlarmService {
     });
     return count ?? 0;
   }
+
+  Future<List<SystemAlarmEntry>> list() async {
+    final values = await _channel.invokeListMethod<Object?>('list') ?? [];
+    return values
+        .map((value) => SystemAlarmEntry.fromMap(value as Map))
+        .toList()
+      ..sort((a, b) => a.time.compareTo(b.time));
+  }
+
+  Future<SystemAlarmEntry> get(String id) async => SystemAlarmEntry.fromMap(
+    (await _channel.invokeMapMethod<Object?, Object?>('get', {'id': id}))!,
+  );
+
+  Future<void> delete(String id) => _channel.invokeMethod('delete', {'id': id});
+  Future<void> disable(String id) =>
+      _channel.invokeMethod('disable', {'id': id});
+  Future<void> forget(String id) => _channel.invokeMethod('forget', {'id': id});
+  Future<void> openClock() => _channel.invokeMethod('openClock');
+  Future<void> sound() => _channel.invokeMethod('sound');
+  Future<void> silence() => _channel.invokeMethod('silence');
+
+  static String diagnostic(Object error) {
+    if (error is! PlatformException) return error.toString();
+    final details = error.details;
+    return [
+      error.code,
+      if (details is Map) ...[
+        if (details['stage'] != null) details['stage'].toString(),
+        if (details['hresult'] != null) details['hresult'].toString(),
+      ],
+      if (error.message?.isNotEmpty ?? false) error.message!,
+    ].join(' · ');
+  }
+}
+
+class SystemAlarmEntry {
+  const SystemAlarmEntry({
+    required this.id,
+    required this.title,
+    required this.notes,
+    required this.time,
+    required this.enabled,
+    required this.weekly,
+    this.lastResult = 0,
+  });
+  factory SystemAlarmEntry.fromMap(Map value) => SystemAlarmEntry(
+    id: value['id'] as String,
+    title: value['title'] as String,
+    notes: value['notes'] as String,
+    time: DateTime.fromMillisecondsSinceEpoch(value['time'] as int).toLocal(),
+    enabled: value['enabled'] as bool? ?? true,
+    weekly: value['weekly'] as bool? ?? false,
+    lastResult: value['lastResult'] as int? ?? 0,
+  );
+  final String id;
+  final String title;
+  final String notes;
+  final DateTime time;
+  final bool enabled;
+  final bool weekly;
+  final int lastResult;
 }
 
 class SystemAlarmPlan {
@@ -65,8 +126,8 @@ class SystemAlarmPlan {
     return values..sort();
   }
 
-  /// ACTION_SET_ALARM accepts hour/minute, not a calendar date. Only export
-  /// dates that exactly match the clock's next occurrence, including DST.
+  /// ACTION_SET_ALARM accepts hour/minute, not a calendar date. Later dates
+  /// require a weekly alarm on their local weekday, including DST.
   static bool isNextClockOccurrence(DateTime time, DateTime now) {
     var next = DateTime(now.year, now.month, now.day, time.hour, time.minute);
     if (!next.isAfter(now)) {

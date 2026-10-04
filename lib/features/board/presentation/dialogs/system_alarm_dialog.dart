@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/alarms/system_alarm_service.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../alarms/alarm_management_page.dart';
 
 Future<void> showSystemAlarmDialog(
   BuildContext context, {
@@ -139,7 +140,7 @@ class _SystemAlarmDialogState extends State<_SystemAlarmDialog> {
                                   firstDate: DateTime(2000),
                                   lastDate: DateTime(9999),
                                 );
-                                if (date != null && mounted)
+                                if (date != null && mounted) {
                                   setState(() {
                                     _time = DateTime(
                                       date.year,
@@ -150,6 +151,7 @@ class _SystemAlarmDialogState extends State<_SystemAlarmDialog> {
                                     );
                                     _error = null;
                                   });
+                                }
                               },
                       ),
                       OutlinedButton.icon(
@@ -162,7 +164,7 @@ class _SystemAlarmDialogState extends State<_SystemAlarmDialog> {
                                   context: context,
                                   initialTime: TimeOfDay.fromDateTime(_time),
                                 );
-                                if (time != null && mounted)
+                                if (time != null && mounted) {
                                   setState(() {
                                     _time = DateTime(
                                       _time.year,
@@ -173,6 +175,7 @@ class _SystemAlarmDialogState extends State<_SystemAlarmDialog> {
                                     );
                                     _error = null;
                                   });
+                                }
                               },
                       ),
                     ],
@@ -182,6 +185,20 @@ class _SystemAlarmDialogState extends State<_SystemAlarmDialog> {
                     l10n.alarmPreview(times.length),
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
+                  if (SystemAlarmService.usesAndroidClock &&
+                      times.any(
+                        (time) => !SystemAlarmPlan.isNextClockOccurrence(
+                          time,
+                          DateTime.now(),
+                        ),
+                      ))
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        l10n.alarmWeeklyWarning,
+                        style: TextStyle(color: colors.error),
+                      ),
+                    ),
                   const SizedBox(height: 8),
                   Container(
                     constraints: const BoxConstraints(maxHeight: 150),
@@ -212,8 +229,15 @@ class _SystemAlarmDialogState extends State<_SystemAlarmDialog> {
                             Expanded(
                               child: Text(
                                 DateFormat.yMMMd(
-                                  locale,
-                                ).add_Hm().format(times[index]),
+                                      locale,
+                                    ).add_Hm().format(times[index]) +
+                                    (SystemAlarmService.usesAndroidClock &&
+                                            !SystemAlarmPlan.isNextClockOccurrence(
+                                              times[index],
+                                              DateTime.now(),
+                                            )
+                                        ? '\n${l10n.alarmWeekly(DateFormat.EEEE(locale).format(times[index]), DateFormat.Hm(locale).format(times[index]))}'
+                                        : ''),
                               ),
                             ),
                           ],
@@ -302,6 +326,16 @@ class _SystemAlarmDialogState extends State<_SystemAlarmDialog> {
         ),
         actions: [
           TextButton(
+            onPressed: _busy
+                ? null
+                : () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const AlarmManagementPage(),
+                    ),
+                  ),
+            child: Text(l10n.alarmManagerTitle),
+          ),
+          TextButton(
             onPressed: _busy ? null : () => Navigator.pop(context),
             child: Text(_receipt == null ? l10n.cancel : l10n.alarmDone),
           ),
@@ -353,13 +387,6 @@ class _SystemAlarmDialogState extends State<_SystemAlarmDialog> {
       setState(() => _error = l10n.alarmPastTime);
       return;
     }
-    if (SystemAlarmService.usesAndroidClock &&
-        times.any(
-          (time) => !SystemAlarmPlan.isNextClockOccurrence(time, now),
-        )) {
-      setState(() => _error = l10n.alarmClockDateUnsupported);
-      return;
-    }
     FocusScope.of(context).unfocus();
     setState(() {
       _busy = true;
@@ -371,14 +398,15 @@ class _SystemAlarmDialogState extends State<_SystemAlarmDialog> {
         notes: _notes.text,
         times: times,
       );
-      if (mounted)
+      if (mounted) {
         setState(
           () => _receipt = SystemAlarmService.usesAndroidClock
               ? l10n.alarmClockSubmitted(count)
               : l10n.alarmScheduled(count),
         );
+      }
     } on PlatformException catch (error) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _error = switch (error.code) {
             'clock_unavailable' => l10n.alarmClockUnavailable,
@@ -387,12 +415,20 @@ class _SystemAlarmDialogState extends State<_SystemAlarmDialog> {
             'notifications_disabled' => l10n.alarmNotificationsDisabled,
             _ => l10n.alarmFailed,
           };
+          _error = '$_error\n${SystemAlarmService.diagnostic(error)}';
           final details = error.details;
-          if (details is int && details > 0)
+          if (details is int && details > 0) {
             _receipt = l10n.alarmPartial(details);
+          }
         });
-    } on Object {
-      if (mounted) setState(() => _error = l10n.alarmFailed);
+      }
+    } on Object catch (error) {
+      if (mounted) {
+        setState(
+          () => _error =
+              '${l10n.alarmFailed}\n${SystemAlarmService.diagnostic(error)}',
+        );
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }

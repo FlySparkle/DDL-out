@@ -127,7 +127,12 @@ bool StartUpdaterWithoutConsole(const flutter::EncodableMap& arguments) {
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
 
-FlutterWindow::~FlutterWindow() {}
+FlutterWindow::~FlutterWindow() {
+  // Null the controller before its destructor dispatches native window
+  // messages. Letting member destruction do this leaves a dangling controller
+  // visible to MessageHandler while Flutter is tearing down its view.
+  OnDestroy();
+}
 
 bool FlutterWindow::OnCreate() {
   if (!Win32Window::OnCreate()) {
@@ -193,6 +198,8 @@ bool FlutterWindow::OnCreate() {
 
 void FlutterWindow::OnDestroy() {
   if (flutter_controller_) {
+    if (system_alarm_channel_) system_alarm_channel_->SetMethodCallHandler(nullptr);
+    if (update_channel_) update_channel_->SetMethodCallHandler(nullptr);
     system_alarm_channel_.reset();
     update_channel_.reset();
     flutter_controller_ = nullptr;

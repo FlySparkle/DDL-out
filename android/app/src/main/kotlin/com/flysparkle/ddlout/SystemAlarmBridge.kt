@@ -1,22 +1,55 @@
 package com.flysparkle.ddlout
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.provider.AlarmClock
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import org.json.JSONObject
 import java.util.Calendar
+import java.util.UUID
 
-/** Exports clock intents in order, waiting for each clock activity to finish. */
+/** Clock owns the alarms; our persisted list is an export journal, not a mirror. */
 class SystemAlarmBridge(private val activity: Activity) {
     companion object { const val REQUEST_CODE = 5404 }
+    private val preferences = activity.getSharedPreferences("clock_exports_v1", Context.MODE_PRIVATE)
     private var pending: MethodChannel.Result? = null
-    private var intents = emptyList<Intent>()
+    private var intents = emptyList<Pair<String, Intent>>()
     private var submitted = 0
     private var waitingForClock = false
 
     fun handle(call: MethodCall, result: MethodChannel.Result) {
-        if (call.method != "schedule") { result.notImplemented(); return }
+        try {
+            when (call.method) {
+                "list" -> {
+                    result.success(preferences.all.values.mapNotNull { value ->
+                        try {
+                            val entry = JSONObject(value as String)
+                            mapOf("id" to entry.getString("id"), "title" to entry.getString("title"),
+                                "notes" to entry.getString("notes"), "time" to entry.getLong("time"),
+                                "weekly" to entry.getBoolean("weekly"), "enabled" to true)
+                        } catch (_: Exception) { null }
+                    }); return
+                }
+                "forget" -> {
+                    val id = call.argument<String>("id") ?: throw IllegalArgumentException("Missing record ID")
+                    if (!preferences.edit().remove(id).commit()) throw IllegalStateException("Cannot save alarm records")
+                    result.success(null); return
+                }
+                "openClock" -> {
+                    activity.startActivity(Intent(AlarmClock.ACTION_SHOW_ALARMS))
+                    result.success(null); return
+                }
+                "schedule" -> schedule(call, result)
+                else -> result.notImplemented()
+            }
+        } catch (error: Exception) {
+            result.error("clock_unavailable", error.message ?: "Clock operation failed.", null)
+        }
+    }
+
+    private fun schedule(call: MethodCall, result: MethodChannel.Result) {
         if (pending != null) { result.error("busy", "A clock export is in progress.", null); return }
         val title = call.argument<String>("title")?.trim().orEmpty()
         val notes = call.argument<String>("notes")?.trim().orEmpty()
@@ -26,31 +59,32 @@ class SystemAlarmBridge(private val activity: Activity) {
         }
         val now = System.currentTimeMillis()
         val times = rawTimes.map { it.toLong() }.distinct().sorted()
-        val clockIntent = Intent(AlarmClock.ACTION_SET_ALARM)
-        val component = clockIntent.resolveActivity(activity.packageManager)
-        if (component == null) { result.error("clock_unavailable", "No clock application is available.", null); return }
-        for (time in times) {
-            if (time <= now) { result.error("past_time", "Alarm times must be in the future.", null); return }
-            val requested = Calendar.getInstance().apply { timeInMillis = time }
-            val next = Calendar.getInstance().apply {
-                timeInMillis = now
-                set(Calendar.HOUR_OF_DAY, requested.get(Calendar.HOUR_OF_DAY))
-                set(Calendar.MINUTE, requested.get(Calendar.MINUTE))
-                set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
-                if (timeInMillis <= now) add(Calendar.DAY_OF_MONTH, 1)
-            }
-            if (next.timeInMillis != time) {
-                result.error("date_unsupported", "The clock interface cannot represent this calendar date.", null); return
-            }
+        if (times.any { it <= now || it > 253402300799000L }) {
+            result.error("past_time", "Alarm times must be valid future timestamps.", null); return
+        }
+        if (Intent(AlarmClock.ACTION_SET_ALARM).resolveActivity(activity.packageManager) == null) {
+            result.error("clock_unavailable", "No clock application is available.", null); return
         }
         intents = times.map { time ->
             val local = Calendar.getInstance().apply { timeInMillis = time }
-            Intent(AlarmClock.ACTION_SET_ALARM).apply {
-                // Leave the default clock choice to Android's resolver when needed.
+            val next = Calendar.getInstance().apply {
+                timeInMillis = now
+                set(Calendar.HOUR_OF_DAY, local.get(Calendar.HOUR_OF_DAY))
+                set(Calendar.MINUTE, local.get(Calendar.MINUTE))
+                set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+                if (timeInMillis <= now) add(Calendar.DAY_OF_MONTH, 1)
+            }
+            val weekly = next.timeInMillis != time
+            val id = UUID.randomUUID().toString()
+            val record = JSONObject().put("id", id).put("title", title).put("notes", notes)
+                .put("time", time).put("weekly", weekly).toString()
+            record to Intent(AlarmClock.ACTION_SET_ALARM).apply {
                 putExtra(AlarmClock.EXTRA_HOUR, local.get(Calendar.HOUR_OF_DAY))
                 putExtra(AlarmClock.EXTRA_MINUTES, local.get(Calendar.MINUTE))
-                putExtra(AlarmClock.EXTRA_MESSAGE, if (notes.isEmpty()) title else "$title\n$notes")
-                putExtra(AlarmClock.EXTRA_SKIP_UI, true)
+                putExtra(AlarmClock.EXTRA_MESSAGE, "$title [DDL:${id.take(8)}]" + if (notes.isEmpty()) "" else "\n$notes")
+                if (weekly) putIntegerArrayListExtra(AlarmClock.EXTRA_DAYS, arrayListOf(local.get(Calendar.DAY_OF_WEEK)))
+                // Keep Clock visible so the user can confirm a recurring alarm.
+                putExtra(AlarmClock.EXTRA_SKIP_UI, false)
             }
         }
         submitted = 0
@@ -61,10 +95,9 @@ class SystemAlarmBridge(private val activity: Activity) {
 
     fun onActivityResult(requestCode: Int) {
         if (requestCode != REQUEST_CODE || !waitingForClock) return
-        // Android defines no success result for this intent. Report submissions,
-        // never pretend this is a receipt proving the clock saved an alarm.
-        submitted++
         waitingForClock = false
+        // No standard success result exists for ACTION_SET_ALARM.
+        activity.window.decorView.post { launchNext() }
     }
 
     fun onResume() {
@@ -78,17 +111,23 @@ class SystemAlarmBridge(private val activity: Activity) {
         if (submitted >= intents.size) {
             pending = null; intents = emptyList(); result.success(submitted); return
         }
+        val (record, intent) = intents[submitted]
+        val id = JSONObject(record).getString("id")
         try {
+            // Persist before leaving; Android may destroy DDL out! while Clock is open.
+            if (!preferences.edit().putString(id, record).commit()) throw IllegalStateException("Cannot save alarm records")
             waitingForClock = true
-            activity.startActivityForResult(intents[submitted], REQUEST_CODE)
+            activity.startActivityForResult(intent, REQUEST_CODE)
+            submitted++
         } catch (error: Exception) {
+            preferences.edit().remove(id).commit()
             waitingForClock = false; pending = null; intents = emptyList()
-            result.error("clock_unavailable", "Unable to open the clock application.", submitted)
+            result.error("clock_unavailable", error.message ?: "Unable to open Clock.", submitted)
         }
     }
 
     fun dispose() {
-        pending?.error("interrupted", "Clock export was interrupted.", submitted)
+        pending?.error("interrupted", "Clock export was interrupted; check the export list.", submitted)
         pending = null
     }
 }

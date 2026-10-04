@@ -5,6 +5,10 @@
 #include <flutter/standard_method_codec.h>
 #include <memory>
 
+void HandleSystemAlarmCall(const flutter::MethodCall<flutter::EncodableValue>& call,
+                          flutter::MethodResult<flutter::EncodableValue>& result,
+                          const std::wstring& executable_override = L"");
+
 std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>>
 CreateSystemAlarmChannel(flutter::BinaryMessenger* messenger);
 

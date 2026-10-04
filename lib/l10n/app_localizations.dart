@@ -100,6 +100,126 @@ abstract class AppLocalizations {
     Locale('ja'),
   ];
 
+  /// No description provided for @alarmManagerTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'闹钟管理'**
+  String get alarmManagerTitle;
+
+  /// No description provided for @alarmManagerEmpty.
+  ///
+  /// In zh, this message translates to:
+  /// **'还没有通过 DDL out! 添加闹钟'**
+  String get alarmManagerEmpty;
+
+  /// No description provided for @alarmManagerInfo.
+  ///
+  /// In zh, this message translates to:
+  /// **'Windows 闹钟由任务计划程序保存。退出 DDL out! 后仍会启动独立闹钟窗口。电脑须开机且已登录；锁屏时需解锁查看，睡眠唤醒取决于系统设置。请保留程序所在文件夹。'**
+  String get alarmManagerInfo;
+
+  /// No description provided for @alarmAndroidManagerInfo.
+  ///
+  /// In zh, this message translates to:
+  /// **'这里显示 DDL out! 的导出记录。实际创建、开关和删除结果请在系统时钟确认；移除记录不会删除系统闹钟。'**
+  String get alarmAndroidManagerInfo;
+
+  /// No description provided for @alarmOpenClock.
+  ///
+  /// In zh, this message translates to:
+  /// **'打开系统时钟'**
+  String get alarmOpenClock;
+
+  /// No description provided for @alarmForget.
+  ///
+  /// In zh, this message translates to:
+  /// **'移除记录'**
+  String get alarmForget;
+
+  /// No description provided for @alarmForgetConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'只移除这条导出记录，系统时钟中的闹钟仍会保留。'**
+  String get alarmForgetConfirm;
+
+  /// No description provided for @alarmDeleteConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除这个闹钟？尚未触发的计划任务将取消。'**
+  String get alarmDeleteConfirm;
+
+  /// No description provided for @alarmDisable.
+  ///
+  /// In zh, this message translates to:
+  /// **'关闭闹钟'**
+  String get alarmDisable;
+
+  /// No description provided for @alarmEnabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'待响铃'**
+  String get alarmEnabled;
+
+  /// No description provided for @alarmDisabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'已关闭'**
+  String get alarmDisabled;
+
+  /// No description provided for @alarmElapsed.
+  ///
+  /// In zh, this message translates to:
+  /// **'已到计划时间'**
+  String get alarmElapsed;
+
+  /// No description provided for @alarmExported.
+  ///
+  /// In zh, this message translates to:
+  /// **'已提交请求 · 请在时钟确认'**
+  String get alarmExported;
+
+  /// No description provided for @alarmWeekly.
+  ///
+  /// In zh, this message translates to:
+  /// **'每周 {day} {time}'**
+  String alarmWeekly(String day, String time);
+
+  /// No description provided for @alarmOnce.
+  ///
+  /// In zh, this message translates to:
+  /// **'单次'**
+  String get alarmOnce;
+
+  /// No description provided for @alarmWeeklyWarning.
+  ///
+  /// In zh, this message translates to:
+  /// **'远期日期将按对应星期每周重复，可能在事项日期之前响铃，且此后每周继续。请在系统时钟中关闭不再需要的闹钟。'**
+  String get alarmWeeklyWarning;
+
+  /// No description provided for @alarmDismiss.
+  ///
+  /// In zh, this message translates to:
+  /// **'知道了，关闭闹钟'**
+  String get alarmDismiss;
+
+  /// No description provided for @alarmRinging.
+  ///
+  /// In zh, this message translates to:
+  /// **'时间到了'**
+  String get alarmRinging;
+
+  /// No description provided for @alarmRetry.
+  ///
+  /// In zh, this message translates to:
+  /// **'重试'**
+  String get alarmRetry;
+
+  /// No description provided for @alarmTechnicalDetails.
+  ///
+  /// In zh, this message translates to:
+  /// **'错误详情'**
+  String get alarmTechnicalDetails;
+
   /// No description provided for @addSystemAlarm.
   ///
   /// In zh, this message translates to:
@@ -121,13 +241,13 @@ abstract class AppLocalizations {
   /// No description provided for @alarmAndroidInfo.
   ///
   /// In zh, this message translates to:
-  /// **'交给手机时钟创建闹钟。仅支持今天或明天该时刻的下一次响铃；创建后，事项的修改或删除不会同步到闹钟。'**
+  /// **'加入手机系统时钟。今天或明天的下一次时刻使用单次闹钟；其他日期按对应星期每周重复。事项后续改动不会同步。'**
   String get alarmAndroidInfo;
 
   /// No description provided for @alarmWindowsInfo.
   ///
   /// In zh, this message translates to:
-  /// **'创建 Windows 系统定时提醒，不会加入“时钟”列表。关闭本应用后仍可提醒，但关机可能错过。事项后续改动不会同步。'**
+  /// **'使用 Windows 任务计划程序按完整日期创建闹钟。退出 DDL out! 后仍会自动启动闹钟窗口；电脑须开机且用户已登录。睡眠唤醒取决于系统设置。'**
   String get alarmWindowsInfo;
 
   /// No description provided for @multipleAlarms.
@@ -217,7 +337,7 @@ abstract class AppLocalizations {
   /// No description provided for @alarmFailed.
   ///
   /// In zh, this message translates to:
-  /// **'无法加入系统闹钟，请稍后重试。'**
+  /// **'闹钟操作失败，请查看下方错误详情。'**
   String get alarmFailed;
 
   /// No description provided for @alarmPreview.

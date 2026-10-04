@@ -9,6 +9,71 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
+  String get alarmManagerTitle => 'アラーム管理';
+
+  @override
+  String get alarmManagerEmpty => 'DDL out! から追加したアラームはありません';
+
+  @override
+  String get alarmManagerInfo =>
+      'Windows タスク スケジューラが保存し、DDL out! 終了後も専用ウィンドウを開きます。電源が入り、ログインしている必要があります。ロック時は解除して確認してください。スリープ解除はシステム設定に依存します。アプリのフォルダーを移動しないでください。';
+
+  @override
+  String get alarmAndroidManagerInfo =>
+      'DDL out! の送信履歴です。作成、オン・オフ、削除はシステム時計で確認してください。履歴の削除ではシステムアラームは削除されません。';
+
+  @override
+  String get alarmOpenClock => 'システム時計を開く';
+
+  @override
+  String get alarmForget => '履歴を削除';
+
+  @override
+  String get alarmForgetConfirm => '送信履歴のみ削除しますか？システム時計のアラームは残ります。';
+
+  @override
+  String get alarmDeleteConfirm => 'このアラームを削除し、予定されたタスクを取り消しますか？';
+
+  @override
+  String get alarmDisable => 'アラームをオフ';
+
+  @override
+  String get alarmEnabled => '予定済み';
+
+  @override
+  String get alarmDisabled => 'オフ';
+
+  @override
+  String get alarmElapsed => '予定時刻に到達';
+
+  @override
+  String get alarmExported => '送信済み・時計で確認';
+
+  @override
+  String alarmWeekly(String day, String time) {
+    return '毎週 $day $time';
+  }
+
+  @override
+  String get alarmOnce => '1回';
+
+  @override
+  String get alarmWeeklyWarning =>
+      '先の日付は同じ曜日に毎週繰り返すため、元の日付より前に鳴ることがあります。その後も毎週鳴ります。不要なアラームは時計でオフにしてください。';
+
+  @override
+  String get alarmDismiss => 'アラームを閉じる';
+
+  @override
+  String get alarmRinging => '時間になりました';
+
+  @override
+  String get alarmRetry => '再試行';
+
+  @override
+  String get alarmTechnicalDetails => 'エラーの詳細';
+
+  @override
   String get addSystemAlarm => 'システムアラームに追加';
 
   @override
@@ -19,11 +84,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get alarmAndroidInfo =>
-      '端末の時計アプリにアラームを作成します。今日または明日の次に到来する時刻に限ります。作成後のタスク変更・削除はアラームに反映されません。';
+      'システム時計に追加します。今日または明日の次の時刻は1回、それ以外の日付は同じ曜日に毎週繰り返します。事項の変更は同期しません。';
 
   @override
   String get alarmWindowsInfo =>
-      'Windows の予約通知を作成します。「時計」の一覧には追加されません。アプリを閉じても通知できますが、PC の電源が切れていると届かない場合があります。タスクの変更は反映されません。';
+      'Windows タスク スケジューラで日付を指定します。DDL out! 終了後も専用ウィンドウを開きます。電源とログインが必要です。スリープ解除はシステム設定に依存します。';
 
   @override
   String get multipleAlarms => '複数アラーム';
@@ -70,7 +135,7 @@ class AppLocalizationsJa extends AppLocalizations {
       'Windows の設定で DDL out! の通知を許可してから、再度追加してください。';
 
   @override
-  String get alarmFailed => 'アラームを追加できませんでした。後でもう一度お試しください。';
+  String get alarmFailed => 'アラームの操作に失敗しました。下の詳細を確認してください。';
 
   @override
   String alarmPreview(int count) {
