@@ -21,8 +21,8 @@
 
 - 项目是使用 Flutter、Riverpod、Drift 和 Material 3 构建的本地优先截止事项
   看板，应用 ID 为 `com.flysparkle.ddlout`。
-- 当前已提交基线为 `v0.5.3+1`，工作区在 `codex/v0.5.4` 分支准备
-  `v0.5.4+1`。
+- 当前代码版本为 `v0.5.4+1`；正式发布标签为 `v0.5.4`。版本先通过 PR 和 CI 合入
+  `main`，再由该合并提交的标签触发正式发布。
 - Windows 和 Android 是主要开发、验证与发布目标；仓库同时保留其他 Flutter
   平台宿主。
 - 数据默认存储在本机 SQLite 中，时间戳使用 UTC，显示时转换为设备本地时区。
