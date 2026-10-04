@@ -373,7 +373,7 @@ abstract class AppLocalizations {
   /// No description provided for @alarmClockSubmitted.
   ///
   /// In zh, this message translates to:
-  /// **'已向系统时钟提交 {count} 个闹钟请求，请在时钟中确认实际创建结果。'**
+  /// **'已直接向系统时钟提交 {count} 个闹钟请求，可在时钟中查看。'**
   String alarmClockSubmitted(int count);
 
   /// No description provided for @alarmScheduled.

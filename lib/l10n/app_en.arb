@@ -54,7 +54,7 @@
       }
     }
   },
-  "alarmClockSubmitted": "Submitted {count} requests to Clock. Please confirm the created alarms in your Clock app.",
+  "alarmClockSubmitted": "Submitted {count} requests directly to Clock. You can view the alarms in your Clock app.",
   "@alarmClockSubmitted": {
     "placeholders": {
       "count": {

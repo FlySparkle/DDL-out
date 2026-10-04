@@ -160,7 +160,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String alarmClockSubmitted(int count) {
-    return '已向系统时钟提交 $count 个闹钟请求，请在时钟中确认实际创建结果。';
+    return '已直接向系统时钟提交 $count 个闹钟请求，可在时钟中查看。';
   }
 
   @override

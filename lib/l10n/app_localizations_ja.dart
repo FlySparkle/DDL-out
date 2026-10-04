@@ -160,7 +160,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String alarmClockSubmitted(int count) {
-    return '時計に $count 件を送信しました。実際の作成結果は時計アプリでご確認ください。';
+    return '時計に $count 件を直接送信しました。時計アプリでアラームを閲覧できます。';
   }
 
   @override

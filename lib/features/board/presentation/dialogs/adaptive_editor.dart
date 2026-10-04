@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 Future<void> showAdaptiveEditor(
   BuildContext context, {
   required Widget child,
+  bool dismissible = true,
 }) async {
   final isAndroid = Theme.of(context).platform == TargetPlatform.android;
   if (isAndroid) {
@@ -10,6 +11,8 @@ Future<void> showAdaptiveEditor(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      isDismissible: dismissible,
+      enableDrag: dismissible,
       builder: (context) => Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.viewInsetsOf(context).bottom,

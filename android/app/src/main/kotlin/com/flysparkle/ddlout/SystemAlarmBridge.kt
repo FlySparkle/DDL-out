@@ -83,8 +83,8 @@ class SystemAlarmBridge(private val activity: Activity) {
                 putExtra(AlarmClock.EXTRA_MINUTES, local.get(Calendar.MINUTE))
                 putExtra(AlarmClock.EXTRA_MESSAGE, "$title [DDL:${id.take(8)}]" + if (notes.isEmpty()) "" else "\n$notes")
                 if (weekly) putIntegerArrayListExtra(AlarmClock.EXTRA_DAYS, arrayListOf(local.get(Calendar.DAY_OF_WEEK)))
-                // Keep Clock visible so the user can confirm a recurring alarm.
-                putExtra(AlarmClock.EXTRA_SKIP_UI, false)
+                // Ask Clock to create the alarm directly without confirmation UI.
+                putExtra(AlarmClock.EXTRA_SKIP_UI, true)
             }
         }
         submitted = 0

@@ -165,7 +165,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String alarmClockSubmitted(int count) {
-    return 'Submitted $count requests to Clock. Please confirm the created alarms in your Clock app.';
+    return 'Submitted $count requests directly to Clock. You can view the alarms in your Clock app.';
   }
 
   @override

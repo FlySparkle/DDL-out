@@ -2,6 +2,8 @@ import 'package:ddl_out/core/alarms/system_alarm_service.dart';
 import 'package:ddl_out/features/alarms/alarm_management_page.dart';
 import 'package:ddl_out/features/alarms/alarm_window.dart';
 import 'package:ddl_out/features/board/presentation/dialogs/system_alarm_dialog.dart';
+import 'package:ddl_out/features/board/presentation/dialogs/adaptive_editor.dart';
+import 'package:ddl_out/features/board/presentation/dialogs/editor_frame.dart';
 import 'package:ddl_out/l10n/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -180,6 +182,73 @@ void main() {
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
+  for (final width in [390.0, 900.0]) {
+    testWidgets(
+      'Android alarm matches editor width at $width with keyboard avoidance',
+      (tester) async {
+        tester.view.physicalSize = Size(width, 1200);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(tester.view.resetViewInsets);
+        await tester.pumpWidget(
+          app(
+            Builder(
+              builder: (context) => Scaffold(
+                body: Column(
+                  children: [
+                    TextButton(
+                      onPressed: () => showAdaptiveEditor(
+                        context,
+                        child: EditorFrame(
+                          title: 'Edit task',
+                          body: const Text('Task fields'),
+                          primaryAction: const SizedBox.shrink(),
+                        ),
+                      ),
+                      child: const Text('Editor'),
+                    ),
+                    TextButton(
+                      onPressed: () => showSystemAlarmDialog(
+                        context,
+                        title: 'Task',
+                        notes: '',
+                        time: time,
+                      ),
+                      child: const Text('Alarm'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.tap(find.text('Editor'));
+        await tester.pumpAndSettle();
+        final editorWidth = tester.getSize(find.byType(EditorFrame)).width;
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Alarm'));
+        await tester.pumpAndSettle();
+        expect(
+          tester.getSize(find.byType(AlertDialog)).width,
+          closeTo(editorWidth, 0.01),
+        );
+        tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+        await tester.pumpAndSettle();
+        expect(
+          tester.getSize(find.byType(AlertDialog)).width,
+          closeTo(editorWidth, 0.01),
+        );
+        expect(
+          tester.getBottomLeft(find.byType(AlertDialog)).dy,
+          closeTo(900, 0.01),
+        );
+        expect(tester.takeException(), isNull);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
+  }
   testWidgets(
     'bulk clear confirms once, deletes the listed alarms and disables when empty',
     (tester) async {
