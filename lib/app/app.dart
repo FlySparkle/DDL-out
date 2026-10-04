@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../core/theme/app_theme.dart';
 import '../core/update/update_checker.dart';
 import '../features/board/board_page.dart';
+import '../features/alarms/alarm_management_page.dart';
 import '../features/settings/application/settings.dart';
 import '../features/settings/about_settings_page.dart';
 import '../features/settings/appearance_settings_page.dart';
@@ -40,6 +41,10 @@ final _router = GoRouter(
         GoRoute(
           path: '/settings/appearance',
           builder: (context, state) => const AppearanceSettingsPage(),
+        ),
+        GoRoute(
+          path: '/settings/alarms',
+          builder: (context, state) => const AlarmManagementPage(),
         ),
         GoRoute(
           path: '/settings/system-data',

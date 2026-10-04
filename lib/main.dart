@@ -9,10 +9,32 @@ import 'package:window_manager/window_manager.dart';
 import 'app/app.dart';
 import 'core/licenses/app_licenses.dart';
 import 'features/board/application/task_image_viewer.dart';
+import 'features/alarms/alarm_window.dart';
 
 Future<void> main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
   registerAppLicenses();
+
+  if (Platform.isWindows &&
+      arguments.length == 2 &&
+      arguments.first == '--ddl-alarm' &&
+      RegExp(r'^\{[0-9a-fA-F-]{36}\}$').hasMatch(arguments[1])) {
+    await windowManager.ensureInitialized();
+    await windowManager.setPreventClose(true);
+    const options = WindowOptions(
+      size: Size(460, 560),
+      minimumSize: Size(360, 360),
+      center: true,
+      alwaysOnTop: true,
+      title: 'DDL out! · Alarm',
+    );
+    runApp(ProviderScope(child: AlarmWindowApp(id: arguments[1])));
+    await windowManager.waitUntilReadyToShow(options, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+    return;
+  }
 
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await windowManager.ensureInitialized();

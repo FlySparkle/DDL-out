@@ -9,6 +9,210 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get alarmClearAll => 'Clear all alarms';
+
+  @override
+  String get alarmClearRecords => 'Clear all records';
+
+  @override
+  String alarmClearAllConfirm(int count) {
+    return 'Delete all $count DDL out! alarms in this list? This cannot be undone.';
+  }
+
+  @override
+  String alarmClearRecordsConfirm(int count) {
+    return 'Clear all $count export records? This will not delete system alarms. Manage them in the system Clock.';
+  }
+
+  @override
+  String get alarmManagerTitle => 'Alarm management';
+
+  @override
+  String get alarmManagerEmpty => 'No alarms added through DDL out! yet';
+
+  @override
+  String get alarmManagerInfo =>
+      'Task Scheduler stores Windows alarms and opens a separate alarm window even after DDL out! exits. Your PC must be on and you must be signed in. Unlock to see the window; waking from sleep depends on system settings. Keep the application folder in place.';
+
+  @override
+  String get alarmAndroidManagerInfo =>
+      'These are DDL out! export records. Confirm creation, switches and deletion in Clock. Removing a record does not delete the system alarm.';
+
+  @override
+  String get alarmOpenClock => 'Open system Clock';
+
+  @override
+  String get alarmForget => 'Remove record';
+
+  @override
+  String get alarmForgetConfirm =>
+      'Remove only this export record? The system alarm will remain in Clock.';
+
+  @override
+  String get alarmDeleteConfirm =>
+      'Delete this alarm and cancel its pending scheduled task?';
+
+  @override
+  String get alarmDisable => 'Turn off alarm';
+
+  @override
+  String get alarmEnabled => 'Scheduled';
+
+  @override
+  String get alarmDisabled => 'Off';
+
+  @override
+  String get alarmElapsed => 'Scheduled time reached';
+
+  @override
+  String get alarmExported => 'Request submitted · Confirm in Clock';
+
+  @override
+  String alarmWeekly(String day, String time) {
+    return 'Every $day at $time';
+  }
+
+  @override
+  String get alarmOnce => 'Once';
+
+  @override
+  String get alarmWeeklyWarning =>
+      'Later dates repeat on the corresponding weekday, possibly before the task date, and continue every week. Turn off alarms you no longer need in Clock.';
+
+  @override
+  String get alarmDismiss => 'Dismiss alarm';
+
+  @override
+  String get alarmRinging => 'Time is up';
+
+  @override
+  String get alarmRetry => 'Retry';
+
+  @override
+  String get alarmTechnicalDetails => 'Error details';
+
+  @override
+  String get addSystemAlarm => 'Add to system alarms';
+
+  @override
+  String get alarmTitle => 'Alarm title';
+
+  @override
+  String get alarmNotes => 'Alarm details';
+
+  @override
+  String get alarmAndroidInfo =>
+      'Adds alarms to system Clock. The next occurrence today or tomorrow is one-time; other dates repeat weekly on the corresponding weekday. Task changes are not synced.';
+
+  @override
+  String get alarmWindowsInfo =>
+      'Uses Windows Task Scheduler with the full date. A separate alarm window opens even after DDL out! exits. Your PC must be on and you must be signed in. Waking from sleep depends on system settings.';
+
+  @override
+  String get multipleAlarms => 'Multiple alarms';
+
+  @override
+  String get alarmRelativeTo => 'Relative to this alarm:';
+
+  @override
+  String get alarmBefore => 'Before';
+
+  @override
+  String get alarmAfter => 'After';
+
+  @override
+  String get alarmInterval => 'Every';
+
+  @override
+  String get alarmRepeat => 'Add';
+
+  @override
+  String get alarmTimes => 'times';
+
+  @override
+  String get alarmConfirm => 'Add alarms';
+
+  @override
+  String get alarmDone => 'Done';
+
+  @override
+  String get alarmInvalidNumber => 'Enter an integer in range';
+
+  @override
+  String get alarmPastTime =>
+      'Every alarm must be in the future. Adjust the time, interval or repeat count.';
+
+  @override
+  String get alarmClockDateUnsupported =>
+      'The system Clock interface cannot set arbitrary dates. Each alarm must match the next occurrence of its time today or tomorrow.';
+
+  @override
+  String get alarmClockUnavailable =>
+      'No compatible Clock app was found, or it could not accept the request.';
+
+  @override
+  String get alarmNotificationsDisabled =>
+      'Allow notifications for DDL out! in Windows Settings, then try again.';
+
+  @override
+  String get alarmFailed =>
+      'The alarm operation failed. See the error details below.';
+
+  @override
+  String alarmPreview(int count) {
+    return '$count alarms to add, including the original';
+  }
+
+  @override
+  String alarmClockSubmitted(int count) {
+    return 'Submitted $count requests directly to Clock. You can view the alarms in your Clock app.';
+  }
+
+  @override
+  String alarmScheduled(int count) {
+    return 'Scheduled $count Windows reminders.';
+  }
+
+  @override
+  String alarmPartial(int count) {
+    return '$count requests were submitted or reminders remain. Check the system before adding again to avoid duplicates.';
+  }
+
+  @override
+  String get exitMarkdownFullscreen => 'Exit full screen';
+
+  @override
+  String get renderMarkdown => 'Render Markdown';
+
+  @override
+  String get markdownFullscreen => 'Full screen';
+
+  @override
+  String get editMarkdown => 'Back to editing';
+
+  @override
+  String get markdownOutline => 'Outline';
+
+  @override
+  String get markdownNoHeadings => 'No headings';
+
+  @override
+  String get customDeadlinePreset => 'Custom deadline preset';
+
+  @override
+  String get presetName => 'Preset name';
+
+  @override
+  String get presetDurationRequired =>
+      'Enter a valid duration greater than zero';
+
+  @override
+  String get presetSaveFailed => 'Could not save presets. Please try again.';
+
+  @override
+  String get markdownImageUnavailable => 'Image unavailable';
+
+  @override
   String get appTitle => 'DDL out!';
 
   @override

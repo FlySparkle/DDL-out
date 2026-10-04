@@ -1,4 +1,94 @@
 {
+  "alarmClearAll": "Clear all alarms",
+  "alarmClearRecords": "Clear all records",
+  "alarmClearAllConfirm": "Delete all {count} DDL out! alarms in this list? This cannot be undone.",
+  "@alarmClearAllConfirm": {"placeholders": {"count": {"type": "int"}}},
+  "alarmClearRecordsConfirm": "Clear all {count} export records? This will not delete system alarms. Manage them in the system Clock.",
+  "@alarmClearRecordsConfirm": {"placeholders": {"count": {"type": "int"}}},
+  "alarmManagerTitle": "Alarm management",
+  "alarmManagerEmpty": "No alarms added through DDL out! yet",
+  "alarmManagerInfo": "Task Scheduler stores Windows alarms and opens a separate alarm window even after DDL out! exits. Your PC must be on and you must be signed in. Unlock to see the window; waking from sleep depends on system settings. Keep the application folder in place.",
+  "alarmAndroidManagerInfo": "These are DDL out! export records. Confirm creation, switches and deletion in Clock. Removing a record does not delete the system alarm.",
+  "alarmOpenClock": "Open system Clock",
+  "alarmForget": "Remove record",
+  "alarmForgetConfirm": "Remove only this export record? The system alarm will remain in Clock.",
+  "alarmDeleteConfirm": "Delete this alarm and cancel its pending scheduled task?",
+  "alarmDisable": "Turn off alarm",
+  "alarmEnabled": "Scheduled",
+  "alarmDisabled": "Off",
+  "alarmElapsed": "Scheduled time reached",
+  "alarmExported": "Request submitted · Confirm in Clock",
+  "alarmWeekly": "Every {day} at {time}",
+  "alarmOnce": "Once",
+  "alarmWeeklyWarning": "Later dates repeat on the corresponding weekday, possibly before the task date, and continue every week. Turn off alarms you no longer need in Clock.",
+  "alarmDismiss": "Dismiss alarm",
+  "alarmRinging": "Time is up",
+  "alarmRetry": "Retry",
+  "alarmTechnicalDetails": "Error details",
+  "@alarmWeekly": {"placeholders": {"day": {"type": "String"}, "time": {"type": "String"}}},
+  "addSystemAlarm": "Add to system alarms",
+  "alarmTitle": "Alarm title",
+  "alarmNotes": "Alarm details",
+  "alarmAndroidInfo": "Adds alarms to system Clock. The next occurrence today or tomorrow is one-time; other dates repeat weekly on the corresponding weekday. Task changes are not synced.",
+  "alarmWindowsInfo": "Uses Windows Task Scheduler with the full date. A separate alarm window opens even after DDL out! exits. Your PC must be on and you must be signed in. Waking from sleep depends on system settings.",
+  "multipleAlarms": "Multiple alarms",
+  "alarmRelativeTo": "Relative to this alarm:",
+  "alarmBefore": "Before",
+  "alarmAfter": "After",
+  "alarmInterval": "Every",
+  "alarmRepeat": "Add",
+  "alarmTimes": "times",
+  "alarmConfirm": "Add alarms",
+  "alarmDone": "Done",
+  "alarmInvalidNumber": "Enter an integer in range",
+  "alarmPastTime": "Every alarm must be in the future. Adjust the time, interval or repeat count.",
+  "alarmClockDateUnsupported": "The system Clock interface cannot set arbitrary dates. Each alarm must match the next occurrence of its time today or tomorrow.",
+  "alarmClockUnavailable": "No compatible Clock app was found, or it could not accept the request.",
+  "alarmNotificationsDisabled": "Allow notifications for DDL out! in Windows Settings, then try again.",
+  "alarmFailed": "The alarm operation failed. See the error details below.",
+  "alarmPreview": "{count} alarms to add, including the original",
+  "@alarmPreview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmClockSubmitted": "Submitted {count} requests directly to Clock. You can view the alarms in your Clock app.",
+  "@alarmClockSubmitted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmScheduled": "Scheduled {count} Windows reminders.",
+  "@alarmScheduled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmPartial": "{count} requests were submitted or reminders remain. Check the system before adding again to avoid duplicates.",
+  "@alarmPartial": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exitMarkdownFullscreen": "Exit full screen",
+  "renderMarkdown": "Render Markdown",
+  "markdownFullscreen": "Full screen",
+  "editMarkdown": "Back to editing",
+  "markdownOutline": "Outline",
+  "markdownNoHeadings": "No headings",
+  "customDeadlinePreset": "Custom deadline preset",
+  "presetName": "Preset name",
+  "presetDurationRequired": "Enter a valid duration greater than zero",
+  "presetSaveFailed": "Could not save presets. Please try again.",
+  "markdownImageUnavailable": "Image unavailable",
   "@@locale": "en",
   "appTitle": "DDL out!",
   "boardTitle": "Deadlines",

@@ -9,6 +9,204 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
+  String get alarmClearAll => 'アラームを一括削除';
+
+  @override
+  String get alarmClearRecords => '記録を一括削除';
+
+  @override
+  String alarmClearAllConfirm(int count) {
+    return '一覧の DDL out! アラーム $count 件をすべて削除しますか？この操作は取り消せません。';
+  }
+
+  @override
+  String alarmClearRecordsConfirm(int count) {
+    return '送信記録 $count 件をすべて削除しますか？システムのアラームは削除されません。時計アプリで管理してください。';
+  }
+
+  @override
+  String get alarmManagerTitle => 'アラーム管理';
+
+  @override
+  String get alarmManagerEmpty => 'DDL out! から追加したアラームはありません';
+
+  @override
+  String get alarmManagerInfo =>
+      'Windows タスク スケジューラが保存し、DDL out! 終了後も専用ウィンドウを開きます。電源が入り、ログインしている必要があります。ロック時は解除して確認してください。スリープ解除はシステム設定に依存します。アプリのフォルダーを移動しないでください。';
+
+  @override
+  String get alarmAndroidManagerInfo =>
+      'DDL out! の送信履歴です。作成、オン・オフ、削除はシステム時計で確認してください。履歴の削除ではシステムアラームは削除されません。';
+
+  @override
+  String get alarmOpenClock => 'システム時計を開く';
+
+  @override
+  String get alarmForget => '履歴を削除';
+
+  @override
+  String get alarmForgetConfirm => '送信履歴のみ削除しますか？システム時計のアラームは残ります。';
+
+  @override
+  String get alarmDeleteConfirm => 'このアラームを削除し、予定されたタスクを取り消しますか？';
+
+  @override
+  String get alarmDisable => 'アラームをオフ';
+
+  @override
+  String get alarmEnabled => '予定済み';
+
+  @override
+  String get alarmDisabled => 'オフ';
+
+  @override
+  String get alarmElapsed => '予定時刻に到達';
+
+  @override
+  String get alarmExported => '送信済み・時計で確認';
+
+  @override
+  String alarmWeekly(String day, String time) {
+    return '毎週 $day $time';
+  }
+
+  @override
+  String get alarmOnce => '1回';
+
+  @override
+  String get alarmWeeklyWarning =>
+      '先の日付は同じ曜日に毎週繰り返すため、元の日付より前に鳴ることがあります。その後も毎週鳴ります。不要なアラームは時計でオフにしてください。';
+
+  @override
+  String get alarmDismiss => 'アラームを閉じる';
+
+  @override
+  String get alarmRinging => '時間になりました';
+
+  @override
+  String get alarmRetry => '再試行';
+
+  @override
+  String get alarmTechnicalDetails => 'エラーの詳細';
+
+  @override
+  String get addSystemAlarm => 'システムアラームに追加';
+
+  @override
+  String get alarmTitle => 'アラーム名';
+
+  @override
+  String get alarmNotes => 'アラームの内容';
+
+  @override
+  String get alarmAndroidInfo =>
+      'システム時計に追加します。今日または明日の次の時刻は1回、それ以外の日付は同じ曜日に毎週繰り返します。事項の変更は同期しません。';
+
+  @override
+  String get alarmWindowsInfo =>
+      'Windows タスク スケジューラで日付を指定します。DDL out! 終了後も専用ウィンドウを開きます。電源とログインが必要です。スリープ解除はシステム設定に依存します。';
+
+  @override
+  String get multipleAlarms => '複数アラーム';
+
+  @override
+  String get alarmRelativeTo => 'このアラームの';
+
+  @override
+  String get alarmBefore => '前';
+
+  @override
+  String get alarmAfter => '後';
+
+  @override
+  String get alarmInterval => '間隔';
+
+  @override
+  String get alarmRepeat => '追加回数';
+
+  @override
+  String get alarmTimes => '回';
+
+  @override
+  String get alarmConfirm => '追加する';
+
+  @override
+  String get alarmDone => '完了';
+
+  @override
+  String get alarmInvalidNumber => '範囲内の整数を入力';
+
+  @override
+  String get alarmPastTime => 'すべてのアラームを現在より後にしてください。時刻・間隔・回数を調整してください。';
+
+  @override
+  String get alarmClockDateUnsupported =>
+      '時計アプリの連携では任意の日付を指定できません。各時刻が今日または明日の次の到来時刻になるよう調整してください。';
+
+  @override
+  String get alarmClockUnavailable => '対応する時計アプリがないか、リクエストを受け付けられませんでした。';
+
+  @override
+  String get alarmNotificationsDisabled =>
+      'Windows の設定で DDL out! の通知を許可してから、再度追加してください。';
+
+  @override
+  String get alarmFailed => 'アラームの操作に失敗しました。下の詳細を確認してください。';
+
+  @override
+  String alarmPreview(int count) {
+    return '元のアラームを含めて $count 件を追加';
+  }
+
+  @override
+  String alarmClockSubmitted(int count) {
+    return '時計に $count 件を直接送信しました。時計アプリでアラームを閲覧できます。';
+  }
+
+  @override
+  String alarmScheduled(int count) {
+    return 'Windows の通知を $count 件予約しました。';
+  }
+
+  @override
+  String alarmPartial(int count) {
+    return '$count 件のリクエストまたは通知が残っています。重複を避けるためシステム側をご確認ください。';
+  }
+
+  @override
+  String get exitMarkdownFullscreen => '全画面表示を終了';
+
+  @override
+  String get renderMarkdown => 'Markdown を表示';
+
+  @override
+  String get markdownFullscreen => '全画面';
+
+  @override
+  String get editMarkdown => '編集に戻る';
+
+  @override
+  String get markdownOutline => '目次';
+
+  @override
+  String get markdownNoHeadings => '見出しがありません';
+
+  @override
+  String get customDeadlinePreset => '時間プリセットを追加';
+
+  @override
+  String get presetName => 'プリセット名';
+
+  @override
+  String get presetDurationRequired => '0 より大きい有効な時間を入力してください';
+
+  @override
+  String get presetSaveFailed => 'プリセットを保存できませんでした。再試行してください。';
+
+  @override
+  String get markdownImageUnavailable => '画像を表示できません';
+
+  @override
   String get appTitle => 'DDL out!';
 
   @override

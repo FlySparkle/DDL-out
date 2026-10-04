@@ -1,4 +1,94 @@
 {
+  "alarmClearAll": "一键清空闹钟",
+  "alarmClearRecords": "一键清空记录",
+  "alarmClearAllConfirm": "确定删除列表中的全部 {count} 个 DDL out! 闹钟？此操作无法撤销。",
+  "@alarmClearAllConfirm": {"placeholders": {"count": {"type": "int"}}},
+  "alarmClearRecordsConfirm": "确定清空全部 {count} 条导出记录？此操作不会删除系统闹钟，请在系统时钟中管理。",
+  "@alarmClearRecordsConfirm": {"placeholders": {"count": {"type": "int"}}},
+  "alarmManagerTitle": "闹钟管理",
+  "alarmManagerEmpty": "还没有通过 DDL out! 添加闹钟",
+  "alarmManagerInfo": "Windows 闹钟由任务计划程序保存。退出 DDL out! 后仍会启动独立闹钟窗口。电脑须开机且已登录；锁屏时需解锁查看，睡眠唤醒取决于系统设置。请保留程序所在文件夹。",
+  "alarmAndroidManagerInfo": "这里显示 DDL out! 的导出记录。实际创建、开关和删除结果请在系统时钟确认；移除记录不会删除系统闹钟。",
+  "alarmOpenClock": "打开系统时钟",
+  "alarmForget": "移除记录",
+  "alarmForgetConfirm": "只移除这条导出记录，系统时钟中的闹钟仍会保留。",
+  "alarmDeleteConfirm": "删除这个闹钟？尚未触发的计划任务将取消。",
+  "alarmDisable": "关闭闹钟",
+  "alarmEnabled": "待响铃",
+  "alarmDisabled": "已关闭",
+  "alarmElapsed": "已到计划时间",
+  "alarmExported": "已提交请求 · 请在时钟确认",
+  "alarmWeekly": "每周 {day} {time}",
+  "alarmOnce": "单次",
+  "alarmWeeklyWarning": "远期日期将按对应星期每周重复，可能在事项日期之前响铃，且此后每周继续。请在系统时钟中关闭不再需要的闹钟。",
+  "alarmDismiss": "知道了，关闭闹钟",
+  "alarmRinging": "时间到了",
+  "alarmRetry": "重试",
+  "alarmTechnicalDetails": "错误详情",
+  "@alarmWeekly": {"placeholders": {"day": {"type": "String"}, "time": {"type": "String"}}},
+  "addSystemAlarm": "加入系统闹钟",
+  "alarmTitle": "闹钟标题",
+  "alarmNotes": "闹钟内容",
+  "alarmAndroidInfo": "加入手机系统时钟。今天或明天的下一次时刻使用单次闹钟；其他日期按对应星期每周重复。事项后续改动不会同步。",
+  "alarmWindowsInfo": "使用 Windows 任务计划程序按完整日期创建闹钟。退出 DDL out! 后仍会自动启动闹钟窗口；电脑须开机且用户已登录。睡眠唤醒取决于系统设置。",
+  "multipleAlarms": "多重闹钟",
+  "alarmRelativeTo": "在该闹钟",
+  "alarmBefore": "前",
+  "alarmAfter": "后",
+  "alarmInterval": "间隔",
+  "alarmRepeat": "重复设置",
+  "alarmTimes": "次",
+  "alarmConfirm": "确认加入",
+  "alarmDone": "完成",
+  "alarmInvalidNumber": "请输入范围内整数",
+  "alarmPastTime": "所有闹钟都必须晚于现在，请调整时间或多重闹钟的间隔与次数。",
+  "alarmClockDateUnsupported": "系统时钟接口不能指定任意日期。请将所有闹钟调整为今天或明天该时刻的下一次响铃，避免提前响铃。",
+  "alarmClockUnavailable": "未找到可用的系统时钟，或时钟拒绝接收请求。",
+  "alarmNotificationsDisabled": "请先在 Windows 设置中允许 DDL out! 发送通知，再重新添加。",
+  "alarmFailed": "闹钟操作失败，请查看下方错误详情。",
+  "alarmPreview": "即将加入 {count} 个闹钟（含原闹钟）",
+  "@alarmPreview": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmClockSubmitted": "已直接向系统时钟提交 {count} 个闹钟请求，可在时钟中查看。",
+  "@alarmClockSubmitted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmScheduled": "已添加 {count} 个 Windows 系统提醒。",
+  "@alarmScheduled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmPartial": "已有 {count} 条请求提交或提醒保留，请先到系统中查看，避免重复添加。",
+  "@alarmPartial": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exitMarkdownFullscreen": "退出全屏",
+  "renderMarkdown": "渲染 Markdown",
+  "markdownFullscreen": "全屏",
+  "editMarkdown": "返回编辑",
+  "markdownOutline": "大纲",
+  "markdownNoHeadings": "暂无标题",
+  "customDeadlinePreset": "自定义时间预设",
+  "presetName": "预设名称",
+  "presetDurationRequired": "请输入大于零的有效时长",
+  "presetSaveFailed": "预设保存失败，请重试",
+  "markdownImageUnavailable": "图片无法显示",
   "@@locale": "zh",
   "appTitle": "DDL out!",
   "boardTitle": "截止事项",

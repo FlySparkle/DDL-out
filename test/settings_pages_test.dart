@@ -18,6 +18,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:ddl_out/features/alarms/alarm_management_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -48,11 +50,62 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Appearance & personalization'), findsOneWidget);
+    expect(find.text('Alarm management'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('Alarm management')).dy,
+      lessThan(tester.getTopLeft(find.text('Appearance & personalization')).dy),
+    );
     expect(find.text('System & data'), findsOneWidget);
     expect(find.text('Community & support'), findsOneWidget);
     expect(find.text('About'), findsNothing);
     expect(find.text('Nearby sync'), findsNothing);
   });
+
+  testWidgets(
+    'alarm management shortcut opens the settings-level route',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      const channel = MethodChannel('ddl_out/system_alarms');
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(channel, (_) async => []);
+      addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+      final router = GoRouter(
+        initialLocation: '/settings',
+        routes: [
+          GoRoute(
+            path: '/settings',
+            builder: (_, _) => const SettingsOverviewPage(),
+          ),
+          GoRoute(
+            path: '/settings/alarms',
+            builder: (_, _) => const AlarmManagementPage(),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp.router(
+            routerConfig: router,
+            locale: const Locale('en'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(ListTile, 'Alarm management'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlarmManagementPage), findsOneWidget);
+      expect(find.text('No alarms added through DDL out! yet'), findsOneWidget);
+      await tester.tap(find.byType(BackButton));
+      await tester.pumpAndSettle();
+      expect(find.text('Appearance & personalization'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+      router.dispose();
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.windows),
+  );
 
   testWidgets('content tiles use the navigation shape and edge inset', (
     tester,

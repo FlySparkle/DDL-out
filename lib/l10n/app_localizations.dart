@@ -100,6 +100,360 @@ abstract class AppLocalizations {
     Locale('ja'),
   ];
 
+  /// No description provided for @alarmClearAll.
+  ///
+  /// In zh, this message translates to:
+  /// **'一键清空闹钟'**
+  String get alarmClearAll;
+
+  /// No description provided for @alarmClearRecords.
+  ///
+  /// In zh, this message translates to:
+  /// **'一键清空记录'**
+  String get alarmClearRecords;
+
+  /// No description provided for @alarmClearAllConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定删除列表中的全部 {count} 个 DDL out! 闹钟？此操作无法撤销。'**
+  String alarmClearAllConfirm(int count);
+
+  /// No description provided for @alarmClearRecordsConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定清空全部 {count} 条导出记录？此操作不会删除系统闹钟，请在系统时钟中管理。'**
+  String alarmClearRecordsConfirm(int count);
+
+  /// No description provided for @alarmManagerTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'闹钟管理'**
+  String get alarmManagerTitle;
+
+  /// No description provided for @alarmManagerEmpty.
+  ///
+  /// In zh, this message translates to:
+  /// **'还没有通过 DDL out! 添加闹钟'**
+  String get alarmManagerEmpty;
+
+  /// No description provided for @alarmManagerInfo.
+  ///
+  /// In zh, this message translates to:
+  /// **'Windows 闹钟由任务计划程序保存。退出 DDL out! 后仍会启动独立闹钟窗口。电脑须开机且已登录；锁屏时需解锁查看，睡眠唤醒取决于系统设置。请保留程序所在文件夹。'**
+  String get alarmManagerInfo;
+
+  /// No description provided for @alarmAndroidManagerInfo.
+  ///
+  /// In zh, this message translates to:
+  /// **'这里显示 DDL out! 的导出记录。实际创建、开关和删除结果请在系统时钟确认；移除记录不会删除系统闹钟。'**
+  String get alarmAndroidManagerInfo;
+
+  /// No description provided for @alarmOpenClock.
+  ///
+  /// In zh, this message translates to:
+  /// **'打开系统时钟'**
+  String get alarmOpenClock;
+
+  /// No description provided for @alarmForget.
+  ///
+  /// In zh, this message translates to:
+  /// **'移除记录'**
+  String get alarmForget;
+
+  /// No description provided for @alarmForgetConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'只移除这条导出记录，系统时钟中的闹钟仍会保留。'**
+  String get alarmForgetConfirm;
+
+  /// No description provided for @alarmDeleteConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除这个闹钟？尚未触发的计划任务将取消。'**
+  String get alarmDeleteConfirm;
+
+  /// No description provided for @alarmDisable.
+  ///
+  /// In zh, this message translates to:
+  /// **'关闭闹钟'**
+  String get alarmDisable;
+
+  /// No description provided for @alarmEnabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'待响铃'**
+  String get alarmEnabled;
+
+  /// No description provided for @alarmDisabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'已关闭'**
+  String get alarmDisabled;
+
+  /// No description provided for @alarmElapsed.
+  ///
+  /// In zh, this message translates to:
+  /// **'已到计划时间'**
+  String get alarmElapsed;
+
+  /// No description provided for @alarmExported.
+  ///
+  /// In zh, this message translates to:
+  /// **'已提交请求 · 请在时钟确认'**
+  String get alarmExported;
+
+  /// No description provided for @alarmWeekly.
+  ///
+  /// In zh, this message translates to:
+  /// **'每周 {day} {time}'**
+  String alarmWeekly(String day, String time);
+
+  /// No description provided for @alarmOnce.
+  ///
+  /// In zh, this message translates to:
+  /// **'单次'**
+  String get alarmOnce;
+
+  /// No description provided for @alarmWeeklyWarning.
+  ///
+  /// In zh, this message translates to:
+  /// **'远期日期将按对应星期每周重复，可能在事项日期之前响铃，且此后每周继续。请在系统时钟中关闭不再需要的闹钟。'**
+  String get alarmWeeklyWarning;
+
+  /// No description provided for @alarmDismiss.
+  ///
+  /// In zh, this message translates to:
+  /// **'知道了，关闭闹钟'**
+  String get alarmDismiss;
+
+  /// No description provided for @alarmRinging.
+  ///
+  /// In zh, this message translates to:
+  /// **'时间到了'**
+  String get alarmRinging;
+
+  /// No description provided for @alarmRetry.
+  ///
+  /// In zh, this message translates to:
+  /// **'重试'**
+  String get alarmRetry;
+
+  /// No description provided for @alarmTechnicalDetails.
+  ///
+  /// In zh, this message translates to:
+  /// **'错误详情'**
+  String get alarmTechnicalDetails;
+
+  /// No description provided for @addSystemAlarm.
+  ///
+  /// In zh, this message translates to:
+  /// **'加入系统闹钟'**
+  String get addSystemAlarm;
+
+  /// No description provided for @alarmTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'闹钟标题'**
+  String get alarmTitle;
+
+  /// No description provided for @alarmNotes.
+  ///
+  /// In zh, this message translates to:
+  /// **'闹钟内容'**
+  String get alarmNotes;
+
+  /// No description provided for @alarmAndroidInfo.
+  ///
+  /// In zh, this message translates to:
+  /// **'加入手机系统时钟。今天或明天的下一次时刻使用单次闹钟；其他日期按对应星期每周重复。事项后续改动不会同步。'**
+  String get alarmAndroidInfo;
+
+  /// No description provided for @alarmWindowsInfo.
+  ///
+  /// In zh, this message translates to:
+  /// **'使用 Windows 任务计划程序按完整日期创建闹钟。退出 DDL out! 后仍会自动启动闹钟窗口；电脑须开机且用户已登录。睡眠唤醒取决于系统设置。'**
+  String get alarmWindowsInfo;
+
+  /// No description provided for @multipleAlarms.
+  ///
+  /// In zh, this message translates to:
+  /// **'多重闹钟'**
+  String get multipleAlarms;
+
+  /// No description provided for @alarmRelativeTo.
+  ///
+  /// In zh, this message translates to:
+  /// **'在该闹钟'**
+  String get alarmRelativeTo;
+
+  /// No description provided for @alarmBefore.
+  ///
+  /// In zh, this message translates to:
+  /// **'前'**
+  String get alarmBefore;
+
+  /// No description provided for @alarmAfter.
+  ///
+  /// In zh, this message translates to:
+  /// **'后'**
+  String get alarmAfter;
+
+  /// No description provided for @alarmInterval.
+  ///
+  /// In zh, this message translates to:
+  /// **'间隔'**
+  String get alarmInterval;
+
+  /// No description provided for @alarmRepeat.
+  ///
+  /// In zh, this message translates to:
+  /// **'重复设置'**
+  String get alarmRepeat;
+
+  /// No description provided for @alarmTimes.
+  ///
+  /// In zh, this message translates to:
+  /// **'次'**
+  String get alarmTimes;
+
+  /// No description provided for @alarmConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'确认加入'**
+  String get alarmConfirm;
+
+  /// No description provided for @alarmDone.
+  ///
+  /// In zh, this message translates to:
+  /// **'完成'**
+  String get alarmDone;
+
+  /// No description provided for @alarmInvalidNumber.
+  ///
+  /// In zh, this message translates to:
+  /// **'请输入范围内整数'**
+  String get alarmInvalidNumber;
+
+  /// No description provided for @alarmPastTime.
+  ///
+  /// In zh, this message translates to:
+  /// **'所有闹钟都必须晚于现在，请调整时间或多重闹钟的间隔与次数。'**
+  String get alarmPastTime;
+
+  /// No description provided for @alarmClockDateUnsupported.
+  ///
+  /// In zh, this message translates to:
+  /// **'系统时钟接口不能指定任意日期。请将所有闹钟调整为今天或明天该时刻的下一次响铃，避免提前响铃。'**
+  String get alarmClockDateUnsupported;
+
+  /// No description provided for @alarmClockUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'未找到可用的系统时钟，或时钟拒绝接收请求。'**
+  String get alarmClockUnavailable;
+
+  /// No description provided for @alarmNotificationsDisabled.
+  ///
+  /// In zh, this message translates to:
+  /// **'请先在 Windows 设置中允许 DDL out! 发送通知，再重新添加。'**
+  String get alarmNotificationsDisabled;
+
+  /// No description provided for @alarmFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'闹钟操作失败，请查看下方错误详情。'**
+  String get alarmFailed;
+
+  /// No description provided for @alarmPreview.
+  ///
+  /// In zh, this message translates to:
+  /// **'即将加入 {count} 个闹钟（含原闹钟）'**
+  String alarmPreview(int count);
+
+  /// No description provided for @alarmClockSubmitted.
+  ///
+  /// In zh, this message translates to:
+  /// **'已直接向系统时钟提交 {count} 个闹钟请求，可在时钟中查看。'**
+  String alarmClockSubmitted(int count);
+
+  /// No description provided for @alarmScheduled.
+  ///
+  /// In zh, this message translates to:
+  /// **'已添加 {count} 个 Windows 系统提醒。'**
+  String alarmScheduled(int count);
+
+  /// No description provided for @alarmPartial.
+  ///
+  /// In zh, this message translates to:
+  /// **'已有 {count} 条请求提交或提醒保留，请先到系统中查看，避免重复添加。'**
+  String alarmPartial(int count);
+
+  /// No description provided for @exitMarkdownFullscreen.
+  ///
+  /// In zh, this message translates to:
+  /// **'退出全屏'**
+  String get exitMarkdownFullscreen;
+
+  /// No description provided for @renderMarkdown.
+  ///
+  /// In zh, this message translates to:
+  /// **'渲染 Markdown'**
+  String get renderMarkdown;
+
+  /// No description provided for @markdownFullscreen.
+  ///
+  /// In zh, this message translates to:
+  /// **'全屏'**
+  String get markdownFullscreen;
+
+  /// No description provided for @editMarkdown.
+  ///
+  /// In zh, this message translates to:
+  /// **'返回编辑'**
+  String get editMarkdown;
+
+  /// No description provided for @markdownOutline.
+  ///
+  /// In zh, this message translates to:
+  /// **'大纲'**
+  String get markdownOutline;
+
+  /// No description provided for @markdownNoHeadings.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无标题'**
+  String get markdownNoHeadings;
+
+  /// No description provided for @customDeadlinePreset.
+  ///
+  /// In zh, this message translates to:
+  /// **'自定义时间预设'**
+  String get customDeadlinePreset;
+
+  /// No description provided for @presetName.
+  ///
+  /// In zh, this message translates to:
+  /// **'预设名称'**
+  String get presetName;
+
+  /// No description provided for @presetDurationRequired.
+  ///
+  /// In zh, this message translates to:
+  /// **'请输入大于零的有效时长'**
+  String get presetDurationRequired;
+
+  /// No description provided for @presetSaveFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'预设保存失败，请重试'**
+  String get presetSaveFailed;
+
+  /// No description provided for @markdownImageUnavailable.
+  ///
+  /// In zh, this message translates to:
+  /// **'图片无法显示'**
+  String get markdownImageUnavailable;
+
   /// No description provided for @appTitle.
   ///
   /// In zh, this message translates to:

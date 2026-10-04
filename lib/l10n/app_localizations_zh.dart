@@ -9,6 +9,204 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get alarmClearAll => '一键清空闹钟';
+
+  @override
+  String get alarmClearRecords => '一键清空记录';
+
+  @override
+  String alarmClearAllConfirm(int count) {
+    return '确定删除列表中的全部 $count 个 DDL out! 闹钟？此操作无法撤销。';
+  }
+
+  @override
+  String alarmClearRecordsConfirm(int count) {
+    return '确定清空全部 $count 条导出记录？此操作不会删除系统闹钟，请在系统时钟中管理。';
+  }
+
+  @override
+  String get alarmManagerTitle => '闹钟管理';
+
+  @override
+  String get alarmManagerEmpty => '还没有通过 DDL out! 添加闹钟';
+
+  @override
+  String get alarmManagerInfo =>
+      'Windows 闹钟由任务计划程序保存。退出 DDL out! 后仍会启动独立闹钟窗口。电脑须开机且已登录；锁屏时需解锁查看，睡眠唤醒取决于系统设置。请保留程序所在文件夹。';
+
+  @override
+  String get alarmAndroidManagerInfo =>
+      '这里显示 DDL out! 的导出记录。实际创建、开关和删除结果请在系统时钟确认；移除记录不会删除系统闹钟。';
+
+  @override
+  String get alarmOpenClock => '打开系统时钟';
+
+  @override
+  String get alarmForget => '移除记录';
+
+  @override
+  String get alarmForgetConfirm => '只移除这条导出记录，系统时钟中的闹钟仍会保留。';
+
+  @override
+  String get alarmDeleteConfirm => '删除这个闹钟？尚未触发的计划任务将取消。';
+
+  @override
+  String get alarmDisable => '关闭闹钟';
+
+  @override
+  String get alarmEnabled => '待响铃';
+
+  @override
+  String get alarmDisabled => '已关闭';
+
+  @override
+  String get alarmElapsed => '已到计划时间';
+
+  @override
+  String get alarmExported => '已提交请求 · 请在时钟确认';
+
+  @override
+  String alarmWeekly(String day, String time) {
+    return '每周 $day $time';
+  }
+
+  @override
+  String get alarmOnce => '单次';
+
+  @override
+  String get alarmWeeklyWarning =>
+      '远期日期将按对应星期每周重复，可能在事项日期之前响铃，且此后每周继续。请在系统时钟中关闭不再需要的闹钟。';
+
+  @override
+  String get alarmDismiss => '知道了，关闭闹钟';
+
+  @override
+  String get alarmRinging => '时间到了';
+
+  @override
+  String get alarmRetry => '重试';
+
+  @override
+  String get alarmTechnicalDetails => '错误详情';
+
+  @override
+  String get addSystemAlarm => '加入系统闹钟';
+
+  @override
+  String get alarmTitle => '闹钟标题';
+
+  @override
+  String get alarmNotes => '闹钟内容';
+
+  @override
+  String get alarmAndroidInfo =>
+      '加入手机系统时钟。今天或明天的下一次时刻使用单次闹钟；其他日期按对应星期每周重复。事项后续改动不会同步。';
+
+  @override
+  String get alarmWindowsInfo =>
+      '使用 Windows 任务计划程序按完整日期创建闹钟。退出 DDL out! 后仍会自动启动闹钟窗口；电脑须开机且用户已登录。睡眠唤醒取决于系统设置。';
+
+  @override
+  String get multipleAlarms => '多重闹钟';
+
+  @override
+  String get alarmRelativeTo => '在该闹钟';
+
+  @override
+  String get alarmBefore => '前';
+
+  @override
+  String get alarmAfter => '后';
+
+  @override
+  String get alarmInterval => '间隔';
+
+  @override
+  String get alarmRepeat => '重复设置';
+
+  @override
+  String get alarmTimes => '次';
+
+  @override
+  String get alarmConfirm => '确认加入';
+
+  @override
+  String get alarmDone => '完成';
+
+  @override
+  String get alarmInvalidNumber => '请输入范围内整数';
+
+  @override
+  String get alarmPastTime => '所有闹钟都必须晚于现在，请调整时间或多重闹钟的间隔与次数。';
+
+  @override
+  String get alarmClockDateUnsupported =>
+      '系统时钟接口不能指定任意日期。请将所有闹钟调整为今天或明天该时刻的下一次响铃，避免提前响铃。';
+
+  @override
+  String get alarmClockUnavailable => '未找到可用的系统时钟，或时钟拒绝接收请求。';
+
+  @override
+  String get alarmNotificationsDisabled =>
+      '请先在 Windows 设置中允许 DDL out! 发送通知，再重新添加。';
+
+  @override
+  String get alarmFailed => '闹钟操作失败，请查看下方错误详情。';
+
+  @override
+  String alarmPreview(int count) {
+    return '即将加入 $count 个闹钟（含原闹钟）';
+  }
+
+  @override
+  String alarmClockSubmitted(int count) {
+    return '已直接向系统时钟提交 $count 个闹钟请求，可在时钟中查看。';
+  }
+
+  @override
+  String alarmScheduled(int count) {
+    return '已添加 $count 个 Windows 系统提醒。';
+  }
+
+  @override
+  String alarmPartial(int count) {
+    return '已有 $count 条请求提交或提醒保留，请先到系统中查看，避免重复添加。';
+  }
+
+  @override
+  String get exitMarkdownFullscreen => '退出全屏';
+
+  @override
+  String get renderMarkdown => '渲染 Markdown';
+
+  @override
+  String get markdownFullscreen => '全屏';
+
+  @override
+  String get editMarkdown => '返回编辑';
+
+  @override
+  String get markdownOutline => '大纲';
+
+  @override
+  String get markdownNoHeadings => '暂无标题';
+
+  @override
+  String get customDeadlinePreset => '自定义时间预设';
+
+  @override
+  String get presetName => '预设名称';
+
+  @override
+  String get presetDurationRequired => '请输入大于零的有效时长';
+
+  @override
+  String get presetSaveFailed => '预设保存失败，请重试';
+
+  @override
+  String get markdownImageUnavailable => '图片无法显示';
+
+  @override
   String get appTitle => 'DDL out!';
 
   @override
