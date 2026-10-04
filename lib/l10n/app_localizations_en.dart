@@ -9,6 +9,22 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get alarmClearAll => 'Clear all alarms';
+
+  @override
+  String get alarmClearRecords => 'Clear all records';
+
+  @override
+  String alarmClearAllConfirm(int count) {
+    return 'Delete all $count DDL out! alarms in this list? This cannot be undone.';
+  }
+
+  @override
+  String alarmClearRecordsConfirm(int count) {
+    return 'Clear all $count export records? This will not delete system alarms. Manage them in the system Clock.';
+  }
+
+  @override
   String get alarmManagerTitle => 'Alarm management';
 
   @override

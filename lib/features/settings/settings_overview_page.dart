@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/navigation/app_navigation_shell.dart';
+import '../../core/alarms/system_alarm_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'presentation/settings_tile_group.dart';
 import 'settings_page.dart';
@@ -18,6 +19,12 @@ class SettingsOverviewPage extends StatelessWidget {
       body: ListView(
         padding: SettingsPageScaffold.contentPadding,
         children: [
+          if (SystemAlarmService.supported)
+            _SettingsDestinationTile(
+              icon: Icons.alarm_outlined,
+              title: l10n.alarmManagerTitle,
+              route: '/settings/alarms',
+            ),
           SettingsTileGroup(
             children: [
               _SettingsDestinationTile(

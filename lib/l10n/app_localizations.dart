@@ -100,6 +100,30 @@ abstract class AppLocalizations {
     Locale('ja'),
   ];
 
+  /// No description provided for @alarmClearAll.
+  ///
+  /// In zh, this message translates to:
+  /// **'一键清空闹钟'**
+  String get alarmClearAll;
+
+  /// No description provided for @alarmClearRecords.
+  ///
+  /// In zh, this message translates to:
+  /// **'一键清空记录'**
+  String get alarmClearRecords;
+
+  /// No description provided for @alarmClearAllConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定删除列表中的全部 {count} 个 DDL out! 闹钟？此操作无法撤销。'**
+  String alarmClearAllConfirm(int count);
+
+  /// No description provided for @alarmClearRecordsConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定清空全部 {count} 条导出记录？此操作不会删除系统闹钟，请在系统时钟中管理。'**
+  String alarmClearRecordsConfirm(int count);
+
   /// No description provided for @alarmManagerTitle.
   ///
   /// In zh, this message translates to:

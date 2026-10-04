@@ -181,6 +181,103 @@ void main() {
     variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
   testWidgets(
+    'bulk clear confirms once, deletes the listed alarms and disables when empty',
+    (tester) async {
+      final records = [
+        record(),
+        {...record(), 'id': 'second-alarm'},
+      ];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            calls.add(call);
+            if (call.method == 'list') return List.of(records);
+            if (call.method == 'delete') {
+              records.removeWhere(
+                (entry) => entry['id'] == call.arguments['id'],
+              );
+            }
+            return null;
+          });
+      await tester.pumpWidget(app(const AlarmManagementPage()));
+      await tester.pumpAndSettle();
+      final clear = find.widgetWithText(
+        FloatingActionButton,
+        'Clear all alarms',
+      );
+      await tester.tap(clear);
+      await tester.pumpAndSettle();
+      expect(find.textContaining('all 2 DDL out! alarms'), findsOneWidget);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(calls.where((call) => call.method == 'delete'), isEmpty);
+      await tester.tap(clear);
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Clear all alarms'));
+      await tester.pumpAndSettle();
+      expect(calls.where((call) => call.method == 'delete').length, 2);
+      expect(find.text('No alarms added through DDL out! yet'), findsOneWidget);
+      expect(tester.widget<FloatingActionButton>(clear).onPressed, isNull);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.windows),
+  );
+  testWidgets(
+    'bulk deletion failure refreshes remaining alarms and exposes the error',
+    (tester) async {
+      final records = [
+        record(),
+        {...record(), 'id': 'second-alarm'},
+      ];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            calls.add(call);
+            if (call.method == 'list') return List.of(records);
+            if (call.method == 'delete') {
+              if (call.arguments['id'] == 'second-alarm') {
+                throw PlatformException(
+                  code: 'scheduler_failed',
+                  message: 'Delete failed',
+                );
+              }
+              records.removeWhere(
+                (entry) => entry['id'] == call.arguments['id'],
+              );
+            }
+            return null;
+          });
+      await tester.pumpWidget(app(const AlarmManagementPage()));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.widgetWithText(FloatingActionButton, 'Clear all alarms'),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Clear all alarms'));
+      await tester.pumpAndSettle();
+      expect(find.text('Native alarm'), findsOneWidget);
+      expect(find.textContaining('Delete failed'), findsOneWidget);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.windows),
+  );
+  testWidgets(
+    'Android bulk clear removes export records without deleting system alarms',
+    (tester) async {
+      await tester.pumpWidget(app(const AlarmManagementPage()));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.widgetWithText(FloatingActionButton, 'Clear all records'),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('will not delete system alarms'),
+        findsOneWidget,
+      );
+      await tester.tap(find.widgetWithText(FilledButton, 'Clear all records'));
+      await tester.pumpAndSettle();
+      expect(calls.where((call) => call.method == 'forget').length, 1);
+      expect(calls.where((call) => call.method == 'delete'), isEmpty);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+  testWidgets(
     'alarm dismiss button silences, disables and destroys its own window',
     (tester) async {
       const windowChannel = MethodChannel('window_manager');

@@ -44,6 +44,16 @@ class SystemAlarmService {
   Future<void> disable(String id) =>
       _channel.invokeMethod('disable', {'id': id});
   Future<void> forget(String id) => _channel.invokeMethod('forget', {'id': id});
+  Future<void> clearEntries(Iterable<SystemAlarmEntry> entries) async {
+    for (final entry in entries) {
+      if (usesAndroidClock) {
+        await forget(entry.id);
+      } else {
+        await delete(entry.id);
+      }
+    }
+  }
+
   Future<void> openClock() => _channel.invokeMethod('openClock');
   Future<void> sound() => _channel.invokeMethod('sound');
   Future<void> silence() => _channel.invokeMethod('silence');

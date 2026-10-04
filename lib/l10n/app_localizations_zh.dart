@@ -9,6 +9,22 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get alarmClearAll => '一键清空闹钟';
+
+  @override
+  String get alarmClearRecords => '一键清空记录';
+
+  @override
+  String alarmClearAllConfirm(int count) {
+    return '确定删除列表中的全部 $count 个 DDL out! 闹钟？此操作无法撤销。';
+  }
+
+  @override
+  String alarmClearRecordsConfirm(int count) {
+    return '确定清空全部 $count 条导出记录？此操作不会删除系统闹钟，请在系统时钟中管理。';
+  }
+
+  @override
   String get alarmManagerTitle => '闹钟管理';
 
   @override

@@ -1,4 +1,10 @@
 {
+  "alarmClearAll": "アラームを一括削除",
+  "alarmClearRecords": "記録を一括削除",
+  "alarmClearAllConfirm": "一覧の DDL out! アラーム {count} 件をすべて削除しますか？この操作は取り消せません。",
+  "@alarmClearAllConfirm": {"placeholders": {"count": {"type": "int"}}},
+  "alarmClearRecordsConfirm": "送信記録 {count} 件をすべて削除しますか？システムのアラームは削除されません。時計アプリで管理してください。",
+  "@alarmClearRecordsConfirm": {"placeholders": {"count": {"type": "int"}}},
   "alarmManagerTitle": "アラーム管理",
   "alarmManagerEmpty": "DDL out! から追加したアラームはありません",
   "alarmManagerInfo": "Windows タスク スケジューラが保存し、DDL out! 終了後も専用ウィンドウを開きます。電源が入り、ログインしている必要があります。ロック時は解除して確認してください。スリープ解除はシステム設定に依存します。アプリのフォルダーを移動しないでください。",

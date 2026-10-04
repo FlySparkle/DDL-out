@@ -1,4 +1,10 @@
 {
+  "alarmClearAll": "一键清空闹钟",
+  "alarmClearRecords": "一键清空记录",
+  "alarmClearAllConfirm": "确定删除列表中的全部 {count} 个 DDL out! 闹钟？此操作无法撤销。",
+  "@alarmClearAllConfirm": {"placeholders": {"count": {"type": "int"}}},
+  "alarmClearRecordsConfirm": "确定清空全部 {count} 条导出记录？此操作不会删除系统闹钟，请在系统时钟中管理。",
+  "@alarmClearRecordsConfirm": {"placeholders": {"count": {"type": "int"}}},
   "alarmManagerTitle": "闹钟管理",
   "alarmManagerEmpty": "还没有通过 DDL out! 添加闹钟",
   "alarmManagerInfo": "Windows 闹钟由任务计划程序保存。退出 DDL out! 后仍会启动独立闹钟窗口。电脑须开机且已登录；锁屏时需解锁查看，睡眠唤醒取决于系统设置。请保留程序所在文件夹。",

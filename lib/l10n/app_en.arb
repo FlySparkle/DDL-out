@@ -1,4 +1,10 @@
 {
+  "alarmClearAll": "Clear all alarms",
+  "alarmClearRecords": "Clear all records",
+  "alarmClearAllConfirm": "Delete all {count} DDL out! alarms in this list? This cannot be undone.",
+  "@alarmClearAllConfirm": {"placeholders": {"count": {"type": "int"}}},
+  "alarmClearRecordsConfirm": "Clear all {count} export records? This will not delete system alarms. Manage them in the system Clock.",
+  "@alarmClearRecordsConfirm": {"placeholders": {"count": {"type": "int"}}},
   "alarmManagerTitle": "Alarm management",
   "alarmManagerEmpty": "No alarms added through DDL out! yet",
   "alarmManagerInfo": "Task Scheduler stores Windows alarms and opens a separate alarm window even after DDL out! exits. Your PC must be on and you must be signed in. Unlock to see the window; waking from sleep depends on system settings. Keep the application folder in place.",

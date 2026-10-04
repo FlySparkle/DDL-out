@@ -104,6 +104,8 @@ ADR 004 取代，不能据此回退现有导航实现。
   Task Scheduler COM 创建完整日期的一次性任务，到点启动独立 Flutter 闹钟进程，
   主程序退出后仍能弹窗（电脑开机且用户已登录，需保留程序目录）。双端提供闹钟
   管理列表；Android 仅能列出本应用导出记录，实际开关和删除在系统时钟中操作。
+  设置首页在「外观与个性化」上方提供同级「闹钟管理」快捷入口；管理页右下角提供
+  经确认的一键清空，Windows 删除列表中的本应用闹钟，Android 仅清空导出记录。
   导出后不跟随事项变动自动同步。详见
   [ADR 008](decisions/008-system-alarm-export.md)。
 - Release 工作流支持在开发分支手动构建 Windows 与 Android，`skip_checks` 可按

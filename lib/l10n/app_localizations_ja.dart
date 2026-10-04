@@ -9,6 +9,22 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
+  String get alarmClearAll => 'アラームを一括削除';
+
+  @override
+  String get alarmClearRecords => '記録を一括削除';
+
+  @override
+  String alarmClearAllConfirm(int count) {
+    return '一覧の DDL out! アラーム $count 件をすべて削除しますか？この操作は取り消せません。';
+  }
+
+  @override
+  String alarmClearRecordsConfirm(int count) {
+    return '送信記録 $count 件をすべて削除しますか？システムのアラームは削除されません。時計アプリで管理してください。';
+  }
+
+  @override
   String get alarmManagerTitle => 'アラーム管理';
 
   @override

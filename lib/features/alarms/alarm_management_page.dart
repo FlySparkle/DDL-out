@@ -58,9 +58,42 @@ class _AlarmManagementPageState extends State<AlarmManagementPage>
       await action();
       await _load();
     } on Object catch (error) {
+      // Bulk deletion may have removed some entries before failing.
+      await _load();
       if (mounted) setState(() => _error = error);
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _clearAll() async {
+    final entries = List<SystemAlarmEntry>.of(_entries ?? []);
+    if (_busy || entries.isEmpty) return;
+    final l10n = AppLocalizations.of(context);
+    final android = SystemAlarmService.usesAndroidClock;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(android ? l10n.alarmClearRecords : l10n.alarmClearAll),
+        content: Text(
+          android
+              ? l10n.alarmClearRecordsConfirm(entries.length)
+              : l10n.alarmClearAllConfirm(entries.length),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(android ? l10n.alarmClearRecords : l10n.alarmClearAll),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      await _run(() => _service.clearEntries(entries));
     }
   }
 
@@ -99,6 +132,14 @@ class _AlarmManagementPageState extends State<AlarmManagementPage>
     final android = SystemAlarmService.usesAndroidClock;
     final locale = Localizations.localeOf(context).toLanguageTag();
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _busy || (_entries?.isEmpty ?? true) || _error != null
+            ? null
+            : _clearAll,
+        icon: const Icon(Icons.delete_sweep_outlined),
+        label: Text(android ? l10n.alarmClearRecords : l10n.alarmClearAll),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       appBar: AppBar(
         title: Text(l10n.alarmManagerTitle),
         actions: [
@@ -114,7 +155,7 @@ class _AlarmManagementPageState extends State<AlarmManagementPage>
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 720),
           child: ListView(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 112),
             children: [
               Card.filled(
                 child: Padding(
